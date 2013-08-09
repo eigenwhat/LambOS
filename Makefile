@@ -1,14 +1,12 @@
 
 .PHONY: all clean go
 
-all: bin/mongoose.iso
-
-bin/mongoose.iso:
+all:
 	cd src; make
 
 clean:
 	cd src; make clean
 
-go: all
+go: 
 	bochs -f bochsrc.bxrc -q; rm none
 
