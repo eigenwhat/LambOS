@@ -1,32 +1,33 @@
 CC=i586-elf-g++
 CPPFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
 ASM=i586-elf-as
-BOOT=../bin/boot.o
-OBJS=../bin/kernel.o ../bin/BasicTerminal.o
+OBJDIR=../bin
+BOOT=$(OBJDIR)/boot.o
+
+_OBJS=kernel.o VGATextTerminal.o
+OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
 .PHONY: all clean
 
-all: ../bin/kernel.bin ../bin/mongoose.iso
+all: $(OBJDIR)/kernel.bin $(OBJDIR)/mongoose.iso
 
-../bin/kernel.bin: ../bin/boot.o ../bin/kernel.o ../bin/BasicTerminal.o
-	$(CC) -T linker.ld -o ../bin/kernel.bin -ffreestanding -O2 -nostdlib $(BOOT) $(OBJS) -lgcc
+$(OBJDIR)/kernel.bin: $(BOOT) $(OBJS)
+	$(CC) -T linker.ld -o $(OBJDIR)/kernel.bin -ffreestanding -O2 -nostdlib $(BOOT) $(OBJS) -lgcc
 
-../bin/boot.o: boot.s
-	mkdir -p ../bin
-	$(ASM) boot.s -o ../bin/boot.o
+$(BOOT): boot.s | $(OBJDIR)
+	$(ASM) boot.s -o $@
 
-../bin/kernel.o: kernel.cpp ../bin/BasicTerminal.o
-	mkdir -p ../bin
-	$(CC) $(CPPFLAGS) -c kernel.cpp -o ../bin/kernel.o
+$(OBJDIR)/%.o: %.cpp %.hpp | $(OBJDIR)
+	$(CC) $(CPPFLAGS) -c $< -o $@
 
-../bin/BasicTerminal.o: BasicTerminal.h BasicTerminal.cpp ITerminal.h
-	mkdir -p ../bin
-	$(CC) $(CPPFLAGS) -c BasicTerminal.cpp -o ../bin/BasicTerminal.o
+$(OBJDIR):
+	mkdir -p $@
 
-../bin/mongoose.iso: ../bin/kernel.bin 
-	cp -r iso ../bin/iso
-	cp ../bin/kernel.bin ../bin/iso/boot/
-	grub-mkrescue --output=../bin/mongoose.iso ../bin/iso
+$(OBJDIR)/mongoose.iso: $(OBJDIR)/kernel.bin 
+	cp -r iso $(OBJDIR)/iso
+	cp $(OBJDIR)/kernel.bin $(OBJDIR)/iso/boot/
+	grub-mkrescue --output=$(OBJDIR)/mongoose.iso $(OBJDIR)/iso
+
 
 clean:
-	rm -rf ../bin
+	rm -rf $(OBJDIR) 

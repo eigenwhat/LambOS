@@ -1,8 +1,9 @@
 #pragma once
 
-#include "ITerminal.h"
 #include <stddef.h>
 #include <stdint.h>
+#include "ITerminal.hpp"
+#include "VGA4BitColor.h"
 
 class BasicTerminal : ITerminal {
 

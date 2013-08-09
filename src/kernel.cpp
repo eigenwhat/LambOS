@@ -1,7 +1,6 @@
 #include <stddef.h>
 #include <stdint.h>
-#include "VGA4BitColor.h"
-#include "BasicTerminal.h"
+#include "VGATextTerminal.hpp"
  
 /* Check if the compiler thinks if we are targeting the wrong operating system. */
 #if defined(__linux__)
