@@ -7,15 +7,53 @@
 
 __BEGIN_DECLS
 
-inline uint8_t inb(uint16_t port);
-inline uint8_t inw(uint16_t port);
-inline uint8_t inl(uint16_t port);
+static inline void outb(uint16_t port, uint8_t val)
+{
+    asm volatile( "outb %0, %1"
+                  : : "a"(val), "Nd"(port) );
+}
 
-inline void outb(unsigned short port, uint8_t val);
-inline void outw(unsigned short port, uint16_t val);
-inline void outl(unsigned short port, uint32_t val);
+static inline void outw(uint16_t port, uint16_t val)
+{
+    asm volatile( "outw %0, %1"
+                  : : "a"(val), "Nd"(port) );
+}
 
-inline void cpuid(int32_t code, uint32_t *a, uint32_t *d);
+static inline void outl(uint16_t port, uint32_t val)
+{
+    asm volatile( "outl %0, %1"
+                  : : "a"(val), "Nd"(port) );
+}
+
+static inline void cpuid(int32_t code, uint32_t *a, uint32_t *d)
+{
+    asm volatile( "cpuid"
+                  : "=a"(*a), "=d"(*d) : "0"(code) : "ebx", "ecx");
+}
+
+static inline uint8_t inb(uint16_t port)
+{
+    unsigned char ret;
+    asm volatile( "inb %1, %0"
+                  : "=a"(ret) : "Nd"(port) );
+    return ret;
+}
+
+static inline uint16_t inw(uint16_t port)
+{
+    unsigned char ret;
+    asm volatile( "inw %1, %0"
+                  : "=a"(ret) : "Nd"(port) );
+    return ret;
+}
+
+static inline uint32_t inl(uint16_t port)
+{
+    unsigned char ret;
+    asm volatile( "inl %1, %0"
+                  : "=a"(ret) : "Nd"(port) );
+    return ret;
+}
 
 __END_DECLS
 

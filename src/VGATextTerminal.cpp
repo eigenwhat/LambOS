@@ -12,12 +12,22 @@ uint16_t make_vgaentry(char c, uint8_t color)
 	return c16 | color16 << 8;
 }
 
-VGATextTerminal::VGATextTerminal()
+void move_cursor_to(size_t row, size_t col)
 {
-	terminal_row = 0;
-	terminal_column = 0;
+	unsigned short position=(row*80) + col;
+	// cursor LOW port to vga INDEX register
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (uint8_t)(position&0xFF));
+    // cursor HIGH port to vga INDEX register
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (uint8_t)((position>>8)&0xFF));
+}
+
+VGATextTerminal::VGATextTerminal() : terminal_row(0), terminal_column(0)
+{
 	terminal_color = COLOR_LIGHT_GREY | COLOR_BLACK << 4;
 	terminal_buffer = (uint16_t*) 0xB8000;
+	setCursorVisible(false);
 	clear();
 }
 
@@ -78,24 +88,25 @@ void VGATextTerminal::putChar(char c)
 
 void VGATextTerminal::moveTo(size_t row, size_t col)
 {
-	unsigned short position=(row*80) + col;
- 
-    // cursor LOW port to vga INDEX register
-    outb(0x3D4, 0x0F);
-    outb(0x3D5, (unsigned char)(position&0xFF));
-    // cursor HIGH port to vga INDEX register
-    outb(0x3D4, 0x0E);
-    outb(0x3D5, (unsigned char )((position>>8)&0xFF));
-
+ 	if(cursorIsVisible) {
+ 		move_cursor_to(row, col);
+	}
     terminal_row = row;
     terminal_column = col;
 }
  
 void VGATextTerminal::writeString(const char* data)
 {
+	bool moveCursor = cursorIsVisible;
+	if(moveCursor) {
+		setCursorVisible(false);
+	}
 	size_t datalen = strlen(data);
 	for ( size_t i = 0; i < datalen; i++ ) {
 		putChar(data[i]);
+	}
+	if(moveCursor) {
+		setCursorVisible(true);
 	}
 }
 
@@ -107,4 +118,13 @@ size_t VGATextTerminal::width()
 size_t VGATextTerminal::height()
 {
 	return VGA_HEIGHT;
+}
+
+void VGATextTerminal::setCursorVisible(bool isVisible) {
+	cursorIsVisible = isVisible;
+	if(!cursorIsVisible) {
+		move_cursor_to(0xFF, 0xFF);
+	} else {
+		move_cursor_to(terminal_row, terminal_column);
+	}
 }

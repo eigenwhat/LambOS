@@ -34,7 +34,7 @@ extern "C" void kernel_main()
     gdt.encodeEntry(2, GDTEntry(0, 0xffffffff, 0x92));
     gdt.writeToMemory();
 
-    kernel.kerror("Whomp whomp.");
+    kernel.kerror("Kernel exited. Maybe you should write the rest of the operating system?");
 }
 
 //======================================================
@@ -51,7 +51,7 @@ void Kernel::kerror(const char *string)
                             "* * * * * * * * * * * * * * * * * * * *"};
     for(int i = 0; i < 3; ++i) {
         size_t bannerlength = strlen(banner[i]);
-        size_t columnToCenter = (stdout()->width() - bannerlength) / 2;
+        size_t columnToCenter = stdout()->width() > bannerlength ? (stdout()->width() - bannerlength) / 2 : 0;
         stdout()->moveTo(i+1,columnToCenter);
         stdout()->writeString(banner[i]);
     }

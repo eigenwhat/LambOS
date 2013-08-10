@@ -19,9 +19,11 @@ public:
 	virtual void clear();
 	virtual size_t width();
 	virtual size_t height();
+	virtual void setCursorVisible(bool isVisible);
 
 private:
 	virtual void putCharAt(char c, uint8_t color, size_t x, size_t y);
+	bool cursorIsVisible;
 	size_t terminal_row;
 	size_t terminal_column;
 	uint8_t terminal_color;
