@@ -1,10 +1,13 @@
-CC=i586-elf-g++
-CPPFLAGS=-ffreestanding -O2 -Wall -Wextra -fno-exceptions -fno-rtti
+CC=i586-elf-gcc
+CPP=i586-elf-g++
+CFLAGS=-std=gnu99 $(COMMONFLAGS)
+COMMONFLAGS=-I./include -ffreestanding -O2 -Wall -Wextra
+CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 OBJDIR=../bin
 BOOT=$(OBJDIR)/boot.o
 
-_OBJS=kernel.o VGATextTerminal.o
+_OBJS=Kernel.o VGATextTerminal.o string.o
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
 .PHONY: all clean
@@ -12,13 +15,16 @@ OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 all: $(OBJDIR)/kernel.bin $(OBJDIR)/mongoose.iso
 
 $(OBJDIR)/kernel.bin: $(BOOT) $(OBJS)
-	$(CC) -T linker.ld -o $(OBJDIR)/kernel.bin -ffreestanding -O2 -nostdlib $(BOOT) $(OBJS) -lgcc
+	$(CPP) -T linker.ld -o $(OBJDIR)/kernel.bin -ffreestanding -O2 -nostdlib $(BOOT) $(OBJS) -lgcc
 
 $(BOOT): boot.s | $(OBJDIR)
 	$(ASM) boot.s -o $@
 
-$(OBJDIR)/%.o: %.cpp %.hpp | $(OBJDIR)
-	$(CC) $(CPPFLAGS) -c $< -o $@
+$(OBJDIR)/%.o: lib/%.c include/lib/%.h | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/%.o: %.cpp include/%.hpp | $(OBJDIR)
+	$(CPP) $(CPPFLAGS) -c $< -o $@
 
 $(OBJDIR):
 	mkdir -p $@

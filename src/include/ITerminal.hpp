@@ -2,7 +2,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "VGA4BitColor.h"
+#include <VGA4BitColor.h>
 
 class ITerminal {
 	public:

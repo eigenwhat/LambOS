@@ -1,4 +1,5 @@
-#include "VGATextTerminal.hpp"
+#include <VGATextTerminal.hpp>
+#include <lib/string.h>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 24;
@@ -8,14 +9,6 @@ uint16_t make_vgaentry(char c, uint8_t color)
 	uint16_t c16 = c;
 	uint16_t color16 = color;
 	return c16 | color16 << 8;
-}
-
-size_t strlen(const char* str)
-{
-	size_t ret = 0;
-	while ( str[ret] != 0 )
-		ret++;
-	return ret;
 }
 
 BasicTerminal::BasicTerminal()
