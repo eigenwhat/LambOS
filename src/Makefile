@@ -7,7 +7,7 @@ ASM=i586-elf-as
 OBJDIR=../bin
 BOOT=$(OBJDIR)/boot.o
 
-_OBJS=Kernel.o VGATextTerminal.o string.o
+_OBJS=Kernel.o VGATextTerminal.o string.o set_gdt.o
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
 .PHONY: all clean
@@ -19,6 +19,9 @@ $(OBJDIR)/kernel.bin: $(BOOT) $(OBJS)
 
 $(BOOT): boot.s | $(OBJDIR)
 	$(ASM) boot.s -o $@
+
+$(OBJDIR)/%.o: %.s | $(OBJDIR)
+	$(ASM) $< -o $@
 
 $(OBJDIR)/%.o: lib/%.c include/lib/%.h | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@

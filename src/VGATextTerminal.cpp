@@ -1,8 +1,9 @@
 #include <VGATextTerminal.hpp>
 #include <lib/string.h>
+#include <lib/asm.h>
 
 static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 24;
+static const size_t VGA_HEIGHT = 25;
 
 uint16_t make_vgaentry(char c, uint8_t color)
 {
@@ -11,7 +12,7 @@ uint16_t make_vgaentry(char c, uint8_t color)
 	return c16 | color16 << 8;
 }
 
-BasicTerminal::BasicTerminal()
+VGATextTerminal::VGATextTerminal()
 {
 	terminal_row = 0;
 	terminal_column = 0;
@@ -20,7 +21,7 @@ BasicTerminal::BasicTerminal()
 	clear();
 }
 
-void BasicTerminal::clear()
+void VGATextTerminal::clear()
 {
 	terminal_row = 0;
 	terminal_column = 0;
@@ -30,31 +31,34 @@ void BasicTerminal::clear()
 			terminal_buffer[index] = make_vgaentry(' ', terminal_color);
 		}
 	}
+
+	moveTo(0,0);
 }
  
-void BasicTerminal::setColor(uint8_t color)
+void VGATextTerminal::setColor(uint8_t color)
 {
 	this->terminal_color = color;
 }
 
-void BasicTerminal::setForegroundColor(VGA4BitColor fg)
+void VGATextTerminal::setForegroundColor(uint32_t fg)
 {
 	this->terminal_color = (this->terminal_color & 0xF0) | fg;
 }
 
-void BasicTerminal::setBackgroundColor(VGA4BitColor bg)
+void VGATextTerminal::setBackgroundColor(uint32_t bg)
 {
 	this->terminal_color = (this->terminal_color & 0x0F) | (bg << 4);
 }
  
-void BasicTerminal::putCharAt(char c, uint8_t color, size_t x, size_t y)
+void VGATextTerminal::putCharAt(char c, uint8_t color, size_t x, size_t y)
 {
 
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = make_vgaentry(c, color);
+	moveTo(terminal_row, terminal_column);
 }
  
-void BasicTerminal::putChar(char c)
+void VGATextTerminal::putChar(char c)
 {
 	if(c == '\n') {
 		terminal_column = 0;
@@ -71,11 +75,36 @@ void BasicTerminal::putChar(char c)
 		}
 	}
 }
+
+void VGATextTerminal::moveTo(size_t row, size_t col)
+{
+	unsigned short position=(row*80) + col;
  
-void BasicTerminal::writeString(const char* data)
+    // cursor LOW port to vga INDEX register
+    outb(0x3D4, 0x0F);
+    outb(0x3D5, (unsigned char)(position&0xFF));
+    // cursor HIGH port to vga INDEX register
+    outb(0x3D4, 0x0E);
+    outb(0x3D5, (unsigned char )((position>>8)&0xFF));
+
+    terminal_row = row;
+    terminal_column = col;
+}
+ 
+void VGATextTerminal::writeString(const char* data)
 {
 	size_t datalen = strlen(data);
 	for ( size_t i = 0; i < datalen; i++ ) {
 		putChar(data[i]);
 	}
+}
+
+size_t VGATextTerminal::width()
+{
+	return VGA_WIDTH;
+}
+
+size_t VGATextTerminal::height()
+{
+	return VGA_HEIGHT;
 }
