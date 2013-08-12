@@ -1,22 +1,10 @@
 #pragma once
 #include <stddef.h>
 #include <stdint.h>
-#include <ITerminal.hpp>
 
 extern "C" void set_gdt(void *gdt, size_t size);
 
 #define GDT_SIZE 3
-
-class Kernel
-{
-public:
-	Kernel() : _stdout(NULL) {}
-	void setStdout(ITerminal &terminal) { this->_stdout = &terminal; }
-	ITerminal* stdout() { return this->_stdout; }
-	void kerror(const char *errorMessage);
-private:
-	ITerminal *_stdout;
-};
 
 struct GDTEntry
 {

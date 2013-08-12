@@ -7,7 +7,7 @@ ASM=i586-elf-as
 OBJDIR=../bin
 BOOT=$(OBJDIR)/boot.o
 
-_OBJS=Kernel.o VGATextTerminal.o string.o set_gdt.o
+_OBJS=Kernel.o GlobalDescriptorTable.o VGATextTerminal.o string.o set_gdt.o
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
 .PHONY: all clean
@@ -17,14 +17,20 @@ all: $(OBJDIR)/kernel.bin $(OBJDIR)/mongoose.iso
 $(OBJDIR)/kernel.bin: $(BOOT) $(OBJS)
 	$(CPP) -T linker.ld -o $(OBJDIR)/kernel.bin -ffreestanding -O2 -nostdlib $(BOOT) $(OBJS) -lgcc
 
-$(BOOT): boot.s | $(OBJDIR)
-	$(ASM) boot.s -o $@
-
-$(OBJDIR)/%.o: %.s | $(OBJDIR)
+$(OBJDIR)/%.o: kernel/%.s | $(OBJDIR)
 	$(ASM) $< -o $@
 
 $(OBJDIR)/%.o: lib/%.c include/lib/%.h | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/%.o: kernel/%.c include/kernel/%.h | $(OBJDIR)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJDIR)/%.o: kernel/%.cpp include/kernel/%.hpp | $(OBJDIR)
+	$(CPP) $(CPPFLAGS) -c $< -o $@
+
+$(OBJDIR)/%.o: device/display/%.cpp include/device/display/%.hpp | $(OBJDIR)
+	$(CPP) $(CPPFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: %.cpp include/%.hpp | $(OBJDIR)
 	$(CPP) $(CPPFLAGS) -c $< -o $@

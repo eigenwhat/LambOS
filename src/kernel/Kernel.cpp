@@ -1,6 +1,7 @@
 #include <lib/string.h>
-#include <Kernel.hpp>
-#include <VGATextTerminal.hpp>
+#include <kernel/Kernel.hpp>
+#include <kernel/GlobalDescriptorTable.hpp>
+#include <device/display/VGATextTerminal.hpp>
  
 /* Check if the compiler thinks if we are targeting the wrong operating system. */
 #if defined(__linux__)
@@ -34,13 +35,13 @@ extern "C" void kernel_main()
     gdt.encodeEntry(2, GDTEntry(0, 0xffffffff, 0x92));
     gdt.writeToMemory();
 
-    kernel.kerror("Kernel exited. Maybe you should write the rest of the operating system?");
+    kernel.panic("Kernel exited. Maybe you should write the rest of the operating system?");
 }
 
 //======================================================
 // Kernel
 //======================================================
-void Kernel::kerror(const char *string)
+void Kernel::panic(const char *string)
 {
     size_t length = strlen(string);
     stdout()->setBackgroundColor(COLOR_RED);
@@ -65,32 +66,3 @@ void Kernel::kerror(const char *string)
     stdout()->writeString("0xL4MBOS");
 }
 
-//======================================================
-// GlobalDescriptorTable
-//======================================================
-void GlobalDescriptorTable::encodeEntry(uint8_t entryNumber, GDTEntry source)
-{
-    uint8_t *target = (uint8_t*)&this->gdt[entryNumber];
-
-    if (source.limit > 65536) {
-        // Adjust granularity if required
-        source.limit = source.limit >> 12;
-        target[6] = 0xC0;
-    } else {
-        target[6] = 0x40;
-    }
- 
-    // Encode the limit
-    target[0] = source.limit & 0xFF;
-    target[1] = (source.limit >> 8) & 0xFF;
-    target[6] |= (source.limit >> 16) & 0xF;
- 
-    // Encode the base 
-    target[2] = source.base & 0xFF;
-    target[3] = (source.base >> 8) & 0xFF;
-    target[4] = (source.base >> 16) & 0xFF;
-    target[7] = (source.base >> 24) & 0xFF;
- 
-    // And... Type
-    target[5] = source.type;
-}

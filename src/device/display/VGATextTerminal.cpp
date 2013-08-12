@@ -1,4 +1,4 @@
-#include <VGATextTerminal.hpp>
+#include <device/display/VGATextTerminal.hpp>
 #include <lib/string.h>
 #include <lib/asm.h>
 
