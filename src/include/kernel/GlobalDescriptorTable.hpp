@@ -4,13 +4,13 @@
 
 extern "C" void set_gdt(void *gdt, size_t size);
 
-#define GDT_SIZE 3
-
-struct GDTEntry
+class GDTEntry
 {
 public:
 	GDTEntry() : base(0), limit(0), type(0) {}
 	GDTEntry(uint32_t base, uint32_t limit, uint32_t type) : base(base), limit(limit), type(type) {}
+	friend class GlobalDescriptorTable;
+private:
 	uint32_t base;
 	uint32_t limit;
 	uint8_t type;

@@ -8,6 +8,8 @@
 __BEGIN_DECLS
 
 size_t strlen(const char* str);
+char *strcpy(char *destination, const char *source);
+void *memset(void *ptr, int value, size_t num);
 
 __END_DECLS
 

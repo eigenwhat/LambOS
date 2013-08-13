@@ -1,6 +1,7 @@
 #include <lib/string.h>
 #include <kernel/Kernel.hpp>
 #include <kernel/GlobalDescriptorTable.hpp>
+#include <kernel/InterruptDescriptorTable.hpp>
 #include <device/display/VGATextTerminal.hpp>
  
 /* Check if the compiler thinks if we are targeting the wrong operating system. */
@@ -11,11 +12,19 @@
 // ====================================================
 // Globals
 // ====================================================
+#define GDT_SIZE 5
 uint64_t gdt_ptr[GDT_SIZE];
+uint64_t idt_ptr[256];
 
 extern "C" void __cxa_pure_virtual()
 {
     // Do nothing or print an error message.
+}
+
+extern "C" void interrupt_handler() {
+    __asm__("pushal");
+    /* do something */
+    __asm__("popal; leave; iret"); /* BLACK MAGIC! */
 }
 
 extern "C" void kernel_main()
@@ -23,19 +32,24 @@ extern "C" void kernel_main()
     VGATextTerminal terminal;
     Kernel kernel;
     kernel.setStdout(terminal);
-	/* Since there is no support for newlines in terminal_putchar yet, \n will
-	   produce some VGA specific character instead. This is normal. */
-	kernel.stdout()->writeString("Hello, kernel World!\n");
-	kernel.stdout()->setForegroundColor(COLOR_LIGHT_BLUE);
-	kernel.stdout()->writeString("Setting up GDT...\n");
     
-    GlobalDescriptorTable gdt(gdt_ptr, 3);
+    GlobalDescriptorTable gdt(gdt_ptr, GDT_SIZE);
     gdt.encodeEntry(0, GDTEntry());
     gdt.encodeEntry(1, GDTEntry(0, 0xffffffff, 0x9A));
     gdt.encodeEntry(2, GDTEntry(0, 0xffffffff, 0x92));
+    gdt.encodeEntry(3, GDTEntry(0, 0xffffffff, 0xFA));
+    gdt.encodeEntry(4, GDTEntry(0, 0xffffffff, 0xF2));
     gdt.writeToMemory();
 
+    InterruptDescriptorTable idt(idt_ptr, 256);
+    memset(idt_ptr, 0, 256*sizeof(uint64_t));
+    for(int i = 0; i < 256; ++i) {
+        idt.encodeEntry(i, IDTEntry(0x08, (uint32_t)interrupt_handler, 0x8E));
+    }
+    idt.writeToMemory();
+
     kernel.panic("Kernel exited. Maybe you should write the rest of the operating system?");
+    asm("int $0x21"); // triple fault!
 }
 
 //======================================================
@@ -62,7 +76,7 @@ void Kernel::panic(const char *string)
     stdout()->moveTo(rowToCenter, columnToCenter);
     stdout()->writeString(string);
 
-    stdout()->moveTo(stdout()->height()-2, (stdout()->width() - 8) / 2);
-    stdout()->writeString("0xL4MBOS");
+    const char *msg = "0xL4MBOS";
+    stdout()->moveTo(stdout()->height()-2, (stdout()->width() - strlen(msg)) / 2);
+    stdout()->writeString(msg);
 }
-

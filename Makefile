@@ -10,3 +10,6 @@ clean:
 go: 
 	bochs -f bochsrc.bxrc -q; rm none
 
+godebug: 
+	bochsdbg -f bochsrc.bxrc -q; rm none
+

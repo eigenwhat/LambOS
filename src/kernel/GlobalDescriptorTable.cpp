@@ -5,7 +5,7 @@
 //======================================================
 void GlobalDescriptorTable::encodeEntry(uint8_t entryNumber, GDTEntry source)
 {
-    uint8_t *target = (uint8_t*)&this->gdt[entryNumber];
+    uint8_t *target = (uint8_t*)&(this->gdt[entryNumber]);
 
     if (source.limit > 65536) {
         // Adjust granularity if required
