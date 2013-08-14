@@ -1,6 +1,12 @@
-#include <kernel/InterruptDescriptorTable.hpp>
+#include "InterruptDescriptorTable.hpp"
+#include "isr.h"
 
-#define ADDISR(num) encodeEntry((num), IDTEntry(0x08, (uint32_t)isr##num, 0x8E))
+#define ADDISR(num) do { \
+      encodeEntry((num), IDTEntry(0x08, (uint32_t)isr##num, 0x8E));\
+      isr[(num)] = defaultISR;\
+   } while(0)
+
+extern "C" void defaultISR(RegisterTable &registers) {}
 
 //======================================================
 // InterruptDescriptorTable

@@ -1,4 +1,4 @@
-#include <kernel/GlobalDescriptorTable.hpp>
+#include "GlobalDescriptorTable.hpp"
  
 //======================================================
 // GlobalDescriptorTable

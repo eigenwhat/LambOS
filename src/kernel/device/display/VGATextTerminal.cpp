@@ -1,6 +1,6 @@
-#include <device/display/VGATextTerminal.hpp>
 #include <string.h>
-#include <lib/asm.h>
+#include <sys/asm.h>
+#include "VGATextTerminal.hpp"
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
