@@ -21,7 +21,7 @@ class GlobalDescriptorTable
 public:
 	GlobalDescriptorTable(uint64_t *address, size_t entries) : gdt(address), size(entries) {}
 	void encodeEntry(uint8_t entryNumber, GDTEntry source);
-	void writeToMemory() { set_gdt(this->gdt, sizeof(uint64_t)*size); }
+	void install() { set_gdt(this->gdt, sizeof(uint64_t)*size); }
 private:
 	uint64_t *gdt;
 	size_t size;

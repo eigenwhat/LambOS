@@ -1,13 +1,13 @@
 CC=i586-elf-gcc
 CPP=i586-elf-g++
 CFLAGS=-std=gnu99 $(COMMONFLAGS)
-COMMONFLAGS=-I./include -ffreestanding -O2 -Wall -Wextra
+COMMONFLAGS=-I./include -ffreestanding -Wall -Wextra
 CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 OBJDIR=../bin
 BOOT=$(OBJDIR)/boot.o
 
-_OBJS=Kernel.o GlobalDescriptorTable.o VGATextTerminal.o string.o set_gdt.o
+_OBJS=Kernel.o GlobalDescriptorTable.o InterruptDescriptorTable.o VGATextTerminal.o string.o set_gdt.o set_idt.o interrupt.o
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
 .PHONY: all clean

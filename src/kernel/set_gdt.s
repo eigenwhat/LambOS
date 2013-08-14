@@ -12,4 +12,12 @@ set_gdt:
    movw 8(%esp), %ax
    movw %ax, (gdtr)
    lgdt (gdtr)
+   movw $0x10, %ax
+   movw %ax, %ds
+   movw %ax, %es
+   movw %ax, %fs
+   movw %ax, %gs
+   movw %ax, %ss
+   jmp $0x08, $flush   # 0x08 is the offset to our code segment: Far jump!
+flush:
    ret
