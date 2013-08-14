@@ -1,7 +1,7 @@
 CC=i586-elf-gcc
 CPP=i586-elf-g++
 CFLAGS=-std=gnu99 $(COMMONFLAGS)
-COMMONFLAGS=-I./include -ffreestanding -Wall -Wextra
+COMMONFLAGS=-I./include -I./include/libc -I./include/libcpp -ffreestanding -Wall -Wextra
 CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 OBJDIR=../bin
@@ -20,7 +20,7 @@ $(OBJDIR)/kernel.bin: $(BOOT) $(OBJS)
 $(OBJDIR)/%.o: kernel/%.s | $(OBJDIR)
 	$(ASM) $< -o $@
 
-$(OBJDIR)/%.o: lib/%.c include/lib/%.h | $(OBJDIR)
+$(OBJDIR)/%.o: libc/%.c include/libc/%.h | $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
 
 $(OBJDIR)/%.o: kernel/%.c include/kernel/%.h | $(OBJDIR)

@@ -1,5 +1,5 @@
 #include <new>
-#include <lib/string.h>
+#include <string.h>
 #include <kernel/Kernel.hpp>
 #include <kernel/GlobalDescriptorTable.hpp>
 #include <kernel/InterruptDescriptorTable.hpp>
