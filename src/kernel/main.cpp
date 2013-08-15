@@ -8,11 +8,19 @@
 // ====================================================
 // Globals
 // ====================================================
+
+Kernel *kernel = NULL;
 uint8_t kern_mem[sizeof(Kernel)];
+
+VGATextTerminal *terminal = NULL;
 uint8_t term_mem[sizeof(VGATextTerminal)];
 
-Kernel *kernel;
-VGATextTerminal *terminal;
+GlobalDescriptorTable *gdt = NULL;
+uint8_t gdt_mem[sizeof(GlobalDescriptorTable)];
+
+InterruptDescriptorTable *idt = NULL;
+uint8_t idt_mem[sizeof(InterruptDescriptorTable)];
+
 
 #define GDT_SIZE 5
 uint64_t gdt_ptr[GDT_SIZE];
@@ -34,24 +42,30 @@ extern "C" char hex2char(uint8_t nib)
     }
 }
 
-char retval[5];
+char retval[7];
 
 extern "C" char *hex2str(uint16_t num)
 {
     retval[0] = '0';
     retval[1] = 'x';
-    retval[2] = hex2char((num & 0xF0) >> 4);
-    retval[3] = hex2char(num & 0xF);
-    retval[4] = 0;
+    retval[2] = hex2char((num & 0xF000) >> 12);
+    retval[3] = hex2char((num & 0xF00) >> 8);
+    retval[4] = hex2char((num & 0xF0) >> 4);
+    retval[5] = hex2char(num & 0xF);
+    retval[6] = 0;
 
     return retval;
 }
 
 extern "C" void interrupt_handler(RegisterTable registers) {
-    const char *data = "\nInterrupt # ";
-    kernel->stdout()->writeString(data);
+    kernel->stdout()->writeString("int ");
     hex2str(registers.int_no);
     kernel->stdout()->writeString(retval);
+    kernel->stdout()->writeString(", err ");
+    hex2str(registers.err_code);
+    kernel->stdout()->writeString(retval);
+    kernel->stdout()->putChar('\n');
+    idt->callInterruptServiceRoutine(registers.int_no, registers);
 }
 
 extern "C" void kernel_main()
@@ -60,17 +74,17 @@ extern "C" void kernel_main()
     terminal = new (term_mem) VGATextTerminal;
     kernel->setStdout(terminal);
     
-    GlobalDescriptorTable gdt(gdt_ptr, GDT_SIZE);
-    gdt.encodeEntry(0, GDTEntry());
-    gdt.encodeEntry(1, GDTEntry(0, 0xffffffff, 0x9A));
-    gdt.encodeEntry(2, GDTEntry(0, 0xffffffff, 0x92));
-    gdt.encodeEntry(3, GDTEntry(0, 0xffffffff, 0xFA));
-    gdt.encodeEntry(4, GDTEntry(0, 0xffffffff, 0xF2));
-    gdt.install();
+    gdt = new (gdt_mem) GlobalDescriptorTable(gdt_ptr, GDT_SIZE);
+    gdt->encodeEntry(0, GDTEntry());
+    gdt->encodeEntry(1, GDTEntry(0, 0xffffffff, 0x9A));
+    gdt->encodeEntry(2, GDTEntry(0, 0xffffffff, 0x92));
+    gdt->encodeEntry(3, GDTEntry(0, 0xffffffff, 0xFA));
+    gdt->encodeEntry(4, GDTEntry(0, 0xffffffff, 0xF2));
+    gdt->install();
 
-    InterruptDescriptorTable idt(idt_ptr, 256);
-    idt.encodeHWExceptionISRs();
-    idt.install();
+    idt = new (idt_mem) InterruptDescriptorTable(idt_ptr, 256);
+    idt->encodeHWExceptionISRs();
+    idt->install();
 
     kernel->panic("Kernel exited. Maybe you should write the rest of the operating system?");
     asm volatile ("int $0x15");

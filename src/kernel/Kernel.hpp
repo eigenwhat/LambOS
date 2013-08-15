@@ -14,3 +14,4 @@ private:
 	ITerminal *_stdout;
 };
 
+extern Kernel *kernel;
