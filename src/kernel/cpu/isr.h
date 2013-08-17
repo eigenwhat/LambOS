@@ -1,5 +1,11 @@
+#ifndef ISR_H
+#define ISR_H
+
+#include <decl.h>
 #define ISR_FUNCTION_NAME(num) isr##num
-#define ISR_FUNCTION_DEF(num) extern "C" void ISR_FUNCTION_NAME(num) ()
+#define ISR_FUNCTION_DEF(num) void ISR_FUNCTION_NAME(num) ()
+
+__BEGIN_DECLS
 
 ISR_FUNCTION_DEF(0);
 ISR_FUNCTION_DEF(1);
@@ -33,3 +39,7 @@ ISR_FUNCTION_DEF(28);
 ISR_FUNCTION_DEF(29);
 ISR_FUNCTION_DEF(30);
 ISR_FUNCTION_DEF(31);
+
+__END_DECLS
+
+#endif

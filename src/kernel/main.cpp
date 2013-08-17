@@ -3,6 +3,7 @@
 #include "Kernel.hpp"
 #include "cpu/GlobalDescriptorTable.hpp"
 #include "cpu/InterruptDescriptorTable.hpp"
+#include "cpu/Paging.hpp"
 #include "device/display/VGATextTerminal.hpp"
 
 // ====================================================
@@ -20,6 +21,9 @@ uint8_t gdt_mem[sizeof(GlobalDescriptorTable)];
 
 InterruptDescriptorTable *idt = NULL;
 uint8_t idt_mem[sizeof(InterruptDescriptorTable)];
+
+PageDirectory *pd = NULL;
+uint8_t pd_mem[sizeof(PageDirectory)];
 
 
 #define GDT_SIZE 5
@@ -72,6 +76,8 @@ extern "C" void kernel_main()
 {
     kernel = new (kern_mem) Kernel;
     terminal = new (term_mem) VGATextTerminal;
+    pd = new (pd_mem) PageDirectory((uint32_t*)0x1000);
+
     kernel->setStdout(terminal);
     
     gdt = new (gdt_mem) GlobalDescriptorTable(gdt_ptr, GDT_SIZE);
@@ -85,6 +91,8 @@ extern "C" void kernel_main()
     idt = new (idt_mem) InterruptDescriptorTable(idt_ptr, 256);
     idt->encodeHWExceptionISRs();
     idt->install();
+
+    //pd->install();
 
     kernel->panic("Kernel exited. Maybe you should write the rest of the operating system?");
     asm volatile ("int $0x15");

@@ -12,6 +12,7 @@ public:
 	void panic(const char *errorMessage);
 private:
 	ITerminal *_stdout;
+
 };
 
 extern Kernel *kernel;
