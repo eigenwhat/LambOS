@@ -9,6 +9,7 @@
 // ====================================================
 // Globals
 // ====================================================
+extern uint32_t kernel_end;
 
 Kernel *kernel = NULL;
 uint8_t kern_mem[sizeof(Kernel)];
@@ -22,8 +23,8 @@ uint8_t gdt_mem[sizeof(GlobalDescriptorTable)];
 InterruptDescriptorTable *idt = NULL;
 uint8_t idt_mem[sizeof(InterruptDescriptorTable)];
 
-PageDirectory *pd = NULL;
-uint8_t pd_mem[sizeof(PageDirectory)];
+PageTable *pageDirectory = NULL;
+uint8_t pd_mem[sizeof(PageTable)];
 
 
 #define GDT_SIZE 5
@@ -76,7 +77,6 @@ extern "C" void kernel_main()
 {
     kernel = new (kern_mem) Kernel;
     terminal = new (term_mem) VGATextTerminal;
-    pd = new (pd_mem) PageDirectory((uint32_t*)0x1000);
 
     kernel->setStdout(terminal);
     
@@ -92,7 +92,26 @@ extern "C" void kernel_main()
     idt->encodeHWExceptionISRs();
     idt->install();
 
-    //pd->install();
+    uint32_t pageDirectoryAddress = (kernel_end & k4KPageAddressMask) + 0x1000;
+    pageDirectory = new (pd_mem) PageTable((uint32_t*)pageDirectoryAddress);
+
+    PageTable firstTable((uint32_t*)(pageDirectoryAddress + 0x1000));
+    uint32_t address = 0;
+
+    // identity map first 4MB
+    for(int i = 0; i < 1024; ++i) {
+        PageEntry entry(address);
+        entry.setFlag(kPresentBit);
+        entry.setFlag(kReadWriteBit);
+        firstTable.setEntry(i, entry);
+        address += 0x1000;
+    }
+
+    PageEntry entry((uint32_t)firstTable.address());
+    entry.setFlag(kPresentBit);
+    entry.setFlag(kReadWriteBit);
+    pageDirectory->setEntry(0, entry);
+    pageDirectory->install();
 
     kernel->panic("Kernel exited. Maybe you should write the rest of the operating system?");
     asm volatile ("int $0x15");

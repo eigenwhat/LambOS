@@ -23,24 +23,21 @@ class PageTable;
 
 class PageEntry {
 public:
-    PageEntry() : _entry(0) {}
-    void setPageTableAddress(uint32_t address) { _entry = (address & k4KPageAddressMask) | (_entry & kPageFlagsMask); }
+    PageEntry(uint32_t address) : _entry(0) { _entry = (address & k4KPageAddressMask) | (_entry & kPageFlagsMask); }
     void unsetFlag(PageEntryFlag flag) { _entry &= flag; }
     void setFlag(PageEntryFlag flag) { _entry |= ~flag; }
     bool getFlag(PageEntryFlag flag) { return (bool)(_entry & ~flag); }
+    friend class PageTable;
 private:
     uint32_t _entry;
 };
 
 class PageTable {
-    
-};
-
-class PageDirectory {
 public:
-    PageDirectory() : _pageDirectoryAddress(0) {}
-    PageDirectory(uint32_t *directoryAddress) : _pageDirectoryAddress(directoryAddress) {}
+    PageTable(uint32_t *tableAddress);
+    uint32_t *address() { return _tableAddress; }
+    void setEntry(uint16_t index, PageEntry entry) { _tableAddress[index] = entry._entry; }
     void install();
 private:
-	uint32_t *_pageDirectoryAddress;
+    uint32_t *_tableAddress;
 };
