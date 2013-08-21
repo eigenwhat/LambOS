@@ -5,6 +5,9 @@
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
 
+//======================================================
+// Helper functions
+//======================================================
 uint16_t make_vgaentry(char c, uint8_t color)
 {
 	uint16_t c16 = c;
@@ -23,6 +26,9 @@ void move_cursor_to(size_t row, size_t col)
     outb(0x3D5, (uint8_t)((position>>8)&0xFF));
 }
 
+//======================================================
+// VGATextTerminal
+//======================================================
 VGATextTerminal::VGATextTerminal() : terminal_row(0), terminal_column(0)
 {
 	terminal_color = COLOR_LIGHT_GREY | COLOR_BLACK << 4;
@@ -65,7 +71,7 @@ void VGATextTerminal::putCharAt(char c, uint8_t color, size_t x, size_t y)
 
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = make_vgaentry(c, color);
-	moveTo(terminal_row, terminal_column);
+	moveTo(x, y);
 }
  
 void VGATextTerminal::putChar(char c)
