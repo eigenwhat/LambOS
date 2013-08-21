@@ -92,7 +92,7 @@ void VGATextTerminal::putChar(char c)
 	}
 }
 
-void VGATextTerminal::moveTo(size_t row, size_t col)
+void VGATextTerminal::moveTo(size_t col, size_t row)
 {
  	if(cursorIsVisible) {
  		move_cursor_to(row, col);
