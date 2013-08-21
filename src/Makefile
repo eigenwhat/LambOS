@@ -8,7 +8,11 @@ CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
 
-_OBJS=main.o Kernel.o GlobalDescriptorTable.o InterruptDescriptorTable.o VGATextTerminal.o string.o set_gdt.o set_idt.o interrupt.o Paging.o
+_LIBC=string.o stdlib.o
+_LIBCPP=
+_KOBJS=main.o Kernel.o GlobalDescriptorTable.o InterruptDescriptorTable.o VGATextTerminal.o set_gdt.o set_idt.o interrupt.o Paging.o
+
+_OBJS=$(_LIBC) $(_LIBCPP) $(_KOBJS)
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
 VPATH=kernel kernel/device kernel/device/display kernel/cpu

@@ -29,3 +29,10 @@ void GlobalDescriptorTable::encodeEntry(uint8_t entryNumber, GDTEntry source)
     // And... Type
     target[5] = source.type;
 }
+
+void GlobalDescriptorTable::installTSS(uint8_t entryIndex)
+{
+    uint32_t descriptor = entryIndex * 8;
+    asm volatile ("movl %0, %%eax;"
+        "ltr %%ax;" : : "r"(descriptor) : "%eax");
+}
