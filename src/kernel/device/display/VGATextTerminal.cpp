@@ -71,7 +71,7 @@ void VGATextTerminal::putCharAt(char c, uint8_t color, size_t x, size_t y)
 
 	const size_t index = y * VGA_WIDTH + x;
 	terminal_buffer[index] = make_vgaentry(c, color);
-	moveTo(x, y);
+	moveTo(y, x);
 }
  
 void VGATextTerminal::putChar(char c)
@@ -92,7 +92,7 @@ void VGATextTerminal::putChar(char c)
 	}
 }
 
-void VGATextTerminal::moveTo(size_t col, size_t row)
+void VGATextTerminal::moveTo(size_t row, size_t col)
 {
  	if(cursorIsVisible) {
  		move_cursor_to(row, col);
