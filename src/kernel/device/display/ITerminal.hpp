@@ -16,4 +16,6 @@ class ITerminal {
 		virtual size_t width() = 0;
 		virtual size_t height() = 0;
 		virtual void setCursorVisible(bool isVisible) = 0;
+		virtual size_t column() = 0;
+		virtual size_t row() = 0;
 };

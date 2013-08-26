@@ -20,6 +20,8 @@ public:
 	virtual size_t width();
 	virtual size_t height();
 	virtual void setCursorVisible(bool isVisible);
+	virtual size_t column() { return terminal_column; }
+	virtual size_t row() { return terminal_row; }
 
 private:
 	virtual void putCharAt(char c, uint8_t color, size_t x, size_t y);
