@@ -28,4 +28,6 @@ void Kernel::panic(const char *string)
     const char *msg = "0xL4MBOS";
     out()->moveTo(out()->height()-2, (out()->width() - strlen(msg)) / 2);
     out()->writeString(msg);
+
+    asm("cli\nhlt");
 }

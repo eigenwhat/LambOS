@@ -70,6 +70,12 @@ void interrupt_handler(RegisterTable registers) {
 
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
 {
+    kernel->out()->moveTo(kernel->out()->row(), 0);
+    for(int i = 0; i < kernel->out()->width(); ++i) {
+        kernel->out()->putChar(' ');
+    }
+    kernel->out()->moveTo(kernel->out()->row() - 1, 0);
+
     kernel->out()->setForegroundColor(COLOR_WHITE);
     kernel->out()->writeString(printstr);
 
@@ -251,8 +257,26 @@ int init_pfalloc(uint32_t mmap_addr, uint32_t mmap_length)
 int testPFA()
 {
     bool foundFreeFrame = false;
-    for(int i = 0; i < 256; ++i) {
-        foundFreeFrame = frameAllocator->frameIsAvailable(i);
+
+    for(int i = 0; i < 0x100000; i += 0x1000) {
+        foundFreeFrame = frameAllocator->frameIsUsable(i);
+        if(foundFreeFrame) {
+            break;
+        }
+    }
+
+    log_test(" > Testing if first 1MB is not fully reserved...", foundFreeFrame);
+
+    for(int i = 0; i < 0x100000; i += 0x1000) {
+        frameAllocator->markFrameUsable(i, false);
+    }
+
+    log_task(" > Marking first 1MB as unusable for allocation...", true);
+
+    foundFreeFrame = false;
+
+    for(int i = 0; i < 0x100000; i += 0x1000) {
+        foundFreeFrame = frameAllocator->frameIsUsable(i);
         if(foundFreeFrame) {
             char num[33];
             itoa(i, num, 10);
@@ -262,7 +286,20 @@ int testPFA()
         }
     }
 
-    log_test(" > Testing if first 1MB is allocated...", !foundFreeFrame);
+    log_test(" > Testing if first 1MB is reserved...", !foundFreeFrame);
+
+    log_test(" > Requesting 0x100000 (free) for first time...", frameAllocator->requestFrame(0x100000));
+    log_test(" > Requesting 0x100000 (used), pass if denied...", !frameAllocator->requestFrame(0x100000));
+    log_task(" > Freeing 0x100000...", (frameAllocator->free(0x100000), true));
+    log_test(" > Requesting 0x100000 (free) again...", frameAllocator->requestFrame(0x100000));
+    log_task(" > Freeing 0x100000...", (frameAllocator->free(0x100000), true));
+    log_test(" > Calling alloc()...", frameAllocator->alloc() == 0x100000);
+    log_test(" > Verifying page is marked as used...", !frameAllocator->frameIsFree(0x100000));
+    log_test(" > Calling alloc() again, checking if new page is returned...", frameAllocator->alloc() == 0x101000);
+    log_task(" > Freeing 0x100000...", (frameAllocator->free(0x100000), true));
+    log_test(" > Verifying page is marked as free...", frameAllocator->frameIsFree(0x100000));
+    log_test(" > Calling alloc() again, checking if new page is returned...", frameAllocator->alloc() == 0x102000);
+    return true;
 }
 
 } // extern C
