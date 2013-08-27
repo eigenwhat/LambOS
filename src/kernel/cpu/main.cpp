@@ -23,8 +23,6 @@ uint8_t term_mem[sizeof(VGATextTerminal)];
 uint8_t gdt_mem[sizeof(GlobalDescriptorTable)];
 uint8_t idt_mem[sizeof(InterruptDescriptorTable)];
 uint8_t pd_mem[sizeof(PageTable)];
-
-PageFrameAllocator *frameAllocator = NULL;
 uint8_t pfa_mem[sizeof(PageFrameAllocator)];
 
 TaskStateSegment tss;
@@ -161,9 +159,7 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
         }
     }
 
-    if(log_task("Setting up page frame allocator...", init_pfalloc(info->mmap_addr, info->mmap_length))) {
-        testPFA();
-    }
+    log_task("Setting up page frame allocator...", init_pfalloc(info->mmap_addr, info->mmap_length));
     log_task("Enabling paging...", install_paging());
 
     kernel->out()->setForegroundColor(COLOR_WHITE);
@@ -204,15 +200,14 @@ int install_idt()
 
 int install_paging()
 {
-    uint32_t kernel_end_addr = (uint32_t) &kernel_end;
-    uint32_t pageDirectoryAddress = (kernel_end_addr & k4KPageAddressMask) + 0x1000;
+    uint32_t pageDirectoryAddress = kernel->frameAllocator()->alloc();
     pageDirectory = new (pd_mem) PageTable((uint32_t*)pageDirectoryAddress);
 
-    PageTable firstTable((uint32_t*)(pageDirectoryAddress + 0x1000));
+    PageTable firstTable((uint32_t*)(kernel->frameAllocator()->alloc()));
     uint32_t address = 0;
 
     // identity map current used address space
-    int lastUsedPage = (pageDirectoryAddress + 0x1000) / 0x1000;
+    int lastUsedPage = (uint32_t)firstTable.address() / 0x1000;
     for(int i = 0; i < lastUsedPage; ++i) {
         PageEntry entry(address);
         entry.setFlag(kPresentBit);
@@ -240,7 +235,20 @@ int install_paging()
 
 int init_pfalloc(uint32_t mmap_addr, uint32_t mmap_length)
 {
-    frameAllocator = new (pfa_mem) PageFrameAllocator(mmap_addr, mmap_length);
+    kernel->setFrameAllocator(new (pfa_mem) PageFrameAllocator(mmap_addr, mmap_length));
+    // reserve first 1MB
+    for(int i = 0; i < 0x100000; i += 0x1000) {
+        kernel->frameAllocator()->markFrameUsable(i, false);
+    }
+
+    uint32_t kernel_end_addr = (uint32_t) &kernel_end;
+
+    for(int i = 0x100000; i <= kernel_end_addr; i += 0x1000) {
+        if(!kernel->frameAllocator()->requestFrame(i)) {
+            kernel->panic("Page allocation error: unable to reserve kernel memory frames.");
+        }
+    }
+
     return true;
 }
 
@@ -249,24 +257,24 @@ int testPFA()
     bool foundFreeFrame = false;
 
     for(int i = 0; i < 0x100000; i += 0x1000) {
-        foundFreeFrame = frameAllocator->frameIsUsable(i);
+        foundFreeFrame = kernel->frameAllocator()->frameIsUsable(i);
         if(foundFreeFrame) {
             break;
         }
     }
 
-    log_test(" > Testing if first 1MB is not fully reserved...", foundFreeFrame);
+    bool res1 = log_test(" > Testing if first 1MB is not fully reserved...", foundFreeFrame);
 
     for(int i = 0; i < 0x100000; i += 0x1000) {
-        frameAllocator->markFrameUsable(i, false);
+        kernel->frameAllocator()->markFrameUsable(i, false);
     }
 
-    log_task(" > Marking first 1MB as unusable for allocation...", true);
+    bool res2 = log_task(" > Marking first 1MB as unusable for allocation...", true);
 
     foundFreeFrame = false;
 
     for(int i = 0; i < 0x100000; i += 0x1000) {
-        foundFreeFrame = frameAllocator->frameIsUsable(i);
+        foundFreeFrame = kernel->frameAllocator()->frameIsUsable(i);
         if(foundFreeFrame) {
             char num[33];
             itoa(i, num, 10);
@@ -276,20 +284,19 @@ int testPFA()
         }
     }
 
-    log_test(" > Testing if first 1MB is reserved...", !foundFreeFrame);
-
-    log_test(" > Requesting 0x100000 (free) for first time...", frameAllocator->requestFrame(0x100000));
-    log_test(" > Requesting 0x100000 (used), pass if denied...", !frameAllocator->requestFrame(0x100000));
-    log_task(" > Freeing 0x100000...", (frameAllocator->free(0x100000), true));
-    log_test(" > Requesting 0x100000 (free) again...", frameAllocator->requestFrame(0x100000));
-    log_task(" > Freeing 0x100000...", (frameAllocator->free(0x100000), true));
-    log_test(" > Calling alloc()...", frameAllocator->alloc() == 0x100000);
-    log_test(" > Verifying page is marked as used...", !frameAllocator->frameIsFree(0x100000));
-    log_test(" > Calling alloc() again, checking if new page is returned...", frameAllocator->alloc() == 0x101000);
-    log_task(" > Freeing 0x100000...", (frameAllocator->free(0x100000), true));
-    log_test(" > Verifying page is marked as free...", frameAllocator->frameIsFree(0x100000));
-    log_test(" > Calling alloc() again, checking if new page is returned...", frameAllocator->alloc() == 0x102000);
-    return true;
+    return res1 && res2 &&
+    log_test(" > Testing if first 1MB is reserved...", !foundFreeFrame) &&
+    log_test(" > Requesting 0x100000 (free) for first time...", kernel->frameAllocator()->requestFrame(0x100000)) &&
+    log_test(" > Requesting 0x100000 (used), pass if denied...", !kernel->frameAllocator()->requestFrame(0x100000)) &&
+    log_task(" > Freeing 0x100000...", (kernel->frameAllocator()->free(0x100000), true)) &&
+    log_test(" > Requesting 0x100000 (free) again...", kernel->frameAllocator()->requestFrame(0x100000)) &&
+    log_task(" > Freeing 0x100000...", (kernel->frameAllocator()->free(0x100000), true)) &&
+    log_test(" > Calling alloc()...", kernel->frameAllocator()->alloc() == 0x100000) &&
+    log_test(" > Verifying page is marked as used...", !kernel->frameAllocator()->frameIsFree(0x100000)) &&
+    log_test(" > Calling alloc() again, checking if new page is returned...", kernel->frameAllocator()->alloc() == 0x101000) &&
+    log_task(" > Freeing 0x100000...", (kernel->frameAllocator()->free(0x100000), true)) &&
+    log_test(" > Verifying page is marked as free...", kernel->frameAllocator()->frameIsFree(0x100000)) &&
+    log_test(" > Calling alloc() again, checking if new page is returned...", kernel->frameAllocator()->alloc() == 0x102000);
 }
 
 } // extern C
