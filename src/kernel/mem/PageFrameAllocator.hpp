@@ -27,5 +27,3 @@ private:
     uint8_t _bitmapFree[PAGES_IN_BITMAP/8];
     PageFrame _lastAllocFrame;
 };
-
-#undef FRAME_TO_INDEX

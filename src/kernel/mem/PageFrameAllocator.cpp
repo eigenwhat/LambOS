@@ -5,7 +5,7 @@
 
 #define FRAME_TO_INDEX(frame) (((frame) & k4KPageAddressMask) / 0x1000)
 
-PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length)
+PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length) : _lastAllocFrame(0)
 {
     memset(_bitmapUsable, 0xFF, PAGES_IN_BITMAP/8);
     memset(_bitmapFree, 0, PAGES_IN_BITMAP/8);
