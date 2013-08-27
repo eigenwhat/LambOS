@@ -56,15 +56,8 @@ void __cxa_pure_virtual()
     // Do nothing or print an error message.
 }
 
-void interrupt_handler(RegisterTable registers) {
-    char hexval[33];
-    kernel->out()->writeString("int ");
-    itoa(registers.int_no, hexval, 16);
-    kernel->out()->writeString(hexval);
-    kernel->out()->writeString(", err ");
-    itoa(registers.err_code, hexval, 16);
-    kernel->out()->writeString(hexval);
-    kernel->out()->putChar('\n');
+void interrupt_handler(RegisterTable registers)
+{
     idt->callInterruptServiceRoutine(registers.int_no, registers);
 }
 
@@ -142,10 +135,7 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     result = check_flag(info, "Checking for reported memory map...", MULTIBOOT_INFO_MEM_MAP);
 
     if(!result) {
-        kernel->out()->setForegroundColor(COLOR_LIGHT_RED);
-        kernel->out()->writeString("ERROR: Cannot set up paging without an accurate memory map!");
-
-        return;
+        kernel->panic("Fatal ERROR: Cannot install paging due to missing memory map.");
     } else {
         multiboot_memory_map_t *mmap;
         for (mmap = (multiboot_memory_map_t *) info->mmap_addr; 

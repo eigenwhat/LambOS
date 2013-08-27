@@ -1,3 +1,5 @@
+#include <stdlib.h>
+#include <Kernel.hpp>
 #include "InterruptDescriptorTable.hpp"
 #include "isr.h"
 
@@ -6,7 +8,17 @@
       isr[(num)] = defaultISR;\
    } while(0)
 
-extern "C" void defaultISR(RegisterTable &registers) {}
+extern "C" void defaultISR(RegisterTable &registers) 
+{
+   char hexval[33];
+   kernel->out()->writeString("int ");
+   itoa(registers.int_no, hexval, 16);
+   kernel->out()->writeString(hexval);
+   kernel->out()->writeString(", err ");
+   itoa(registers.err_code, hexval, 16);
+   kernel->out()->writeString(hexval);
+   kernel->out()->putChar('\n');
+}
 
 //======================================================
 // InterruptDescriptorTable
