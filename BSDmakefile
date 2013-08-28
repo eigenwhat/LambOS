@@ -1,0 +1,5 @@
+all:
+	gmake
+
+.DEFAULT: 
+	gmake $@
