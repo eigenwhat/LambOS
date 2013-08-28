@@ -5,24 +5,29 @@
 
 #define FRAME_TO_INDEX(frame) (((frame) & k4KPageAddressMask) / 0x1000)
 
-PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length) : _lastAllocFrame(0)
+PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length, PageFrameInitializationHook *hook) 
+    : _lastAllocFrame(0)
 {
     memset(_bitmapUsable, 0xFF, PAGES_IN_BITMAP/8);
     memset(_bitmapFree, 0, PAGES_IN_BITMAP/8);
     multiboot_memory_map_t *mmap;
     for (mmap = (multiboot_memory_map_t *) mmap_addr; 
-            (uint32_t) mmap < mmap_addr + mmap_length;
-            mmap = (multiboot_memory_map_t *) ((uint32_t) mmap + mmap->size + sizeof (mmap->size)))
-        {
-            uint32_t page_offset = mmap->addr/0x1000;
-            uint32_t num_pages = mmap->len/0x1000;
-            if(mmap->type == 1) {
-                for(int i = page_offset; i < page_offset + num_pages; ++i) {
-                    int bitmap_index = i/8;
-                    _bitmapUsable[bitmap_index] &= ~(1 << (i % 8));
-                }
+        (uint32_t) mmap < mmap_addr + mmap_length;
+        mmap = (multiboot_memory_map_t *) ((uint32_t) mmap + mmap->size + sizeof (mmap->size)))
+    {
+        uint32_t page_offset = mmap->addr/0x1000;
+        uint32_t num_pages = mmap->len/0x1000;
+        if(mmap->type == 1) {
+            for(int i = page_offset; i < page_offset + num_pages; ++i) {
+                int bitmap_index = i/8;
+                _bitmapUsable[bitmap_index] &= ~(1 << (i % 8));
             }
         }
+    }
+
+    if(hook != NULL) {
+        (*hook)(this);
+    }
 }
 
 void PageFrameAllocator::markFrameUsable(PageFrame frame, bool usable)

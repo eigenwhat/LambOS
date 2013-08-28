@@ -1,24 +1,28 @@
 #include <stdlib.h>
 #include <Kernel.hpp>
+#include <new>
 #include "InterruptDescriptorTable.hpp"
 #include "isr.h"
 
-#define ADDISR(num) do { \
+#define ADDISR(num, isrf) do { \
       encodeEntry((num), IDTEntry(0x08, (uint32_t)isr##num, 0x8E));\
-      isr[(num)] = defaultISR;\
+      isr[(num)] = (isrf);\
    } while(0)
 
-extern "C" void defaultISR(RegisterTable &registers) 
+struct StubISR : InterruptServiceRoutine
 {
-   char hexval[33];
-   kernel->out()->writeString("int ");
-   itoa(registers.int_no, hexval, 16);
-   kernel->out()->writeString(hexval);
-   kernel->out()->writeString(", err ");
-   itoa(registers.err_code, hexval, 16);
-   kernel->out()->writeString(hexval);
-   kernel->out()->putChar('\n');
-}
+   virtual void operator()(RegisterTable &registers) 
+   {
+      char hexval[33];
+      kernel->out()->writeString("int ");
+      itoa(registers.int_no, hexval, 16);
+      kernel->out()->writeString(hexval);
+      kernel->out()->writeString(", err ");
+      itoa(registers.err_code, hexval, 16);
+      kernel->out()->writeString(hexval);
+      kernel->out()->putChar('\n');
+   }
+};
 
 //======================================================
 // InterruptDescriptorTable
@@ -45,38 +49,41 @@ void InterruptDescriptorTable::encodeEntry(uint8_t entryNumber, IDTEntry source)
 	target[5] = source.type_attr;
 }
 
+uint8_t isr_mem[sizeof(StubISR)];
+
 void InterruptDescriptorTable::encodeHWExceptionISRs()
 {
-   ADDISR(0);
-   ADDISR(1);
-   ADDISR(2);
-   ADDISR(3);
-   ADDISR(4);
-   ADDISR(5);
-   ADDISR(6);
-   ADDISR(7);
-   ADDISR(8);
-   ADDISR(9);
-   ADDISR(10);
-   ADDISR(11);
-   ADDISR(12);
-   ADDISR(13);
-   ADDISR(14);
-   ADDISR(15);
-   ADDISR(16);
-   ADDISR(17);
-   ADDISR(18);
-   ADDISR(19);
-   ADDISR(20);
-   ADDISR(21);
-   ADDISR(22);
-   ADDISR(23);
-   ADDISR(24);
-   ADDISR(25);
-   ADDISR(26);
-   ADDISR(27);
-   ADDISR(28);
-   ADDISR(29);
-   ADDISR(30);
-   ADDISR(31);
+   StubISR *defaultISR = new (isr_mem) StubISR;
+   ADDISR(0, defaultISR);
+   ADDISR(1, defaultISR);
+   ADDISR(2, defaultISR);
+   ADDISR(3, defaultISR);
+   ADDISR(4, defaultISR);
+   ADDISR(5, defaultISR);
+   ADDISR(6, defaultISR);
+   ADDISR(7, defaultISR);
+   ADDISR(8, defaultISR);
+   ADDISR(9, defaultISR);
+   ADDISR(10, defaultISR);
+   ADDISR(11, defaultISR);
+   ADDISR(12, defaultISR);
+   ADDISR(13, defaultISR);
+   ADDISR(14, defaultISR);
+   ADDISR(15, defaultISR);
+   ADDISR(16, defaultISR);
+   ADDISR(17, defaultISR);
+   ADDISR(18, defaultISR);
+   ADDISR(19, defaultISR);
+   ADDISR(20, defaultISR);
+   ADDISR(21, defaultISR);
+   ADDISR(22, defaultISR);
+   ADDISR(23, defaultISR);
+   ADDISR(24, defaultISR);
+   ADDISR(25, defaultISR);
+   ADDISR(26, defaultISR);
+   ADDISR(27, defaultISR);
+   ADDISR(28, defaultISR);
+   ADDISR(29, defaultISR);
+   ADDISR(30, defaultISR);
+   ADDISR(31, defaultISR);
 }

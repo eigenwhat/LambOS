@@ -2,16 +2,23 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <cpu/Paging.hpp>
+#include <mem/PageTable.hpp>
 
 #define PAGES_IN_BITMAP 1048576
 
 typedef uint32_t PageFrame;
 
+class PageFrameAllocator;
+
+struct PageFrameInitializationHook
+{
+    virtual void operator()(PageFrameAllocator *allocator) = 0;
+};
+
 class PageFrameAllocator
 {
 public:
-    PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length);
+    PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length, PageFrameInitializationHook *hook = NULL);
     PageFrame alloc();
     void free(PageFrame frame);
     void markFrameUsable(PageFrame frame, bool usable);

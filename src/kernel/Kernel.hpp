@@ -2,24 +2,24 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "device/display/ITerminal.hpp"
-#include <mem/PageFrameAllocator.hpp>
+#include <mem/MMU.hpp>
 
 class Kernel
 {
 public:
-	Kernel() : _stdout(NULL) {}
+	Kernel() : _out(NULL) {}
 
     // accessors/mutators
-	void setOut(ITerminal *terminal) { this->_stdout = terminal; }
-	ITerminal* out() { return this->_stdout; }
-    void setFrameAllocator(PageFrameAllocator *allocator) { _frameAllocator = allocator; }
-    PageFrameAllocator *frameAllocator() { return this->_frameAllocator; }
+	void setOut(ITerminal *terminal) { this->_out = terminal; }
+	ITerminal* out() { return this->_out; }
+    void setMMU(MMU *mmu) { _mmu = mmu; }
+    MMU *mmu() { return this->_mmu; }
 
     // methods
 	void panic(const char *errorMessage);
 private:
-	ITerminal *_stdout;
-    PageFrameAllocator *_frameAllocator;
+	ITerminal *_out;
+    MMU *_mmu;
 };
 
 extern Kernel *kernel;

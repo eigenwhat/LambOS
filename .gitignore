@@ -1,2 +1,3 @@
 bin/
 stoof/
+*.o
