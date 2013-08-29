@@ -57,7 +57,7 @@ void interrupt_handler(RegisterTable registers)
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
 {
     kernel->out()->moveTo(kernel->out()->row(), 0);
-    for(int i = 0; i < kernel->out()->width(); ++i) {
+    for(uint32_t i = 0; i < kernel->out()->width(); ++i) {
         kernel->out()->putChar(' ');
     }
     kernel->out()->moveTo(kernel->out()->row() - 1, 0);

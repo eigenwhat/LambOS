@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <Kernel.hpp>
 #include <new>
+#include <sys/asm.h>
 #include "InterruptDescriptorTable.hpp"
 #include "isr.h"
 
@@ -9,11 +10,23 @@
       isr[(num)] = (isrf);\
    } while(0)
 
+#define BochsConsolePrintChar(c) outb(0xe9, c)
+
 struct StubISR : InterruptServiceRoutine
 {
    virtual void operator()(RegisterTable &registers) 
    {
       char hexval[33];
+      BochsConsolePrintChar('i');
+      BochsConsolePrintChar('n');
+      BochsConsolePrintChar('t');
+      BochsConsolePrintChar(' ');
+      itoa(registers.int_no, hexval, 16);
+      BochsConsolePrintChar('0');
+      BochsConsolePrintChar('x');
+      BochsConsolePrintChar(hexval[0]);
+      BochsConsolePrintChar(hexval[1]);
+      asm("xchg %bx, %bx");
       kernel->out()->writeString("int ");
       itoa(registers.int_no, hexval, 16);
       kernel->out()->writeString(hexval);

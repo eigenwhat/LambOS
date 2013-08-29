@@ -10,7 +10,7 @@ __BEGIN_DECLS
 
 #define MIN(a, b) (a) > (b) ? (b) : (a)
 #define MAX(a, b) (a) > (b) ? (a) : (b)
-#define CLAMP(num, min, max) num = MAX(MIN((num), (max)), (min))
+#define CLAMP(num, min, max) MAX(MIN((num), (max)), (min))
 
 char *itoa(int value, char *str, int base);
 
