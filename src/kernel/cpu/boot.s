@@ -61,7 +61,6 @@ _start:
 	# we'll create a C entry point called kernel_main and call it here.
 	push %eax
 	push %ebx
-	xchg %bx, %bx
 	call kernel_main
 
 	# In case the function returns, we'll want to put the computer into an

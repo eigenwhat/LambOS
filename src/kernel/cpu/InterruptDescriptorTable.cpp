@@ -26,7 +26,7 @@ struct StubISR : InterruptServiceRoutine
       BochsConsolePrintChar('x');
       BochsConsolePrintChar(hexval[0]);
       BochsConsolePrintChar(hexval[1]);
-      asm("xchg %bx, %bx");
+      BochsConsolePrintChar('\n');
       kernel->out()->writeString("int ");
       itoa(registers.int_no, hexval, 16);
       kernel->out()->writeString(hexval);

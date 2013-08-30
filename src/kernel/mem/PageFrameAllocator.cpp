@@ -18,7 +18,7 @@ PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length,
         uint32_t page_offset = mmap->addr/0x1000;
         uint32_t num_pages = mmap->len/0x1000;
         if(mmap->type == 1) {
-            for(int i = page_offset; i < page_offset + num_pages; ++i) {
+            for(uint32_t i = page_offset; i < page_offset + num_pages; ++i) {
                 int bitmap_index = i/8;
                 _bitmapUsable[bitmap_index] &= ~(1 << (i % 8));
             }

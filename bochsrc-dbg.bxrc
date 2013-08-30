@@ -25,7 +25,7 @@ cpuid: mmx=1, apic=xapic, sse=sse2, sse4a=0, misaligned_sse=0, sep=1, movbe=0, a
 cpuid: aes=0, xsave=0, xsaveopt=0, x86_64=1, 1g_pages=0, pcid=0, fsgsbase=0, smep=0
 cpuid: smap=0, mwait=1, vmx=1
 print_timestamps: enabled=0
-port_e9_hack: enabled=0
+port_e9_hack: enabled=1
 private_colormap: enabled=0
 clock: sync=none, time0=local, rtc_sync=0
 # no cmosimage
