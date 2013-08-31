@@ -17,13 +17,28 @@ char *strcpy(char *dst, const char *src)
 	return retval;
 }
 
+char *strncpy(char *dst, const char *src, size_t num)
+{
+	char *retval = dst;
+	while((num--) && (*dst++ = *src++));
+	for(; num--; *dst++ = 0);
+
+	return retval;
+}
+
 void *memset(void *ptr, int value, size_t num)
 {
 	uint8_t *dst = (uint8_t *)ptr;
-	while(num > 0) {
-		*dst++ = (uint8_t)value;
-		--num;
-	}
+	for(; num--; *dst++ = (uint8_t)value);
 
 	return ptr;
+}
+
+void *memcpy(void *dst, const void *src, size_t num)
+{
+	uint8_t *c_dst = (uint8_t *)dst;
+	const uint8_t *c_src = (const uint8_t *)src;
+	for(; num--; *c_dst++ = *c_src++);
+
+	return dst;
 }
