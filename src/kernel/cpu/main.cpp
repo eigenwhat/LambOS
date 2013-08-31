@@ -108,6 +108,10 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     kernel = new (kern_mem) Kernel;
     kernel->setOut(new (term_mem) VGATextTerminal);
 
+    if(magic != 0x2BADB002) {
+        kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
+    }
+
     int result;
 
     log_task("Installing global descriptor table...", install_gdt());
