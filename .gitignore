@@ -2,3 +2,4 @@ bin/
 stoof/
 *.o
 .AppleDouble
+.DS_Store
