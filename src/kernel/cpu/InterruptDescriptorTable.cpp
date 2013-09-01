@@ -27,13 +27,13 @@ struct StubISR : InterruptServiceRoutine
       BochsConsolePrintChar(hexval[0]);
       BochsConsolePrintChar(hexval[1]);
       BochsConsolePrintChar('\n');
-      kernel->out()->writeString("int ");
+      kernel->terminal()->writeString("int ");
       itoa(registers.int_no, hexval, 16);
-      kernel->out()->writeString(hexval);
-      kernel->out()->writeString(", err ");
+      kernel->terminal()->writeString(hexval);
+      kernel->terminal()->writeString(", err ");
       itoa(registers.err_code, hexval, 16);
-      kernel->out()->writeString(hexval);
-      kernel->out()->putChar('\n');
+      kernel->terminal()->writeString(hexval);
+      kernel->terminal()->putChar('\n');
    }
 };
 

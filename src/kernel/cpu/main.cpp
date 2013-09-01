@@ -56,34 +56,34 @@ void interrupt_handler(RegisterTable registers)
 
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
 {
-    kernel->out()->moveTo(kernel->out()->row(), 0);
-    for(uint32_t i = 0; i < kernel->out()->width(); ++i) {
-        kernel->out()->putChar(' ');
+    kernel->terminal()->moveTo(kernel->terminal()->row(), 0);
+    for(uint32_t i = 0; i < kernel->terminal()->width(); ++i) {
+        kernel->terminal()->putChar(' ');
     }
-    kernel->out()->moveTo(kernel->out()->row() - 1, 0);
+    kernel->terminal()->moveTo(kernel->terminal()->row() - 1, 0);
 
-    kernel->out()->setForegroundColor(COLOR_WHITE);
-    kernel->out()->writeString(printstr);
+    kernel->terminal()->setForegroundColor(COLOR_WHITE);
+    kernel->terminal()->writeString(printstr);
 
-    if(kernel->out()->column() > kernel->out()->width() - 6) {
-        kernel->out()->writeString("\n");
+    if(kernel->terminal()->column() > kernel->terminal()->width() - 6) {
+        kernel->terminal()->writeString("\n");
     }
     
     if(success) {
-        kernel->out()->moveTo(kernel->out()->row(), kernel->out()->width() - (strlen(ackstr) + 3));
-        kernel->out()->writeString("[");
-        kernel->out()->setForegroundColor(COLOR_GREEN);
-        kernel->out()->writeString(ackstr);
+        kernel->terminal()->moveTo(kernel->terminal()->row(), kernel->terminal()->width() - (strlen(ackstr) + 3));
+        kernel->terminal()->writeString("[");
+        kernel->terminal()->setForegroundColor(COLOR_GREEN);
+        kernel->terminal()->writeString(ackstr);
     } else {
-        kernel->out()->moveTo(kernel->out()->row(), kernel->out()->width() - (strlen(nakstr) + 3));
-        kernel->out()->writeString("[");
-        kernel->out()->setForegroundColor(COLOR_RED);
-        kernel->out()->writeString(nakstr);
+        kernel->terminal()->moveTo(kernel->terminal()->row(), kernel->terminal()->width() - (strlen(nakstr) + 3));
+        kernel->terminal()->writeString("[");
+        kernel->terminal()->setForegroundColor(COLOR_RED);
+        kernel->terminal()->writeString(nakstr);
     }
-    kernel->out()->setForegroundColor(COLOR_WHITE);
-    kernel->out()->writeString("]\n");
+    kernel->terminal()->setForegroundColor(COLOR_WHITE);
+    kernel->terminal()->writeString("]\n");
 
-    kernel->out()->setForegroundColor(defaultTextColor);
+    kernel->terminal()->setForegroundColor(defaultTextColor);
 
     return success;
 }
@@ -106,7 +106,7 @@ int log_test(const char *printstr, int success)
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
     kernel = new (kern_mem) Kernel;
-    kernel->setOut(new (term_mem) VGATextTerminal);
+    kernel->setTerminal(new (term_mem) VGATextTerminal);
 
     if(magic != 0x2BADB002) {
         kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
@@ -121,12 +121,12 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     if(result) {
         char decval[33];
         itoa(info->mem_lower, decval, 10);
-        kernel->out()->writeString(decval);
-        kernel->out()->writeString("KiB lower memory.\n");
+        kernel->terminal()->writeString(decval);
+        kernel->terminal()->writeString("KiB lower memory.\n");
 
         itoa(info->mem_upper, decval, 10);
-        kernel->out()->writeString(decval);
-        kernel->out()->writeString("KiB upper memory.\n");
+        kernel->terminal()->writeString(decval);
+        kernel->terminal()->writeString("KiB upper memory.\n");
     }
 
     result = check_flag(info, "Checking for reported memory map...", MULTIBOOT_INFO_MEM_MAP);
@@ -142,28 +142,28 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
             char hexval[35];
             hexval[0] = '0';
             hexval[1] = 'x';
-            kernel->out()->writeString("address: ");
+            kernel->terminal()->writeString("address: ");
             itoa(mmap->addr, hexval+2, 16);
-            kernel->out()->writeString(hexval);
+            kernel->terminal()->writeString(hexval);
 
-            kernel->out()->writeString(" length: ");
+            kernel->terminal()->writeString(" length: ");
             itoa(mmap->len, hexval+2, 16);
-            kernel->out()->writeString(hexval);
+            kernel->terminal()->writeString(hexval);
 
-            kernel->out()->writeString(" type: ");
+            kernel->terminal()->writeString(" type: ");
             itoa(mmap->type, hexval+2, 16);
-            kernel->out()->writeString(hexval);
+            kernel->terminal()->writeString(hexval);
 
-            kernel->out()->writeString("\n");
+            kernel->terminal()->writeString("\n");
         }
     }
 
     log_task("Setting up memory management unit...", init_mmu(info->mmap_addr, info->mmap_length));
 
-    kernel->out()->setForegroundColor(COLOR_WHITE);
-    kernel->out()->writeString("\n* * *\n");
-    kernel->out()->setForegroundColor(COLOR_LIGHT_RED);
-    kernel->out()->writeString("Kernel exited. Maybe you should write the rest of the operating system?");
+    kernel->terminal()->setForegroundColor(COLOR_WHITE);
+    kernel->terminal()->writeString("\n* * *\n");
+    kernel->terminal()->setForegroundColor(COLOR_LIGHT_RED);
+    kernel->terminal()->writeString("Kernel exited. Maybe you should write the rest of the operating system?");
 }
 
 int install_gdt()

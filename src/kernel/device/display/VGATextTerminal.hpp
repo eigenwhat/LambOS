@@ -2,10 +2,10 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "ITerminal.hpp"
+#include "Terminal.hpp"
 #include "VGA4BitColor.h"
 
-class VGATextTerminal : public ITerminal {
+class VGATextTerminal : public Terminal {
 
 public:
 	VGATextTerminal();
