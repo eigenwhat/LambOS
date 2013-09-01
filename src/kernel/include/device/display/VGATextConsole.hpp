@@ -2,13 +2,13 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include "Terminal.hpp"
+#include "Console.hpp"
 #include "VGA4BitColor.h"
 
-class VGATextTerminal : public Terminal {
+class VGATextConsole : public Console {
 
 public:
-	VGATextTerminal();
+	VGATextConsole();
 
 	virtual void setColor(uint8_t color);
 	virtual void setForegroundColor(uint32_t fg);
@@ -20,14 +20,14 @@ public:
 	virtual size_t width();
 	virtual size_t height();
 	virtual void setCursorVisible(bool isVisible);
-	virtual size_t column() { return terminal_column; }
-	virtual size_t row() { return terminal_row; }
+	virtual size_t column() { return console_column; }
+	virtual size_t row() { return console_row; }
 
 private:
 	virtual void putCharAt(char c, uint8_t color, size_t x, size_t y);
 	bool cursorIsVisible;
-	size_t terminal_row;
-	size_t terminal_column;
-	uint8_t terminal_color;
-	uint16_t* terminal_buffer;
+	size_t console_row;
+	size_t console_column;
+	uint8_t console_color;
+	uint16_t* console_buffer;
 };

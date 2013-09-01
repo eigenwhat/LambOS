@@ -7,27 +7,27 @@
 void Kernel::panic(const char *string)
 {
     size_t length = strlen(string);
-    terminal()->setBackgroundColor(COLOR_RED);
-    terminal()->setForegroundColor(COLOR_WHITE);
-    terminal()->clear();
+    console()->setBackgroundColor(COLOR_RED);
+    console()->setForegroundColor(COLOR_WHITE);
+    console()->clear();
     const char *banner[3]= {"* * * * * * * * * * * * * * * * * * * *",
                             "* LAMBOS FOUND OUT ABOUT WHAT YOU DID *",
                             "* * * * * * * * * * * * * * * * * * * *"};
     for(int i = 0; i < 3; ++i) {
         size_t bannerlength = strlen(banner[i]);
-        size_t columnToCenter = terminal()->width() > bannerlength ? (terminal()->width() - bannerlength) / 2 : 0;
-        terminal()->moveTo(i+1,columnToCenter);
-        terminal()->writeString(banner[i]);
+        size_t columnToCenter = console()->width() > bannerlength ? (console()->width() - bannerlength) / 2 : 0;
+        console()->moveTo(i+1,columnToCenter);
+        console()->writeString(banner[i]);
     }
     
-    size_t rowToCenter = terminal()->height()/2;
-    size_t columnToCenter = (terminal()->width() - length) / 2;
-    terminal()->moveTo(rowToCenter, columnToCenter);
-    terminal()->writeString(string);
+    size_t rowToCenter = console()->height()/2;
+    size_t columnToCenter = (console()->width() - length) / 2;
+    console()->moveTo(rowToCenter, columnToCenter);
+    console()->writeString(string);
 
     const char *msg = "0xL4MBOS";
-    terminal()->moveTo(terminal()->height()-2, (terminal()->width() - strlen(msg)) / 2);
-    terminal()->writeString(msg);
+    console()->moveTo(console()->height()-2, (console()->width() - strlen(msg)) / 2);
+    console()->writeString(msg);
 
     asm("cli\nhlt");
 }

@@ -1,6 +1,6 @@
 #include <string.h>
 #include <sys/asm.h>
-#include <device/display/VGATextTerminal.hpp>
+#include <device/display/VGATextConsole.hpp>
 
 static const size_t VGA_WIDTH = 80;
 static const size_t VGA_HEIGHT = 25;
@@ -27,81 +27,81 @@ void move_cursor_to(size_t row, size_t col)
 }
 
 //======================================================
-// VGATextTerminal
+// VGATextConsole
 //======================================================
-VGATextTerminal::VGATextTerminal() : terminal_row(0), terminal_column(0)
+VGATextConsole::VGATextConsole() : console_row(0), console_column(0)
 {
-	terminal_color = COLOR_LIGHT_GREY | COLOR_BLACK << 4;
-	terminal_buffer = (uint16_t*) 0xB8000;
+	console_color = COLOR_LIGHT_GREY | COLOR_BLACK << 4;
+	console_buffer = (uint16_t*) 0xB8000;
 	setCursorVisible(false);
 	clear();
 }
 
-void VGATextTerminal::clear()
+void VGATextConsole::clear()
 {
-	terminal_row = 0;
-	terminal_column = 0;
+	console_row = 0;
+	console_column = 0;
 	for ( size_t y = 0; y < VGA_HEIGHT; y++ ) {
 		for ( size_t x = 0; x < VGA_WIDTH; x++ ) {
 			const size_t index = y * VGA_WIDTH + x;
-			terminal_buffer[index] = make_vgaentry(' ', terminal_color);
+			console_buffer[index] = make_vgaentry(' ', console_color);
 		}
 	}
 
 	moveTo(0,0);
 }
  
-void VGATextTerminal::setColor(uint8_t color)
+void VGATextConsole::setColor(uint8_t color)
 {
-	this->terminal_color = color;
+	this->console_color = color;
 }
 
-void VGATextTerminal::setForegroundColor(uint32_t fg)
+void VGATextConsole::setForegroundColor(uint32_t fg)
 {
-	this->terminal_color = (this->terminal_color & 0xF0) | fg;
+	this->console_color = (this->console_color & 0xF0) | fg;
 }
 
-void VGATextTerminal::setBackgroundColor(uint32_t bg)
+void VGATextConsole::setBackgroundColor(uint32_t bg)
 {
-	this->terminal_color = (this->terminal_color & 0x0F) | (bg << 4);
+	this->console_color = (this->console_color & 0x0F) | (bg << 4);
 }
  
-void VGATextTerminal::putCharAt(char c, uint8_t color, size_t x, size_t y)
+void VGATextConsole::putCharAt(char c, uint8_t color, size_t x, size_t y)
 {
 
 	const size_t index = y * VGA_WIDTH + x;
-	terminal_buffer[index] = make_vgaentry(c, color);
+	console_buffer[index] = make_vgaentry(c, color);
 	moveTo(y, x);
 }
  
-void VGATextTerminal::putChar(char c)
+void VGATextConsole::putChar(char c)
 {
 	if(c == '\n') {
-		terminal_column = 0;
-		if ( ++terminal_row == VGA_HEIGHT ) {
-			terminal_row = 0;
+		console_column = 0;
+		if ( ++console_row == VGA_HEIGHT ) {
+			console_row = 0;
 		}
 	} else {
-		putCharAt(c, terminal_color, terminal_column, terminal_row);
-		if ( ++terminal_column == VGA_WIDTH ) {
-			terminal_column = 0;
-			if ( ++terminal_row == VGA_HEIGHT ) {
-				terminal_row = 0;
+		putCharAt(c, console_color, console_column, console_row);
+		if ( ++console_column == VGA_WIDTH ) {
+			console_column = 0;
+			if ( ++console_row == VGA_HEIGHT ) {
+				console_row = 0;
 			}
 		}
 	}
 }
 
-void VGATextTerminal::moveTo(size_t row, size_t col)
+void VGATextConsole::moveTo(size_t row, size_t col)
 {
  	if(cursorIsVisible) {
  		move_cursor_to(row, col);
 	}
-    terminal_row = row;
-    terminal_column = col;
+    console_row = row;
+    console_column = col;
 }
  
-void VGATextTerminal::writeString(const char* data)
+void VGATextConsole::writeString(const char* data)
 {
 	bool moveCursor = cursorIsVisible;
 	if(moveCursor) {
@@ -116,21 +116,21 @@ void VGATextTerminal::writeString(const char* data)
 	}
 }
 
-size_t VGATextTerminal::width()
+size_t VGATextConsole::width()
 {
 	return VGA_WIDTH;
 }
 
-size_t VGATextTerminal::height()
+size_t VGATextConsole::height()
 {
 	return VGA_HEIGHT;
 }
 
-void VGATextTerminal::setCursorVisible(bool isVisible) {
+void VGATextConsole::setCursorVisible(bool isVisible) {
 	cursorIsVisible = isVisible;
 	if(!cursorIsVisible) {
 		move_cursor_to(0xFF, 0xFF);
 	} else {
-		move_cursor_to(terminal_row, terminal_column);
+		move_cursor_to(console_row, console_column);
 	}
 }

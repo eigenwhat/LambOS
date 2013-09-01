@@ -6,9 +6,9 @@
 #include <cpu/GlobalDescriptorTable.hpp>
 #include <cpu/InterruptDescriptorTable.hpp>
 #include <mem/MMU.hpp>
-#include <device/display/VGATextTerminal.hpp>
+#include <device/display/VGATextConsole.hpp>
 #include <io/PrintStream.hpp>
-#include <device/display/TerminalOutputStream.hpp>
+#include <device/display/ConsoleOutputStream.hpp>
 
 // ====================================================
 // Globals
@@ -19,8 +19,8 @@ Kernel *kernel = NULL;
 GlobalDescriptorTable *gdt = NULL;
 InterruptDescriptorTable *idt = NULL;
 uint8_t kern_mem[sizeof(Kernel)];
-uint8_t term_mem[sizeof(VGATextTerminal)];
-uint8_t tout_mem[sizeof(TerminalOutputStream)];
+uint8_t term_mem[sizeof(VGATextConsole)];
+uint8_t tout_mem[sizeof(ConsoleOutputStream)];
 uint8_t stdout_mem[sizeof(PrintStream)];
 uint8_t gdt_mem[sizeof(GlobalDescriptorTable)];
 uint8_t idt_mem[sizeof(InterruptDescriptorTable)];
@@ -60,34 +60,34 @@ void interrupt_handler(RegisterTable registers)
 
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
 {
-    kernel->terminal()->moveTo(kernel->terminal()->row(), 0);
-    for(uint32_t i = 0; i < kernel->terminal()->width(); ++i) {
-        kernel->terminal()->putChar(' ');
+    kernel->console()->moveTo(kernel->console()->row(), 0);
+    for(uint32_t i = 0; i < kernel->console()->width(); ++i) {
+        kernel->console()->putChar(' ');
     }
-    kernel->terminal()->moveTo(kernel->terminal()->row() - 1, 0);
+    kernel->console()->moveTo(kernel->console()->row() - 1, 0);
 
-    kernel->terminal()->setForegroundColor(COLOR_WHITE);
-    kernel->terminal()->writeString(printstr);
+    kernel->console()->setForegroundColor(COLOR_WHITE);
+    kernel->console()->writeString(printstr);
 
-    if(kernel->terminal()->column() > kernel->terminal()->width() - 6) {
-        kernel->terminal()->writeString("\n");
+    if(kernel->console()->column() > kernel->console()->width() - 6) {
+        kernel->console()->writeString("\n");
     }
     
     if(success) {
-        kernel->terminal()->moveTo(kernel->terminal()->row(), kernel->terminal()->width() - (strlen(ackstr) + 3));
-        kernel->terminal()->writeString("[");
-        kernel->terminal()->setForegroundColor(COLOR_GREEN);
-        kernel->terminal()->writeString(ackstr);
+        kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(ackstr) + 3));
+        kernel->console()->writeString("[");
+        kernel->console()->setForegroundColor(COLOR_GREEN);
+        kernel->console()->writeString(ackstr);
     } else {
-        kernel->terminal()->moveTo(kernel->terminal()->row(), kernel->terminal()->width() - (strlen(nakstr) + 3));
-        kernel->terminal()->writeString("[");
-        kernel->terminal()->setForegroundColor(COLOR_RED);
-        kernel->terminal()->writeString(nakstr);
+        kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(nakstr) + 3));
+        kernel->console()->writeString("[");
+        kernel->console()->setForegroundColor(COLOR_RED);
+        kernel->console()->writeString(nakstr);
     }
-    kernel->terminal()->setForegroundColor(COLOR_WHITE);
-    kernel->terminal()->writeString("]\n");
+    kernel->console()->setForegroundColor(COLOR_WHITE);
+    kernel->console()->writeString("]\n");
 
-    kernel->terminal()->setForegroundColor(defaultTextColor);
+    kernel->console()->setForegroundColor(defaultTextColor);
 
     return success;
 }
@@ -110,9 +110,9 @@ int log_test(const char *printstr, int success)
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
     kernel = new (kern_mem) Kernel;
-    Terminal *term = new (term_mem) VGATextTerminal;
-    TerminalOutputStream *tOut = new (tout_mem) TerminalOutputStream(*term);
-    kernel->setTerminal(term);
+    Console *term = new (term_mem) VGATextConsole;
+    ConsoleOutputStream *tOut = new (tout_mem) ConsoleOutputStream(*term);
+    kernel->setConsole(term);
     kernel->setOut(new (stdout_mem) PrintStream(*tOut));
 
     if(magic != 0x2BADB002) {
@@ -165,9 +165,9 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
     log_task("Setting up memory management unit...", init_mmu(info->mmap_addr, info->mmap_length));
 
-    kernel->terminal()->setForegroundColor(COLOR_WHITE);
+    kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->out()->println("\n* * *");
-    kernel->terminal()->setForegroundColor(COLOR_LIGHT_RED);
+    kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
     kernel->out()->print("Kernel exited. Maybe you should write the rest of the operating system?");
 }
 

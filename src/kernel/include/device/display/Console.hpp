@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include "VGA4BitColor.h"
 
-class Terminal {
+class Console {
 public:
 	virtual void setColor(uint8_t color) = 0;
 	virtual void setForegroundColor(uint32_t fg) = 0;
