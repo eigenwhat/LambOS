@@ -1,9 +1,9 @@
 #include <Kernel.hpp>
 #include <stdlib.h>
 #include <new>
-#include "MMU.hpp"
-#include "PageFrameAllocator.hpp"
-#include "PageTable.hpp"
+#include <mem/MMU.hpp>
+#include <mem/PageFrameAllocator.hpp>
+#include <mem/PageTable.hpp>
 
 extern uint32_t kernel_end;
 extern uint32_t readonly_end;

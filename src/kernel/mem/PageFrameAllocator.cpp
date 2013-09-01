@@ -1,5 +1,5 @@
 #include <string.h>
-#include "PageFrameAllocator.hpp"
+#include <mem/PageFrameAllocator.hpp>
 #include <cpu/multiboot.h>
 #include <Kernel.hpp>
 

@@ -1,8 +1,8 @@
 #include <stdlib.h>
-#include <Kernel.hpp>
 #include <new>
 #include <sys/asm.h>
-#include "InterruptDescriptorTable.hpp"
+#include <io/BochsDebugOutputStream.hpp>
+#include <cpu/InterruptDescriptorTable.hpp>
 #include "isr.h"
 
 #define ADDISR(num, isrf) do { \
@@ -10,31 +10,22 @@
       isr[(num)] = (isrf);\
    } while(0)
 
-#define BochsConsolePrintChar(c) outb(0xe9, c)
-
 struct StubISR : InterruptServiceRoutine
 {
+   StubISR(OutputStream &out) : _out(out) {}
    virtual void operator()(RegisterTable &registers) 
    {
       char hexval[33];
-      BochsConsolePrintChar('i');
-      BochsConsolePrintChar('n');
-      BochsConsolePrintChar('t');
-      BochsConsolePrintChar(' ');
+      _out.write((uint8_t*)"int 0x", 6);
       itoa(registers.int_no, hexval, 16);
-      BochsConsolePrintChar('0');
-      BochsConsolePrintChar('x');
-      BochsConsolePrintChar(hexval[0]);
-      BochsConsolePrintChar(hexval[1]);
-      BochsConsolePrintChar('\n');
-      kernel->terminal()->writeString("int ");
-      itoa(registers.int_no, hexval, 16);
-      kernel->terminal()->writeString(hexval);
-      kernel->terminal()->writeString(", err ");
+      _out.write((uint8_t*)hexval, 2);
+      _out.write((uint8_t*)", err 0x", 8);
       itoa(registers.err_code, hexval, 16);
-      kernel->terminal()->writeString(hexval);
-      kernel->terminal()->putChar('\n');
+      _out.write((uint8_t*)hexval, 2);
+      _out.write('\n');
    }
+private:
+   OutputStream &_out;
 };
 
 //======================================================
@@ -63,10 +54,12 @@ void InterruptDescriptorTable::encodeEntry(uint8_t entryNumber, IDTEntry source)
 }
 
 uint8_t isr_mem[sizeof(StubISR)];
+uint8_t bochs_out_mem[sizeof(BochsDebugOutputStream)];
 
 void InterruptDescriptorTable::encodeHWExceptionISRs()
 {
-   StubISR *defaultISR = new (isr_mem) StubISR;
+   BochsDebugOutputStream *out = new (bochs_out_mem) BochsDebugOutputStream;
+   StubISR *defaultISR = new (isr_mem) StubISR(*out);
    ADDISR(0, defaultISR);
    ADDISR(1, defaultISR);
    ADDISR(2, defaultISR);

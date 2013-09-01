@@ -1,12 +1,14 @@
 #include <new>
 #include <string.h>
 #include <stdlib.h>
-#include "multiboot.h"
-#include "../Kernel.hpp"
-#include "GlobalDescriptorTable.hpp"
-#include "InterruptDescriptorTable.hpp"
+#include <cpu/multiboot.h>
+#include <Kernel.hpp>
+#include <cpu/GlobalDescriptorTable.hpp>
+#include <cpu/InterruptDescriptorTable.hpp>
 #include <mem/MMU.hpp>
-#include "../device/display/VGATextTerminal.hpp"
+#include <device/display/VGATextTerminal.hpp>
+#include <io/PrintStream.hpp>
+#include <device/display/TerminalOutputStream.hpp>
 
 // ====================================================
 // Globals
@@ -18,6 +20,8 @@ GlobalDescriptorTable *gdt = NULL;
 InterruptDescriptorTable *idt = NULL;
 uint8_t kern_mem[sizeof(Kernel)];
 uint8_t term_mem[sizeof(VGATextTerminal)];
+uint8_t tout_mem[sizeof(TerminalOutputStream)];
+uint8_t stdout_mem[sizeof(PrintStream)];
 uint8_t gdt_mem[sizeof(GlobalDescriptorTable)];
 uint8_t idt_mem[sizeof(InterruptDescriptorTable)];
 uint8_t mmu_mem[sizeof(MMU)];
@@ -106,7 +110,10 @@ int log_test(const char *printstr, int success)
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
     kernel = new (kern_mem) Kernel;
-    kernel->setTerminal(new (term_mem) VGATextTerminal);
+    Terminal *term = new (term_mem) VGATextTerminal;
+    TerminalOutputStream *tOut = new (tout_mem) TerminalOutputStream(*term);
+    kernel->setTerminal(term);
+    kernel->setOut(new (stdout_mem) PrintStream(*tOut));
 
     if(magic != 0x2BADB002) {
         kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
@@ -121,12 +128,12 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     if(result) {
         char decval[33];
         itoa(info->mem_lower, decval, 10);
-        kernel->terminal()->writeString(decval);
-        kernel->terminal()->writeString("KiB lower memory.\n");
+        kernel->out()->print(decval);
+        kernel->out()->println("KiB lower memory.");
 
         itoa(info->mem_upper, decval, 10);
-        kernel->terminal()->writeString(decval);
-        kernel->terminal()->writeString("KiB upper memory.\n");
+        kernel->out()->print(decval);
+        kernel->out()->println("KiB upper memory.");
     }
 
     result = check_flag(info, "Checking for reported memory map...", MULTIBOOT_INFO_MEM_MAP);
@@ -142,28 +149,26 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
             char hexval[35];
             hexval[0] = '0';
             hexval[1] = 'x';
-            kernel->terminal()->writeString("address: ");
+            kernel->out()->print("address: ");
             itoa(mmap->addr, hexval+2, 16);
-            kernel->terminal()->writeString(hexval);
+            kernel->out()->print(hexval);
 
-            kernel->terminal()->writeString(" length: ");
+            kernel->out()->print(" length: ");
             itoa(mmap->len, hexval+2, 16);
-            kernel->terminal()->writeString(hexval);
+            kernel->out()->print(hexval);
 
-            kernel->terminal()->writeString(" type: ");
+            kernel->out()->print(" type: ");
             itoa(mmap->type, hexval+2, 16);
-            kernel->terminal()->writeString(hexval);
-
-            kernel->terminal()->writeString("\n");
+            kernel->out()->println(hexval);
         }
     }
 
     log_task("Setting up memory management unit...", init_mmu(info->mmap_addr, info->mmap_length));
 
     kernel->terminal()->setForegroundColor(COLOR_WHITE);
-    kernel->terminal()->writeString("\n* * *\n");
+    kernel->out()->println("\n* * *");
     kernel->terminal()->setForegroundColor(COLOR_LIGHT_RED);
-    kernel->terminal()->writeString("Kernel exited. Maybe you should write the rest of the operating system?");
+    kernel->out()->print("Kernel exited. Maybe you should write the rest of the operating system?");
 }
 
 int install_gdt()
