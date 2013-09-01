@@ -24,7 +24,7 @@ VPATH=$(_LIBC_VPATH) kernel kernel/device kernel/device/display kernel/cpu kerne
 
 .PHONY: all clean
 
-all: $(OBJDIR)/kernel.bin $(OBJDIR)/mongoose.iso
+all: $(OBJDIR)/kernel.bin $(OBJDIR)/lambos.iso
 
 $(OBJDIR)/kernel.bin: $(BOOT) $(OBJS)
 	$(CPP) -T linker.ld -o $(OBJDIR)/kernel.bin -ffreestanding -O2 -nostdlib $(BOOT) $(OBJS) -lgcc
@@ -44,10 +44,10 @@ $(OBJDIR)/%.o: %.s | $(OBJDIR)
 $(OBJDIR):
 	mkdir -p $@
 
-$(OBJDIR)/mongoose.iso: $(OBJDIR)/kernel.bin 
+$(OBJDIR)/lambos.iso: $(OBJDIR)/kernel.bin 
 	cp -r iso $(OBJDIR)/iso
 	cp $(OBJDIR)/kernel.bin $(OBJDIR)/iso/boot/
-	grub-mkrescue --output=$(OBJDIR)/mongoose.iso $(OBJDIR)/iso
+	grub-mkrescue --output=$(OBJDIR)/lambos.iso $(OBJDIR)/iso
 
 
 clean:
