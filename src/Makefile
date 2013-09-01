@@ -3,7 +3,7 @@ INCLUDEDIR=./include
 CC=i586-elf-gcc
 CPP=i586-elf-g++
 CFLAGS=-std=gnu99 $(COMMONFLAGS)
-COMMONFLAGS=-I./kernel/include -I$(INCLUDEDIR) -I$(INCLUDEDIR)/libc -I$(INCLUDEDIR)/libcpp -ffreestanding -O2 -Wall -Wextra -g
+COMMONFLAGS=-I./kernel/include -I$(INCLUDEDIR) -I$(INCLUDEDIR)/libc -I$(INCLUDEDIR)/libcpp -ffreestanding -O2 -Wall -Wextra
 CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
