@@ -42,3 +42,18 @@ void *memcpy(void *dst, const void *src, size_t num)
 
 	return dst;
 }
+
+void *memmove(void *dst, const void *src, size_t num)
+{
+	uint8_t *c_dst = (uint8_t *)dst;
+	const uint8_t *c_src = (const uint8_t *)src;
+	if(dst > src && dst < src + num) {
+		c_src += num;
+		c_dst += num;
+		for(; num--; *--c_dst = *--c_src);
+	} else {
+		for(; num--; *c_dst++ = *c_src++);
+	}
+
+	return dst;
+}
