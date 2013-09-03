@@ -49,11 +49,6 @@ int init_mmu(uint32_t mmap_addr, uint32_t mmap_length);
 // ====================================================
 // Functions
 // ====================================================
-void __cxa_pure_virtual()
-{
-    // Do nothing or print an error message.
-}
-
 void interrupt_handler(RegisterTable registers)
 {
     idt->callInterruptServiceRoutine(registers.int_no, registers);

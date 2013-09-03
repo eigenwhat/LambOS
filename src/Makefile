@@ -3,13 +3,13 @@ INCLUDEDIR=./include
 CC=i586-elf-gcc
 CPP=i586-elf-g++
 CFLAGS=-std=gnu99 $(COMMONFLAGS)
-COMMONFLAGS=-I./kernel/include -I$(INCLUDEDIR) -I$(INCLUDEDIR)/libc -I$(INCLUDEDIR)/libcpp -ffreestanding -O2 -Wall -Wextra
+COMMONFLAGS=-I./kernel/include -I$(INCLUDEDIR) -I$(INCLUDEDIR)/libc -I$(INCLUDEDIR)/libcpp -ffreestanding -O2 -Wall -Wextra -fstack-protector-all
 CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
 
 _LIBC_OBJS=string.o itoa.o
-_LIBCPP_OBJS=
+_LIBCPP_OBJS=_runtime.o
 _LIBSYS_OBJS=PrintStream.o
 
 _MMU_OBJS=PageTable.o PageFrameAllocator.o MMU.o liballoc.o liballoc_hook.o
@@ -20,8 +20,9 @@ _OBJS=$(_LIBC_OBJS) $(_LIBCPP_OBJS) $(_LIBSYS_OBJS) $(_KOBJS)
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
 _LIBC_VPATH=libc libc/stdlib
+_LIBCPP_VPATH=libcpp
 _LIBSYS_VPATH=libsys
-VPATH=$(_LIBC_VPATH) $(_LIBSYS_VPATH) kernel kernel/device kernel/device/display kernel/cpu kernel/mem
+VPATH=$(_LIBC_VPATH) $(_LIBCPP_VPATH) $(_LIBSYS_VPATH) kernel kernel/device kernel/device/display kernel/cpu kernel/mem
 
 .PHONY: all clean
 
