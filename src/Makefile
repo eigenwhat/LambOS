@@ -12,7 +12,7 @@ _LIBC_OBJS=string.o itoa.o
 _LIBCPP_OBJS=
 _LIBSYS_OBJS=PrintStream.o
 
-_MMU_OBJS=PageTable.o PageFrameAllocator.o MMU.o
+_MMU_OBJS=PageTable.o PageFrameAllocator.o MMU.o liballoc.o liballoc_hook.o
 _CPU_OBJS=GlobalDescriptorTable.o InterruptDescriptorTable.o set_gdt.o set_idt.o interrupt.o
 _KOBJS= $(_MMU_OBJS) $(_CPU_OBJS) main.o Kernel.o VGATextConsole.o
 

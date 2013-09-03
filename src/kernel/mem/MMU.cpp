@@ -12,6 +12,7 @@ extern "C" int log_test(const char *printstr, int success);
 
 struct MMUPFAHook : PageFrameInitializationHook
 {
+    // lock frames in low memory, mark kernel frames as used
     virtual void operator()(PageFrameAllocator *allocator)
     {
         uint32_t i = 0;
@@ -35,6 +36,8 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
     : _pageFrameAllocator(mmap_addr, mmap_length, new (hook1) MMUPFAHook),
       _pageDirectory((uint32_t*)_pageFrameAllocator.alloc())
 {
+    _pageDirectory.clear();
+
     PageTable firstTable((uint32_t*)(_pageFrameAllocator.alloc()));
     uint32_t address = 0;
 
@@ -43,7 +46,11 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
     uint32_t readOnlyEnd = (uint32_t)&readonly_end / 0x1000;
     uint32_t lastUsedPage = (uint32_t)firstTable.address() / 0x1000;
 
-    for(uint32_t i = 0; i < lastUsedPage; ++i) {
+    if(lastUsedPage >= 0x400) {
+        kernel->panic("Kernel spans past first page table.");
+    }
+
+    for(uint32_t i = 0; i <= lastUsedPage; ++i) {
         PageEntry entry(address);
         entry.setFlag(kPresentBit);
         // make sure pages for read only data are marked read only
@@ -65,6 +72,66 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
     directory.setFlag(kPresentBit);
     directory.setFlag(kReadWriteBit);
     _pageDirectory.setEntry(1023, directory);
+}
 
+void MMU::install()
+{
     _pageDirectory.install();
+}
+
+void *MMU::palloc(size_t numberOfPages)
+{
+    uint32_t pde;
+    uint32_t pte;
+    void *retval = NULL;
+    size_t contiguousFoundPages = 0;
+    for(pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
+        PageEntry directoryEntry = _pageDirectory.entryAtIndex(pde);
+        PageTable table((uint32_t*)directoryEntry.address());
+
+        // no page table here, create one
+        if(!directoryEntry.getFlag(kPresentBit)) {
+            directoryEntry = PageEntry(_pageFrameAllocator.alloc());
+            directoryEntry.setFlags(kPresentBit | kReadWriteBit);
+            _pageDirectory.setEntry(pde, directoryEntry);
+            table = PageTable((uint32_t*)directoryEntry.address());
+            table.clear();
+        }
+
+        // look through page table
+        for(pte = 0; pte < 1024; ++pte) {
+            PageEntry entry = table.entryAtIndex(pte);
+            if(!entry.getFlag(kPresentBit)) { // found a page that isn't present (is available)
+                entry = PageEntry(_pageFrameAllocator.alloc());
+                if(contiguousFoundPages == 0) { // this is the first available page, set our return pointer to it
+                    retval = (void*) ((pde << 22) | (pte << 12));
+                }
+
+                ++contiguousFoundPages;
+
+                // we got our pages, let's mark them present
+                if(contiguousFoundPages == numberOfPages) {
+                    for(size_t k = pte; k > pte - numberOfPages; --k) {
+                        PageEntry previousEntry = table.entryAtIndex(k);
+                        previousEntry.setFlags(kPresentBit | kReadWriteBit);
+                        table.setEntry(k, previousEntry);
+                    }
+                    break;
+                }
+            } else { // current page is used, reset our contiguous page count
+                pfree(retval, numberOfPages);
+                contiguousFoundPages = 0;
+                retval = NULL;
+            }
+        }
+    }
+
+    asm volatile("movl %0, %%cr3" : : "r"(_pageDirectory.address()));
+
+    return retval;
+}
+
+int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
+{
+    return -1;
 }

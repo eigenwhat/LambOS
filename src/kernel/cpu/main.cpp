@@ -9,6 +9,7 @@
 #include <device/display/VGATextConsole.hpp>
 #include <io/PrintStream.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
+#include <mem/liballoc.h>
 
 // ====================================================
 // Globals
@@ -165,6 +166,15 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
     log_task("Setting up memory management unit...", init_mmu(info->mmap_addr, info->mmap_length));
 
+    const char *somestr = "This is a test string to see if kmalloc works now.";
+    char *longstr = (char*)kmalloc(strlen(somestr) + 1);
+    if(log_test("Testing if kmalloc gives us an appropriate pointer...", (uint32_t)longstr > (uint32_t)&kernel_end)) {
+        strcpy(longstr, somestr);
+        kernel->out()->println(longstr);
+    } else {
+        kernel->panic("kmalloc no work :(");
+    }
+
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->out()->println("\n* * *");
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
@@ -204,6 +214,7 @@ int install_idt()
 int init_mmu(uint32_t mmap_addr, uint32_t mmap_length)
 {
     kernel->setMMU(new (mmu_mem) MMU(mmap_addr, mmap_length));
+    kernel->mmu()->install();
 
     return true;
 }
