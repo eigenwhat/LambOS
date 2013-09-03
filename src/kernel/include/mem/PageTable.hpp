@@ -8,15 +8,15 @@
 #define kPageFlagsMask 0x00000FFF
 
 typedef enum page_flag {
-    kPresentBit = 0xFFFFFFFE,
-    kReadWriteBit = 0xFFFFFFFD,
-    kSupervisorBit = 0xFFFFFFFB,
-    kWriteThroughBit = 0xFFFFFFF7,
-    kCacheDisabledBit = 0xFFFFFFEF,
-    kAccessedBit = 0xFFFFFFDF,
-    kDirtyBit = 0xFFFFFFBF,
-    kPageSizeBit = 0xFFFFFF7F,
-    kGlobalBit = 0xFFFFFEFF,
+    kPresentBit = 0x00000001,
+    kReadWriteBit = 0x00000002,
+    kSupervisorBit = 0x00000004,
+    kWriteThroughBit = 0x00000008,
+    kCacheDisabledBit = 0x00000010,
+    kAccessedBit = 0x00000020,
+    kDirtyBit = 0x00000040,
+    kPageSizeBit = 0x00000080,
+    kGlobalBit = 0x00000100,
 } PageEntryFlag;
 
 class PageTable;
@@ -24,10 +24,12 @@ class PageTable;
 class PageEntry {
 public:
     PageEntry(uint32_t address) : _entry(address & k4KPageAddressMask) {}
-    void unsetFlag(PageEntryFlag flag) { _entry &= flag; }
-    void setFlag(PageEntryFlag flag) { _entry |= ~flag; }
-    bool getFlag(PageEntryFlag flag) { return (bool)(_entry & ~flag); }
+    void unsetFlag(PageEntryFlag flag) { _entry &= ~flag; }
+    void setFlag(PageEntryFlag flag) { _entry |= flag; }
+    bool getFlag(PageEntryFlag flag) { return (bool)(_entry & flag); }
     void setFlags(uint32_t flags) { _entry = (_entry & k4KPageAddressMask) | (flags & kPageFlagsMask); }
+    uint32_t address() { return _entry & k4KPageAddressMask; }
+    uint32_t flags() { return _entry & kPageFlagsMask; }
     friend class PageTable;
 private:
     uint32_t _entry;
@@ -35,10 +37,11 @@ private:
 
 class PageTable {
 public:
-    PageTable() {}
-    PageTable(uint32_t *tableAddress);
+    PageTable(uint32_t *tableAddress) : _tableAddress(tableAddress) {}
+    void clear();
     uint32_t *address() { return _tableAddress; }
     void setEntry(uint16_t index, PageEntry entry) { _tableAddress[index] = entry._entry; }
+    PageEntry entryAtIndex(uint16_t index);
     void install();
 private:
     uint32_t *_tableAddress;

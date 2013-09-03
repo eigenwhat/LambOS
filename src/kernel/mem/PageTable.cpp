@@ -3,12 +3,19 @@
 //======================================================
 // PageTable
 //======================================================
-PageTable::PageTable(uint32_t *tableAddress) : _tableAddress(tableAddress) 
+void PageTable::clear()
 {
-    for(int i = 0; i < 1024; i++)
+	for(int i = 0; i < 1024; i++)
     {
-        _tableAddress[i] = 0 | 2; 
+        _tableAddress[i] = 0 | kReadWriteBit;
     }
+}
+
+PageEntry PageTable::entryAtIndex(uint16_t index) 
+{ 
+	PageEntry entry(_tableAddress[index]);
+	entry.setFlags(_tableAddress[index]);
+	return entry;
 }
 
 void PageTable::install()
