@@ -126,12 +126,30 @@ void *MMU::palloc(size_t numberOfPages)
         }
     }
 
-    asm volatile("movl %0, %%cr3" : : "r"(_pageDirectory.address()));
+    _flush();
 
     return retval;
 }
 
 int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
 {
-    return -1;
+    uint32_t virtualAddress = (uint32_t)startOfMemoryRange;
+    
+    if(!numberOfPages) return -1;
+
+    while(numberOfPages--) {
+        uint32_t pdeIndex = virtualAddress >> 22;
+        uint32_t pteIndex = virtualAddress >> 12 & 0x03FF;
+        PageEntry pde = _pageDirectory.entryAtIndex(pdeIndex);
+        PageTable table((uint32_t*)pde.address());
+        PageEntry pte = table.entryAtIndex(pteIndex);
+        _pageFrameAllocator.free(pte.address());
+        table.setEntry(pteIndex, PageEntry(0));
+
+        virtualAddress += 0x1000;
+    }
+
+    _flush();
+
+    return 0;
 }

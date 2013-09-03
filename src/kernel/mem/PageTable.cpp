@@ -7,7 +7,7 @@ void PageTable::clear()
 {
 	for(int i = 0; i < 1024; i++)
     {
-        _tableAddress[i] = 0 | kReadWriteBit;
+        _tableAddress[i] = 0;
     }
 }
 
