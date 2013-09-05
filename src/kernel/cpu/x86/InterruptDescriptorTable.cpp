@@ -3,10 +3,16 @@
 #include <sys/asm.h>
 #include <io/BochsDebugOutputStream.hpp>
 #include <cpu/InterruptDescriptorTable.hpp>
+#include <Kernel.hpp>
+#include <cpu/X86CPU.hpp>
 #include "isr.h"
 
+//======================================================
+// ISR functions
+//======================================================
+
 #define ADDISR(num, isrf) do { \
-      encodeEntry((num), IDTEntry(0x08, (uint32_t)isr##num, 0x8E));\
+      encodeEntry((num), IDTEntry(0x08, (uint32_t)ISR_FUNCTION_NAME(num), 0x8E));\
       isr[(num)] = (isrf);\
    } while(0)
 
@@ -27,6 +33,12 @@ struct StubISR : InterruptServiceRoutine
 private:
    OutputStream &_out;
 };
+
+extern "C" void interrupt_handler(RegisterTable registers)
+{
+    X86CPU *cpu = (X86CPU*)kernel->cpu();
+    cpu->idt()->callInterruptServiceRoutine(registers.int_no, registers);
+}
 
 //======================================================
 // InterruptDescriptorTable

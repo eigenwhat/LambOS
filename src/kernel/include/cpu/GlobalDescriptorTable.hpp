@@ -2,6 +2,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
+#define GDT_SIZE 6
+
 extern "C" void set_gdt(void *gdt, size_t size);
 
 class GDTEntry
@@ -19,13 +21,11 @@ private:
 class GlobalDescriptorTable
 {
 public:
-	GlobalDescriptorTable(uint64_t *address, size_t entries) : gdt(address), size(entries) {}
 	void encodeEntry(uint8_t entryNumber, GDTEntry source);
-	void install() { set_gdt(this->gdt, sizeof(uint64_t)*size); }
+	void install() { set_gdt(this->gdt, sizeof(uint64_t)*GDT_SIZE); }
 	void installTSS(uint8_t entryIndex);
 private:
-	uint64_t *gdt;
-	size_t size;
+	uint64_t gdt[GDT_SIZE];
 };
 
 typedef struct tss_entry {

@@ -5,6 +5,8 @@
 
 extern "C" void set_idt(void *idt, size_t size);
 
+#define IDT_SIZE 256
+
 struct InterruptServiceRoutine
 {
 	virtual void operator()(RegisterTable&) = 0;
@@ -26,13 +28,11 @@ private:
 class InterruptDescriptorTable
 {
 public:
-	InterruptDescriptorTable(uint64_t *address, size_t entries) : idt(address), size(entries) {}
 	void encodeEntry(uint8_t entryNumber, IDTEntry source);
 	void encodeHWExceptionISRs();
-	void install() { set_idt(this->idt, sizeof(uint64_t)*size); }
+	void install() { set_idt(this->idt, sizeof(uint64_t) * IDT_SIZE); }
 	void callInterruptServiceRoutine(uint8_t interruptNumber, RegisterTable &registers) { (*isr[interruptNumber])(registers); }
 private:
-	InterruptServiceRoutine *isr[256];
-	uint64_t *idt;
-	size_t size;
+	InterruptServiceRoutine *isr[IDT_SIZE];
+	uint64_t idt[IDT_SIZE];
 };

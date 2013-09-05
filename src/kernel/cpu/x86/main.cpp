@@ -3,8 +3,7 @@
 #include <stdlib.h>
 #include <cpu/multiboot.h>
 #include <Kernel.hpp>
-#include <cpu/GlobalDescriptorTable.hpp>
-#include <cpu/InterruptDescriptorTable.hpp>
+#include <cpu/X86CPU.hpp>
 #include <mem/MMU.hpp>
 #include <device/display/VGATextConsole.hpp>
 #include <io/PrintStream.hpp>
@@ -17,24 +16,12 @@
 extern uint32_t kernel_end;
 VGA4BitColor defaultTextColor = COLOR_LIGHT_GREY;
 Kernel *kernel = NULL;
-GlobalDescriptorTable *gdt = NULL;
-InterruptDescriptorTable *idt = NULL;
 uint8_t kern_mem[sizeof(Kernel)];
 uint8_t term_mem[sizeof(VGATextConsole)];
 uint8_t tout_mem[sizeof(ConsoleOutputStream)];
 uint8_t stdout_mem[sizeof(PrintStream)];
-uint8_t gdt_mem[sizeof(GlobalDescriptorTable)];
-uint8_t idt_mem[sizeof(InterruptDescriptorTable)];
 uint8_t mmu_mem[sizeof(MMU)];
-
-TaskStateSegment tss;
-
-// ====================================================
-// CPU tables
-// ====================================================
-#define GDT_SIZE 6
-uint64_t gdt_ptr[GDT_SIZE];
-uint64_t idt_ptr[256];
+uint8_t x86cpu_mem[sizeof(X86CPU)];
 
 extern "C" {
 
@@ -42,18 +29,12 @@ extern "C" {
 // Function prototypes
 // ====================================================
 int install_paging();
-int install_gdt();
-int install_idt();
-int init_mmu(uint32_t mmap_addr, uint32_t mmap_length);
+int install_cpu();
+int install_mmu(uint32_t mmap_addr, uint32_t mmap_length);
 
 // ====================================================
 // Functions
 // ====================================================
-void interrupt_handler(RegisterTable registers)
-{
-    idt->callInterruptServiceRoutine(registers.int_no, registers);
-}
-
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
 {
     kernel->console()->moveTo(kernel->console()->row(), 0);
@@ -115,10 +96,9 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
         kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
     }
 
-    int result;
+    log_task("Installing CPU descriptor tables...", install_cpu());
 
-    log_task("Installing global descriptor table...", install_gdt());
-    log_task("Installing interrupt descriptor table...", install_idt());
+    int result;
 
     result = check_flag(info, "Checking for reported memory size...", MULTIBOOT_INFO_MEMORY);
     if(result) {
@@ -159,7 +139,7 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
         }
     }
 
-    log_task("Setting up memory management unit...", init_mmu(info->mmap_addr, info->mmap_length));
+    log_task("Setting up memory management unit...", install_mmu(info->mmap_addr, info->mmap_length));
 
     const char *somestr = "This is a test string to see if kmalloc works now.";
     char *longstr = (char*)kmalloc(strlen(somestr) + 1);
@@ -176,37 +156,15 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     kernel->out()->print("Kernel exited. Maybe you should write the rest of the operating system?");
 }
 
-int install_gdt()
+int install_cpu()
 {
-    gdt = new (gdt_mem) GlobalDescriptorTable(gdt_ptr, GDT_SIZE);
-    gdt->encodeEntry(0, GDTEntry());
-    gdt->encodeEntry(1, GDTEntry(0, 0xffffffff, 0x9A));
-    gdt->encodeEntry(2, GDTEntry(0, 0xffffffff, 0x92));
-    gdt->encodeEntry(3, GDTEntry(0, 0xffffffff, 0xFA));
-    gdt->encodeEntry(4, GDTEntry(0, 0xffffffff, 0xF2));
-
-    memset(&tss, 0x0, sizeof(tss));
-    tss.ss0 = 0x10;
-    tss.esp0 = 0x0;
-    tss.iomap_base = sizeof(tss);
-
-    gdt->encodeEntry(5, GDTEntry((uint32_t)&tss, sizeof(tss), 0x89));
-    gdt->install();
-    gdt->installTSS(5);
+    kernel->setCPU(new (x86cpu_mem) X86CPU);
+    kernel->cpu()->install();
 
     return true;
 }
 
-int install_idt()
-{
-    idt = new (idt_mem) InterruptDescriptorTable(idt_ptr, 256);
-    idt->encodeHWExceptionISRs();
-    idt->install();
-
-    return true;
-}
-
-int init_mmu(uint32_t mmap_addr, uint32_t mmap_length)
+int install_mmu(uint32_t mmap_addr, uint32_t mmap_length)
 {
     kernel->setMMU(new (mmu_mem) MMU(mmap_addr, mmap_length));
     kernel->mmu()->install();
