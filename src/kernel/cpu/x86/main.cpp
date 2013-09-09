@@ -9,6 +9,7 @@
 #include <io/PrintStream.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
 #include <mem/liballoc.h>
+#include <io/BochsDebugOutputStream.hpp>
 
 // ====================================================
 // Globals
@@ -28,62 +29,16 @@ extern "C" {
 // ====================================================
 // Function prototypes
 // ====================================================
-int install_paging();
 int install_cpu();
 int install_mmu(uint32_t mmap_addr, uint32_t mmap_length);
+int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr);
+int log_task(const char *printstr, int success);
+int check_flag(multiboot_info_t *info, const char *printstr, uint32_t flag);
+int log_test(const char *printstr, int success);
 
 // ====================================================
 // Functions
 // ====================================================
-int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
-{
-    kernel->console()->moveTo(kernel->console()->row(), 0);
-    for(uint32_t i = 0; i < kernel->console()->width(); ++i) {
-        kernel->console()->putChar(' ');
-    }
-    kernel->console()->moveTo(kernel->console()->row() - 1, 0);
-
-    kernel->console()->setForegroundColor(COLOR_WHITE);
-    kernel->console()->writeString(printstr);
-
-    if(kernel->console()->column() > kernel->console()->width() - 6) {
-        kernel->console()->writeString("\n");
-    }
-    
-    if(success) {
-        kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(ackstr) + 3));
-        kernel->console()->writeString("[");
-        kernel->console()->setForegroundColor(COLOR_GREEN);
-        kernel->console()->writeString(ackstr);
-    } else {
-        kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(nakstr) + 3));
-        kernel->console()->writeString("[");
-        kernel->console()->setForegroundColor(COLOR_RED);
-        kernel->console()->writeString(nakstr);
-    }
-    kernel->console()->setForegroundColor(COLOR_WHITE);
-    kernel->console()->writeString("]\n");
-
-    kernel->console()->setForegroundColor(defaultTextColor);
-
-    return success;
-}
-
-int log_task(const char *printstr, int success)
-{
-    return log_result(printstr, success, "DONE", "FAIL");
-}
-
-int check_flag(multiboot_info_t *info, const char *printstr, uint32_t flag)
-{
-    return log_result(printstr, info->flags & flag, "FOUND", "FAIL");
-}
-
-int log_test(const char *printstr, int success)
-{
-    return log_result(printstr, success, "PASS", "FAIL");
-}
-
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
     kernel = new (kern_mem) Kernel;
@@ -170,6 +125,55 @@ int install_mmu(uint32_t mmap_addr, uint32_t mmap_length)
     kernel->mmu()->install();
 
     return true;
+}
+
+int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
+{
+    kernel->console()->moveTo(kernel->console()->row(), 0);
+    for(uint32_t i = 0; i < kernel->console()->width(); ++i) {
+        kernel->console()->putChar(' ');
+    }
+    kernel->console()->moveTo(kernel->console()->row() - 1, 0);
+
+    kernel->console()->setForegroundColor(COLOR_WHITE);
+    kernel->console()->writeString(printstr);
+
+    if(kernel->console()->column() > kernel->console()->width() - 6) {
+        kernel->console()->writeString("\n");
+    }
+    
+    if(success) {
+        kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(ackstr) + 3));
+        kernel->console()->writeString("[");
+        kernel->console()->setForegroundColor(COLOR_GREEN);
+        kernel->console()->writeString(ackstr);
+    } else {
+        kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(nakstr) + 3));
+        kernel->console()->writeString("[");
+        kernel->console()->setForegroundColor(COLOR_RED);
+        kernel->console()->writeString(nakstr);
+    }
+    kernel->console()->setForegroundColor(COLOR_WHITE);
+    kernel->console()->writeString("]\n");
+
+    kernel->console()->setForegroundColor(defaultTextColor);
+
+    return success;
+}
+
+int log_task(const char *printstr, int success)
+{
+    return log_result(printstr, success, "DONE", "FAIL");
+}
+
+int check_flag(multiboot_info_t *info, const char *printstr, uint32_t flag)
+{
+    return log_result(printstr, info->flags & flag, "FOUND", "FAIL");
+}
+
+int log_test(const char *printstr, int success)
+{
+    return log_result(printstr, success, "PASS", "FAIL");
 }
 
 } // extern C

@@ -9,7 +9,7 @@ ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
 
 _LIBC_OBJS=string.o itoa.o
-_LIBCPP_OBJS=_runtime.o
+_LIBCPP_OBJS=_lang.o
 _LIBSYS_OBJS=PrintStream.o
 
 _MMU_OBJS=PageTable.o PageFrameAllocator.o MMU.o liballoc.o liballoc_hook.o

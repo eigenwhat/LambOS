@@ -24,3 +24,23 @@ extern int liballoc_free(void* ptr, size_t numPages)
 {
 	return kernel->mmu()->pfree(ptr, numPages);
 }
+
+void *operator new(size_t size)
+{
+    return kmalloc(size);
+}
+ 
+void *operator new[](size_t size)
+{
+    return kmalloc(size);
+}
+ 
+void operator delete(void *p)
+{
+    kfree(p);
+}
+ 
+void operator delete[](void *p)
+{
+    kfree(p);
+}
