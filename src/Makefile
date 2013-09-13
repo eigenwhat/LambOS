@@ -14,7 +14,7 @@ _LIBSYS_OBJS=PrintStream.o
 
 _MMU_OBJS=PageTable.o PageFrameAllocator.o MMU.o liballoc.o liballoc_hook.o
 _CPU_OBJS=X86CPU.o GlobalDescriptorTable.o InterruptDescriptorTable.o set_gdt.o set_idt.o interrupt.o
-_KOBJS= $(_MMU_OBJS) $(_CPU_OBJS) main.o Kernel.o VGATextConsole.o PS2Keyboard.o
+_KOBJS= $(_MMU_OBJS) $(_CPU_OBJS) main.o Kernel.o VGATextConsole.o KeyboardInputStream.o
 
 _OBJS=$(_LIBC_OBJS) $(_LIBCPP_OBJS) $(_LIBSYS_OBJS) $(_KOBJS)
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))

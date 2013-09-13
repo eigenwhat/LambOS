@@ -25,7 +25,23 @@ typedef enum interrupt_number {
     kIntMathFault,
     kIntAlignmentCheck,
     kIntMachineCheck,
-    kIntSIMDFloatingPointException    
+    kIntSIMDFloatingPointException,
+    kIntIRQ0 = 32,
+    kIntKeyboardIRQ,
+    kIntIRQ2,
+    kIntIRQ3,
+    kIntIRQ4,
+    kIntIRQ5,
+    kIntIRQ6,
+    kIntIRQ7,
+    kIntIRQ8,
+    kIntIRQ9,
+    kIntIRQ10,
+    kIntIRQ11,
+    kIntIRQ12,
+    kIntIRQ13,
+    kIntIRQ14,
+    kIntIRQ15
 } InterruptNumber;
 
 __END_DECLS
