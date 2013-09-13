@@ -14,7 +14,7 @@ _LIBSYS_OBJS=PrintStream.o
 
 _MMU_OBJS=PageTable.o PageFrameAllocator.o MMU.o liballoc.o liballoc_hook.o
 _CPU_OBJS=X86CPU.o GlobalDescriptorTable.o InterruptDescriptorTable.o set_gdt.o set_idt.o interrupt.o
-_KOBJS= $(_MMU_OBJS) $(_CPU_OBJS) main.o Kernel.o VGATextConsole.o
+_KOBJS= $(_MMU_OBJS) $(_CPU_OBJS) main.o Kernel.o VGATextConsole.o PS2Keyboard.o
 
 _OBJS=$(_LIBC_OBJS) $(_LIBCPP_OBJS) $(_LIBSYS_OBJS) $(_KOBJS)
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
@@ -22,7 +22,7 @@ OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 _LIBC_VPATH=libc libc/stdlib
 _LIBCPP_VPATH=libcpp
 _LIBSYS_VPATH=libsys
-_KERNEL_VPATH=kernel kernel/device kernel/device/display kernel/cpu kernel/cpu/x86 kernel/mem
+_KERNEL_VPATH=kernel kernel/device/display kernel/device/input kernel/cpu kernel/cpu/x86 kernel/mem
 VPATH=$(_LIBC_VPATH) $(_LIBCPP_VPATH) $(_LIBSYS_VPATH) $(_KERNEL_VPATH)
 
 .PHONY: all clean
