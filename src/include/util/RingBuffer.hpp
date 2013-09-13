@@ -7,7 +7,7 @@ class RingBuffer : public virtual Queue<T>
 {
 public:
     explicit RingBuffer(size_t capacity) : _capacity(capacity), _front(0), _back(0), _size(0) { _buffer = new T[capacity]; }
-    void enqueue(T item) {
+    bool enqueue(T item) {
         _buffer[_back] = item;
         _back = _next(_back);
         if(_front == _back) {
@@ -15,6 +15,8 @@ public:
         } else {
             ++_size;
         }
+
+        return true;
     }
     T dequeue() {
         if(isEmpty()) {
@@ -43,6 +45,11 @@ public:
     void clear() {
         _front = _back;
     }
+
+    bool remove(T) {
+        return false; // can't delete from buffer!
+    }
+
 private:
     size_t _next(size_t current) { return (current + 1) % _capacity; }
     size_t _capacity;
