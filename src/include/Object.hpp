@@ -1,5 +1,8 @@
 #pragma once
 
+#include <stddef.h>
+#include <stdint.h>
+
 class Object
 {
 public:
@@ -13,6 +16,8 @@ public:
 			delete (Object *)this;
 		}
 	}
+
+	virtual bool isEqualTo(Object *o) { return this == o; }
 private:
 	mutable int _referenceCount;
 };
