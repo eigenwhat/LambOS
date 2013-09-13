@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __DECL_H
+#define __DECL_H
 
 #undef __BEGIN_DECLS
 #undef __END_DECLS
@@ -8,4 +9,6 @@
 #else
 # define __BEGIN_DECLS /* empty */
 # define __END_DECLS /* empty */
+#endif
+
 #endif

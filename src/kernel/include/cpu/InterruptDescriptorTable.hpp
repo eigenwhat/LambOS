@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "RegisterTable.h"
+#include "intdefs.h"
 
 extern "C" void set_idt(void *idt, size_t size);
 
@@ -32,6 +33,7 @@ public:
 	void encodeHWExceptionISRs();
 	void install() { set_idt(this->idt, sizeof(uint64_t) * IDT_SIZE); }
 	void callInterruptServiceRoutine(uint8_t interruptNumber, RegisterTable &registers) { (*isr[interruptNumber])(registers); }
+	void setISR(uint8_t interruptNumber, InterruptServiceRoutine *routine) { isr[interruptNumber] = routine; }
 private:
 	InterruptServiceRoutine *isr[IDT_SIZE];
 	uint64_t idt[IDT_SIZE];
