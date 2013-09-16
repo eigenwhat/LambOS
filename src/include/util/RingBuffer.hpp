@@ -37,7 +37,7 @@ public:
     }
 
     bool isEmpty() {
-        return _front == _back;
+        return (_size == 0);
     }
 
     size_t size() { return _size; }
