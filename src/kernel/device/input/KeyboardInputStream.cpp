@@ -12,6 +12,7 @@ public:
         while(inb(KEY_PENDING) & 2);
         uint8_t scancode = inb(KBD_DEVICE);
         _keyboard.pushScanCode(scancode);
+        outb(0x20, 0x20);
     }
 private:
     KeyboardInputStream &_keyboard;

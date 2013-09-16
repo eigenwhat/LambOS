@@ -3,15 +3,11 @@
 
 int liballoc_lock()
 {
-	asm volatile ("cli");
-
 	return 0;
 }
 
 int liballoc_unlock()
 {
-	//asm volatile ("sti");
-
 	return 0;
 }
 

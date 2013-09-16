@@ -55,6 +55,13 @@ static inline uint32_t inl(uint16_t port)
     return ret;
 }
 
+static inline void io_wait( void )
+{
+    asm volatile( "jmp 1f\n\t"
+                  "1:jmp 2f\n\t"
+                  "2:" );
+}
+
 __END_DECLS
 
 #endif

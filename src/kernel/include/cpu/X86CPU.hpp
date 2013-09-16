@@ -10,6 +10,8 @@ public:
 	X86CPU();
 	virtual void install();
 	InterruptDescriptorTable *idt() { return &_idt; }
+	virtual void enableInterrupts();
+	virtual void disableInterrupts() { asm volatile ("cli"); }
 private:
 	GlobalDescriptorTable _gdt;
 	InterruptDescriptorTable _idt;

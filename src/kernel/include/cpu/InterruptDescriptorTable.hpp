@@ -30,9 +30,9 @@ class InterruptDescriptorTable
 {
 public:
 	void encodeEntry(uint8_t entryNumber, IDTEntry source);
-	void encodeHWExceptionISRs();
+	void encodeISRs();
 	void install() { set_idt(this->idt, sizeof(uint64_t) * IDT_SIZE); }
-	void callInterruptServiceRoutine(uint8_t interruptNumber, RegisterTable &registers) { (*isr[interruptNumber])(registers); }
+	void callISR(uint8_t interruptNumber, RegisterTable &registers) { (*isr[interruptNumber])(registers); }
 	void setISR(uint8_t interruptNumber, InterruptServiceRoutine *routine) { isr[interruptNumber] = routine; }
 private:
 	InterruptServiceRoutine *isr[IDT_SIZE];

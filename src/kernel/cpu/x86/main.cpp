@@ -8,6 +8,7 @@
 #include <device/display/VGATextConsole.hpp>
 #include <io/PrintStream.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
+#include <device/input/KeyboardInputStream.hpp>
 #include <mem/liballoc.h>
 #include <io/BochsDebugOutputStream.hpp>
 
@@ -104,6 +105,10 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     } else {
         kernel->panic("kmalloc no work :(");
     }
+
+    kernel->cpu()->enableInterrupts();
+
+    KeyboardInputStream *in = new KeyboardInputStream((X86CPU&)*(kernel->cpu()));
 
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->out()->println("\n* * *");
