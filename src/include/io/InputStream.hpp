@@ -1,8 +1,8 @@
 #pragma once
-#include <stddef.h>
-#include <stdint.h>
+#include <Object.hpp>
 
-class InputStream {
+class InputStream : public Object
+{
 public:
 	virtual size_t available() { return 0; }
 	virtual void close() { }

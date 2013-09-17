@@ -1,8 +1,8 @@
 #pragma once
-#include <stddef.h>
-#include <stdint.h>
+#include <Object.hpp>
 
-class OutputStream {
+class OutputStream : public Object
+{
 public:
 	virtual void close() { }
 	virtual void flush() { }
