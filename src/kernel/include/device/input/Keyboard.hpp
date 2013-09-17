@@ -5,5 +5,5 @@
 class Keyboard : public Object
 {
 public:
-    virtual KeyCode read() = 0;
+    virtual KeyEvent read() = 0;
 };

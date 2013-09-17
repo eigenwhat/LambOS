@@ -45,24 +45,23 @@ void PS2Keyboard::pushScanCode(uint8_t scancode)
     _buffer.enqueue(scancode);
 }
 
-KeyCode PS2Keyboard::read()
+KeyEvent PS2Keyboard::read()
 {
-    KeyCode retval = kKeyNull;
-    while(true) {
-        while(_buffer.isEmpty());
-        int scancode = _buffer.dequeue();
-        if((scancode & 128) == 128) {
-            // Released
-            continue;
-        } else {
-            // Pressed
-            if(scancode < 70) {
-                retval = scan1_to_key[scancode];
-            } else {
-                retval = kKeyNull;
-            }
-            break;
-        }
+    KeyEvent retval;
+    while(_buffer.isEmpty());
+    int scancode = _buffer.dequeue();
+    if((scancode & 128) == 128) {
+        retval.type = kKeyEventReleased;
+    } else {
+        retval.type = kKeyEventPressed;
+    }
+
+    scancode = scancode & 0x7F;
+
+    if(scancode < 70) {
+        retval.keyCode = scan1_to_key[scancode];
+    } else {
+        retval.keyCode = kKeyNull;
     }
 
     return retval;

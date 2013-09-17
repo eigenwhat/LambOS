@@ -7,7 +7,7 @@ class PS2Keyboard : public Keyboard
 {
 public:
     PS2Keyboard(X86CPU &cpu);
-    virtual KeyCode read();
+    virtual KeyEvent read();
     friend class KeyboardISR;
 private:
     void pushScanCode(uint8_t code);

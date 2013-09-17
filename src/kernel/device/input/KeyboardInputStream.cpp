@@ -15,5 +15,9 @@ char key_to_char[128] = {
 
 int KeyboardInputStream::read()
 {
-    return key_to_char[_keyboard.read()];
+    KeyEvent event;
+    do {
+        event = _keyboard.read();
+    } while(event.type != kKeyEventPressed);
+    return key_to_char[event.keyCode];
 }

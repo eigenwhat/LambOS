@@ -1,6 +1,10 @@
 #ifndef __SYS_KEYS_H
 #define __SYS_KEYS_H
 
+typedef enum keyevent_type_t {
+    kKeyEventPressed, kKeyEventReleased
+} KeyEventType;
+
 typedef enum keycode_t {
 	kKeyNull = 0,
 	kKeyEscape, kKeyF1, kKeyF2, kKeyF3, kKeyF4, kKeyF5, kKeyF6, kKeyF7, kKeyF8, kKeyF9, kKeyF10, kKeyF11, kKeyF12,
@@ -11,5 +15,10 @@ typedef enum keycode_t {
 	kKeyLeftControl, kKeyLeftAlt, kKeyLeftSuper, kKeySpace, kKeyRightSuper, kKeyRightAlt, kKeyRightControl,
     kKeyPadAsterisk, kKeyNumLock
 } KeyCode;
+
+typedef struct keyevent_t {
+    KeyEventType type;
+    KeyCode keyCode;
+} KeyEvent;
 
 #endif
