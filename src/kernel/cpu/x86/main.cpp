@@ -8,6 +8,7 @@
 #include <device/display/VGATextConsole.hpp>
 #include <io/PrintStream.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
+#include <device/input/PS2Keyboard.hpp>
 #include <device/input/KeyboardInputStream.hpp>
 #include <mem/liballoc.h>
 #include <io/BochsDebugOutputStream.hpp>
@@ -108,7 +109,8 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
     kernel->cpu()->enableInterrupts();
 
-    KeyboardInputStream *in = new KeyboardInputStream((X86CPU&)*(kernel->cpu()));
+    Keyboard *kb = new PS2Keyboard((X86CPU&)*(kernel->cpu()));
+    KeyboardInputStream *in = new KeyboardInputStream(*kb);
 
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->out()->println("\n* * *");

@@ -1,5 +1,4 @@
-#include <stddef.h>
-#include <stdint.h>
+#pragma once
 #include <util/Queue.hpp>
 
 template <typename T>
@@ -37,7 +36,7 @@ public:
     }
 
     bool isEmpty() {
-        return (_size == 0);
+        return size() == 0;
     }
 
     size_t size() { return _size; }
