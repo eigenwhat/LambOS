@@ -18,6 +18,6 @@ int KeyboardInputStream::read()
     KeyEvent event;
     do {
         event = _keyboard.read();
-    } while(event.type != kKeyEventPressed);
+    } while(event.type != kKeyEventPressed || key_to_char[event.keyCode] == 0);
     return key_to_char[event.keyCode];
 }

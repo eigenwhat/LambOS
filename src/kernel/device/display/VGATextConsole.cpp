@@ -79,16 +79,32 @@ void VGATextConsole::putChar(char c)
 	if(c == '\n') {
 		console_column = 0;
 		if ( ++console_row == VGA_HEIGHT ) {
-			console_row = 0;
+			scroll(1);
+			moveTo(VGA_HEIGHT - 1, 0);
 		}
 	} else {
 		putCharAt(c, console_color, console_column, console_row);
 		if ( ++console_column == VGA_WIDTH ) {
 			console_column = 0;
 			if ( ++console_row == VGA_HEIGHT ) {
-				console_row = 0;
+				scroll(1);
+				moveTo(VGA_HEIGHT - 1, 0);
 			}
 		}
+	}
+}
+
+void VGATextConsole::scroll(size_t lines) {
+	if(lines) {
+		size_t old_row = console_row;
+		memcpy(console_buffer, console_buffer + (VGA_WIDTH*lines), 2 * (VGA_WIDTH * (VGA_HEIGHT-lines)));
+		console_row = VGA_HEIGHT - lines;
+		for(uint8_t j = console_row; j < VGA_HEIGHT; ++j) {
+			for(uint8_t i = 0; i < VGA_WIDTH; ++i) {
+				putCharAt(' ', console_color, i, j);
+			}
+		}
+		console_row = old_row;
 	}
 }
 
