@@ -71,7 +71,6 @@ void VGATextConsole::putCharAt(char c, uint8_t color, size_t x, size_t y)
 
 	const size_t index = y * VGA_WIDTH + x;
 	console_buffer[index] = make_vgaentry(c, color);
-	moveTo(y, x);
 }
  
 void VGATextConsole::putChar(char c)
@@ -92,6 +91,8 @@ void VGATextConsole::putChar(char c)
 			}
 		}
 	}
+
+	moveTo(console_row, console_column);
 }
 
 void VGATextConsole::scroll(size_t lines) {

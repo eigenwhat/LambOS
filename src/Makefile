@@ -8,7 +8,7 @@ CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
 
-_LIBC_OBJS=string.o itoa.o
+_LIBC_OBJS=string.o itoa.o ctype.o
 _LIBCPP_OBJS=_lang.o
 _LIBSYS_OBJS=PrintStream.o
 

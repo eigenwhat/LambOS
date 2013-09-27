@@ -116,6 +116,7 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     kernel->out()->println("\n* * *");
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
     kernel->out()->print("Kernel exited. Maybe you should write the rest of the operating system?");
+    kernel->console()->setCursorVisible(true);
 
     while(true) {
         kernel->out()->write(in->read());

@@ -1,5 +1,6 @@
 #include <device/input/PS2Keyboard.hpp>
 #include <sys/asm.h>
+#include <string.h>
 
 #define KBD_DEVICE    0x60
 #define KEY_PENDING   0x64
@@ -38,6 +39,7 @@ private:
 PS2Keyboard::PS2Keyboard(X86CPU &cpu) : _buffer(128), _cpu(cpu) 
 {
     _cpu.idt()->setISR(kIntKeyboardIRQ, new KeyboardISR(*this));
+    memset(_keysPressed, 0, sizeof(bool) * 256);
 }
 
 void PS2Keyboard::pushScanCode(uint8_t scancode)
@@ -63,6 +65,8 @@ KeyEvent PS2Keyboard::read()
     } else {
         retval.keyCode = kKeyNull;
     }
+
+    _keysPressed[retval.keyCode] = retval.type == kKeyEventPressed ? true : false;
 
     return retval;
 }
