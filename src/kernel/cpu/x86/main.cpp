@@ -33,6 +33,10 @@ extern "C" {
 // ====================================================
 int install_cpu();
 int install_mmu(uint32_t mmap_addr, uint32_t mmap_length);
+void init_context();
+void init_system();
+void read_multiboot(multiboot_info_t *info);
+
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr);
 int log_task(const char *printstr, int success);
 int check_flag(multiboot_info_t *info, const char *printstr, uint32_t flag);
@@ -43,18 +47,62 @@ int log_test(const char *printstr, int success);
 // ====================================================
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
-    kernel = new (kern_mem) Kernel;
-    Console *term = new (term_mem) VGATextConsole;
-    ConsoleOutputStream *tOut = new (tout_mem) ConsoleOutputStream(*term);
-    kernel->setConsole(term);
-    kernel->setOut(new (stdout_mem) PrintStream(*tOut));
+    init_context();
 
     if(magic != 0x2BADB002) {
         kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
     }
 
+    read_multiboot(info);
     log_task("Installing CPU descriptor tables...", install_cpu());
+    log_task("Setting up memory management unit...", install_mmu(info->mmap_addr, info->mmap_length));
+    kernel->cpu()->enableInterrupts();
+    init_system();
+}
 
+void init_system()
+{
+    kernel->console()->setForegroundColor(COLOR_WHITE);
+    kernel->out()->println("\n* * *");
+    kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
+    kernel->out()->print("Kernel exited. Maybe you should write the rest of the operating system?");
+    kernel->console()->setCursorVisible(true);
+
+    Keyboard *kb = new PS2Keyboard((X86CPU&)*(kernel->cpu()));
+    KeyboardInputStream *in = new KeyboardInputStream(*kb);
+
+    while(true) {
+        kernel->out()->write(in->read());
+    }
+}
+
+void init_context()
+{
+    kernel = new (kern_mem) Kernel;
+    Console *term = new (term_mem) VGATextConsole;
+    ConsoleOutputStream *tOut = new (tout_mem) ConsoleOutputStream(*term);
+    kernel->setConsole(term);
+    kernel->setOut(new (stdout_mem) PrintStream(*tOut));
+}
+
+int install_cpu()
+{
+    kernel->setCPU(new (x86cpu_mem) X86CPU);
+    kernel->cpu()->install();
+
+    return true;
+}
+
+int install_mmu(uint32_t mmap_addr, uint32_t mmap_length)
+{
+    kernel->setMMU(new (mmu_mem) MMU(mmap_addr, mmap_length));
+    kernel->mmu()->install();
+
+    return true;
+}
+
+void read_multiboot(multiboot_info_t *info)
+{
     int result;
 
     result = check_flag(info, "Checking for reported memory size...", MULTIBOOT_INFO_MEMORY);
@@ -95,48 +143,6 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
             kernel->out()->println(hexval);
         }
     }
-
-    log_task("Setting up memory management unit...", install_mmu(info->mmap_addr, info->mmap_length));
-
-    const char *somestr = "This is a test string to see if kmalloc works now.";
-    char *longstr = (char*)kmalloc(strlen(somestr) + 1);
-    if(log_test("Testing if kmalloc gives us an appropriate pointer...", (uint32_t)longstr > (uint32_t)&kernel_end)) {
-        strcpy(longstr, somestr);
-        kernel->out()->println(longstr);
-    } else {
-        kernel->panic("kmalloc no work :(");
-    }
-
-    kernel->cpu()->enableInterrupts();
-
-    Keyboard *kb = new PS2Keyboard((X86CPU&)*(kernel->cpu()));
-    KeyboardInputStream *in = new KeyboardInputStream(*kb);
-
-    kernel->console()->setForegroundColor(COLOR_WHITE);
-    kernel->out()->println("\n* * *");
-    kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
-    kernel->out()->print("Kernel exited. Maybe you should write the rest of the operating system?");
-    kernel->console()->setCursorVisible(true);
-
-    while(true) {
-        kernel->out()->write(in->read());
-    }
-}
-
-int install_cpu()
-{
-    kernel->setCPU(new (x86cpu_mem) X86CPU);
-    kernel->cpu()->install();
-
-    return true;
-}
-
-int install_mmu(uint32_t mmap_addr, uint32_t mmap_length)
-{
-    kernel->setMMU(new (mmu_mem) MMU(mmap_addr, mmap_length));
-    kernel->mmu()->install();
-
-    return true;
 }
 
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)

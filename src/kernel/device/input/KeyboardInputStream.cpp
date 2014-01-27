@@ -25,8 +25,6 @@ char key_to_char_shift[128] = {
     '*', 0
 };
 
-char shift_digit[10] = { ')','!','@','#','$','%','^','&','*','(' };
-
 int KeyboardInputStream::read()
 {
     KeyEvent event;
@@ -39,6 +37,6 @@ int KeyboardInputStream::read()
     if(_keyboard.keyIsPressed(kKeyLeftShift) || _keyboard.keyIsPressed(kKeyRightShift)) {
         ret = key_to_char_shift[event.keyCode];
     }
-    
+
     return ret;
 }

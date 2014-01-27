@@ -51,7 +51,7 @@ int isprint(int c)
 /* Check if character is a punctuation character */
 int ispunct(int c)
 {
-    return 0;
+    return isgraph(c) && !isalnum(c);
 }
 
 /* Check if character is a white-space */
