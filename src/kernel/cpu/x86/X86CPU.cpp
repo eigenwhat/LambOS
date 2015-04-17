@@ -108,17 +108,17 @@ void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2)
     a1 = inb(PIC1_DATA);                        // save masks
     a2 = inb(PIC2_DATA);
  
-    outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);  // starts the initialization sequence (in cascade mode)
+    outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);    // starts the initialization sequence (in cascade mode)
     io_wait();
     outb(PIC2_COMMAND, ICW1_INIT+ICW1_ICW4);
     io_wait();
-    outb(PIC1_DATA, pic1);                 // ICW2: Master PIC vector offset
+    outb(PIC1_DATA, pic1);                      // ICW2: Master PIC vector offset
     io_wait();
-    outb(PIC2_DATA, pic2);                 // ICW2: Slave PIC vector offset
+    outb(PIC2_DATA, pic2);                      // ICW2: Slave PIC vector offset
     io_wait();
-    outb(PIC1_DATA, 4);                       // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
+    outb(PIC1_DATA, 4);                         // ICW3: tell Master PIC that there is a slave PIC at IRQ2 (0000 0100)
     io_wait();
-    outb(PIC2_DATA, 2);                       // ICW3: tell Slave PIC its cascade identity (0000 0010)
+    outb(PIC2_DATA, 2);                         // ICW3: tell Slave PIC its cascade identity (0000 0010)
     io_wait();
  
     outb(PIC1_DATA, ICW4_8086);
@@ -126,9 +126,13 @@ void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2)
     outb(PIC2_DATA, ICW4_8086);
     io_wait();
  
-    outb(PIC1_DATA, a1);   // restore saved masks.
+    outb(PIC1_DATA, a1);                        // restore saved masks.
     outb(PIC2_DATA, a2);
 
-    outb(0x21,0xfd);
-    outb(0xa1,0xff);
+    /*
+    Disable all but the IRQs we're prepared for. For debugging/sanity purposes only.
+    */
+    outb(PIC1_DATA,0xfd);                       // mask all but IRQ1 (keyboard)
+    outb(PIC2_DATA,0xff);                       // mask all IRQs
 }
+
