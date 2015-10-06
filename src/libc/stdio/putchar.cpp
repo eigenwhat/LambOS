@@ -1,6 +1,8 @@
 #include <Kernel.hpp>
 #include <stdio.h>
 
+extern "C" {
+
 int putchar(int ic)
 {
 #if defined(__is_myos_kernel)
@@ -12,3 +14,4 @@ int putchar(int ic)
     return ic;
 }
 
+} // extern "C"
