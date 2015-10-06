@@ -8,7 +8,7 @@ CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
 
-_LIBC_OBJS=string.o itoa.o ctype.o
+_LIBC_OBJS=string.o itoa.o ctype.o printf.o putchar.o
 _LIBCPP_OBJS=_lang.o
 _LIBSYS_OBJS=PrintStream.o
 
@@ -19,7 +19,7 @@ _KOBJS= $(_MMU_OBJS) $(_CPU_OBJS) main.o Kernel.o VGATextConsole.o KeyboardInput
 _OBJS=$(_LIBC_OBJS) $(_LIBCPP_OBJS) $(_LIBSYS_OBJS) $(_KOBJS)
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
-_LIBC_VPATH=libc libc/stdlib
+_LIBC_VPATH=libc libc/stdlib libc/stdio
 _LIBCPP_VPATH=libcpp
 _LIBSYS_VPATH=libsys
 _KERNEL_VPATH=kernel kernel/device/display kernel/device/input kernel/cpu kernel/cpu/x86 kernel/mem
