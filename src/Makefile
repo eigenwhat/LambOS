@@ -8,7 +8,7 @@ CPPFLAGS=$(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
 
-_LIBC_OBJS=string.o itoa.o ctype.o printf.o putchar.o
+_LIBC_OBJS=string.o itoa.o ctype.o putchar.o #printf.o
 _LIBCPP_OBJS=_lang.o
 _LIBSYS_OBJS=PrintStream.o
 
@@ -42,13 +42,13 @@ $(OBJDIR)/%.o: %.s | $(OBJDIR)
 	$(ASM) $< -o $@
 
 $(OBJDIR):
-	mkdir -p $@
+	@mkdir -p $@
 
 $(OBJDIR)/lambos.iso: $(OBJDIR)/kernel.bin 
-	cp -r iso $(OBJDIR)/iso
-	cp $(OBJDIR)/kernel.bin $(OBJDIR)/iso/boot/
+	@cp -r iso $(OBJDIR)/iso
+	@cp $(OBJDIR)/kernel.bin $(OBJDIR)/iso/boot/
 	grub-mkrescue --output=$(OBJDIR)/lambos.iso $(OBJDIR)/iso
 
 
 clean:
-	rm -rf $(OBJDIR) 
+	@rm -rf $(OBJDIR) 
