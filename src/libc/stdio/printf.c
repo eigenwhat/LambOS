@@ -2,6 +2,7 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 int puts(const char *string)
 {
@@ -50,16 +51,37 @@ incomprehensible_conversion:
             goto print_c;
         }
 
-        if ( *format == 'c' ) {
-            format++;
-            char c = (char) va_arg(parameters, int /* char promotes to int */);
-            print(&c, sizeof(c));
-        } else if ( *format == 's' ) {
-            format++;
-            const char *s = va_arg(parameters, const char *);
-            print(s, strlen(s));
-        } else {
-            goto incomprehensible_conversion;
+        char specifier = *format;
+
+        char sbuf[64];
+        int num;
+        switch(specifier) {
+            case 'c':
+                ++format;
+                char c = (char) va_arg(parameters, int /* char promotes to int */);
+                print(&c, sizeof(c));
+                break;
+            case 's':
+                format++;
+                const char *s = va_arg(parameters, const char *);
+                print(s, strlen(s));
+                break;
+            case 'd':
+                format++;
+                num = (int) va_arg(parameters, int);
+                itoa(num, sbuf, 10);
+                print(sbuf, strlen(sbuf));
+                break;
+            case 'x':
+                format++;
+                num = (int) va_arg(parameters, int);
+                sbuf[0] = '0';
+                sbuf[1] = 'x';
+                itoa(num, sbuf+2, 16);
+                print(sbuf, strlen(sbuf));
+                break;
+            default:
+                goto incomprehensible_conversion;
         }
     }
 
