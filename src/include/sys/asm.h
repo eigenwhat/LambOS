@@ -62,6 +62,12 @@ static inline void io_wait( void )
                   "2:" );
 }
 
+static inline void invlpg(uint32_t m)
+{
+    /* Clobber memory to avoid optimizer re-ordering access before invlpg, which may cause nasty bugs. */
+    asm volatile ( "invlpg (%0)" : : "b"(m) : "memory" );
+}
+
 __END_DECLS
 
 #endif

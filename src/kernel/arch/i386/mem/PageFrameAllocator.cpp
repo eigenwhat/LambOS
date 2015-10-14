@@ -2,6 +2,7 @@
 #include <mem/PageFrameAllocator.hpp>
 #include <cpu/multiboot.h>
 #include <Kernel.hpp>
+#include <stdio.h>
 
 #define FRAME_TO_INDEX(frame) (((frame) & k4KPageAddressMask) / 0x1000)
 
@@ -17,6 +18,7 @@ PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length,
     {
         uint32_t page_offset = mmap->addr/0x1000;
         uint32_t num_pages = mmap->len/0x1000;
+        printf("page_offset=%d,num_pages=%d\n", page_offset, num_pages);
         if(mmap->type == 1) {
             for(uint32_t i = page_offset; i < page_offset + num_pages; ++i) {
                 int bitmap_index = i/8;
@@ -53,10 +55,11 @@ bool PageFrameAllocator::requestFrame(PageFrame frame)
 PageFrame PageFrameAllocator::alloc()
 {
     int startIndex = _frameToIndex(_lastAllocFrame);
-
     // start checking from the last place we allocated since the next page is likely available
-    for(int i = startIndex; i < PAGES_IN_BITMAP; ++i) {
+    for(int i = startIndex + 1; i < PAGES_IN_BITMAP; ++i) {
+        // printf("checking bitmap idx %d\n", i);
         if(_frameIsUsable(i) && _frameIsFree(i)) {
+            // puts("got 'em");
             _lastAllocFrame = _indexToFrame(i);
             _bitmapFree[i/8] |= 1 << (i % 8);
             return _lastAllocFrame;

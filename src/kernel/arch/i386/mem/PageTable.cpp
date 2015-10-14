@@ -1,4 +1,6 @@
 #include <mem/PageTable.hpp>
+#include <sys/asm.h>
+#include <stdio.h>
 
 //======================================================
 // PageTable
@@ -16,6 +18,11 @@ PageEntry PageTable::entryAtIndex(uint16_t index)
 	PageEntry entry(_tableAddress[index]);
 	entry.setFlags(_tableAddress[index]);
 	return entry;
+}
+
+void PageTable::setEntry(uint16_t index, PageEntry entry) { 
+    _tableAddress[index] = entry._entry;
+    invlpg(entry.address());
 }
 
 void PageTable::install()

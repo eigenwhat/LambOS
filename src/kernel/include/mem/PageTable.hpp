@@ -40,7 +40,7 @@ public:
     PageTable(uint32_t *tableAddress) : _tableAddress(tableAddress) {}
     void clear();
     uint32_t *address() { return _tableAddress; }
-    void setEntry(uint16_t index, PageEntry entry) { _tableAddress[index] = entry._entry; }
+    void setEntry(uint16_t index, PageEntry entry); 
     PageEntry entryAtIndex(uint16_t index);
     void install();
 private:

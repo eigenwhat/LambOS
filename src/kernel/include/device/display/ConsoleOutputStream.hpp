@@ -1,3 +1,5 @@
+#include <io/OutputStream.hpp>
+
 class ConsoleOutputStream : public OutputStream
 {
 public:

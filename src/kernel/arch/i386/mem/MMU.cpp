@@ -1,15 +1,30 @@
 #include <Kernel.hpp>
 #include <stdlib.h>
+#include <stdio.h>
 #include <new>
 #include <mem/MMU.hpp>
 #include <mem/PageFrameAllocator.hpp>
 #include <mem/PageTable.hpp>
+#include <sys/asm.h>
 
+#define kPDESelfMapIndex 1023
+
+//==========================================================
+// Externs
+//==========================================================
 extern uint32_t kernel_end;
 extern uint32_t readonly_end;
 extern "C" int log_task(const char *printstr, int success);
 extern "C" int log_test(const char *printstr, int success);
 
+//==========================================================
+// Prototypes
+//==========================================================
+PageTable PageTableForDirectoryIndex(int index);
+
+//==========================================================
+// Page Frame Allocator init hook
+//==========================================================
 struct MMUPFAHook : PageFrameInitializationHook
 {
     // lock frames in low memory, mark kernel frames as used
@@ -32,14 +47,16 @@ struct MMUPFAHook : PageFrameInitializationHook
 
 uint8_t hook1[sizeof(MMUPFAHook)];
 
-MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
-    : _pageFrameAllocator(mmap_addr, mmap_length, new (hook1) MMUPFAHook),
-      _pageDirectory((uint32_t*)_pageFrameAllocator.alloc())
+//===========================================================
+// MMU Public Methods
+//===========================================================
+
+    MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
+: _pageFrameAllocator(mmap_addr, mmap_length, new (hook1) MMUPFAHook),
+    _pageDirectory((uint32_t*)_pageFrameAllocator.alloc())
 {
     _pageDirectory.clear();
-
     PageTable firstTable((uint32_t*)(_pageFrameAllocator.alloc()));
-    uint32_t address = 0;
 
     // identity map current used address space
     uint32_t highMemoryBegin = 0x100000/0x1000;
@@ -50,6 +67,7 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
         kernel->panic("Kernel spans past first page table.");
     }
 
+    uint32_t address = 0;
     for(uint32_t i = 0; i <= lastUsedPage; ++i) {
         PageEntry entry(address);
         entry.setFlag(kPresentBit);
@@ -71,7 +89,7 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
     PageEntry directory((uint32_t)_pageDirectory.address());
     directory.setFlag(kPresentBit);
     directory.setFlag(kReadWriteBit);
-    _pageDirectory.setEntry(1023, directory);
+    _pageDirectory.setEntry(kPDESelfMapIndex, directory);
 }
 
 void MMU::install()
@@ -87,39 +105,36 @@ void *MMU::palloc(size_t numberOfPages)
     size_t contiguousFoundPages = 0;
     for(pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
         PageEntry directoryEntry = _pageDirectory.entryAtIndex(pde);
-        PageTable table((uint32_t*)directoryEntry.address());
-
-        // no page table here, create one
-        if(!directoryEntry.getFlag(kPresentBit)) {
+        PageTable table = PageTableForDirectoryIndex(pde);
+        
+        if(!directoryEntry.getFlag(kPresentBit)) { // no page table here, create one
             directoryEntry = PageEntry(_pageFrameAllocator.alloc());
             directoryEntry.setFlags(kPresentBit | kReadWriteBit);
             _pageDirectory.setEntry(pde, directoryEntry);
-            table = PageTable((uint32_t*)directoryEntry.address());
+            _flush();
             table.clear();
+            _flush();
         }
 
         // look through page table
-        for(pte = 0; pte < 1024; ++pte) {
+        for (pte = 0; pte < 1024; ++pte) {
             PageEntry entry = table.entryAtIndex(pte);
-            if(!entry.getFlag(kPresentBit)) { // found a page that isn't present (is available)
-                entry = PageEntry(_pageFrameAllocator.alloc());
+            if (!entry.getFlag(kPresentBit)) { // found a page that isn't present (is available)
                 if(contiguousFoundPages == 0) { // this is the first available page, set our return pointer to it
                     retval = (void*) ((pde << 22) | (pte << 12));
                 }
 
                 ++contiguousFoundPages;
-
                 // we got our pages, let's mark them present
                 if(contiguousFoundPages == numberOfPages) {
                     for(size_t k = pte; k > pte - numberOfPages; --k) {
-                        PageEntry previousEntry = table.entryAtIndex(k);
-                        previousEntry.setFlags(kPresentBit | kReadWriteBit);
-                        table.setEntry(k, previousEntry);
+                        entry = PageEntry(_pageFrameAllocator.alloc());
+                        entry.setFlags(kPresentBit | kReadWriteBit);
+                        table.setEntry(k, entry);
                     }
                     break;
                 }
-            } else { // current page is used, reset our contiguous page count
-                pfree(retval, numberOfPages);
+            } else if (retval && contiguousFoundPages) { // current page is used, reset our contiguous page count
                 contiguousFoundPages = 0;
                 retval = NULL;
             }
@@ -127,14 +142,14 @@ void *MMU::palloc(size_t numberOfPages)
     }
 
     _flush();
-
+    
     return retval;
 }
 
 int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
 {
     uint32_t virtualAddress = (uint32_t)startOfMemoryRange;
-    
+
     if(!numberOfPages) return -1;
 
     while(numberOfPages--) {
@@ -153,3 +168,26 @@ int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
 
     return 0;
 }
+
+//===========================================================
+// MMU Private methods
+//===========================================================
+
+void MMU::_flush()
+{
+    asm volatile(
+            "movl %cr3, %eax;"
+            "movl %eax, %cr3"
+            );
+}
+
+//===========================================================
+// Utility methods
+//===========================================================
+
+PageTable PageTableForDirectoryIndex(int index)
+{
+    uint32_t *addr = (uint32_t *)0xFFC00000 + (0x400 * index);
+    return PageTable(addr);
+}
+

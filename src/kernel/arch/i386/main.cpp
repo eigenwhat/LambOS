@@ -12,6 +12,8 @@
 #include <device/input/KeyboardInputStream.hpp>
 #include <mem/liballoc.h>
 #include <io/BochsDebugOutputStream.hpp>
+#include <stdio.h>
+#include <io/debug.h>
 
 // ====================================================
 // Globals
@@ -25,6 +27,9 @@ uint8_t tout_mem[sizeof(ConsoleOutputStream)];
 uint8_t stdout_mem[sizeof(PrintStream)];
 uint8_t mmu_mem[sizeof(MMU)];
 uint8_t x86cpu_mem[sizeof(X86CPU)];
+//uint8_t dbgout_mem[sizeof(PrintStream)];
+//uint8_t bochsout_mem[sizeof(BochsDebugOutputStream)];
+//PrintStream *debugOut;
 
 extern "C" {
 
@@ -47,6 +52,8 @@ int log_test(const char *printstr, int success);
 // ====================================================
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
+//    OutputStream *stream = new (bochsout_mem) BochsDebugOutputStream();
+//    debugOut = new (dbgout_mem) PrintStream(*stream);
     init_context();
 
     if(magic != 0x2BADB002) {
@@ -62,6 +69,8 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
 void init_system()
 {
+    puts("puts() test");
+    printf("printf test #%d\n", 2);
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->out()->println("\n* * *");
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
@@ -107,14 +116,8 @@ void read_multiboot(multiboot_info_t *info)
 
     result = check_flag(info, "Checking for reported memory size...", MULTIBOOT_INFO_MEMORY);
     if(result) {
-        char decval[33];
-        itoa(info->mem_lower, decval, 10);
-        kernel->out()->print(decval);
-        kernel->out()->println("KiB lower memory.");
-
-        itoa(info->mem_upper, decval, 10);
-        kernel->out()->print(decval);
-        kernel->out()->println("KiB upper memory.");
+        printf("%dKiB lower memory.\n", info->mem_lower);
+        printf("%dKiB upper memory.\n", info->mem_upper);
     }
 
     result = check_flag(info, "Checking for reported memory map...", MULTIBOOT_INFO_MEM_MAP);
@@ -127,20 +130,7 @@ void read_multiboot(multiboot_info_t *info)
             (uint32_t) mmap < info->mmap_addr + info->mmap_length;
             mmap = (multiboot_memory_map_t *) ((uint32_t) mmap + mmap->size + sizeof (mmap->size)))
         {
-            char hexval[35];
-            hexval[0] = '0';
-            hexval[1] = 'x';
-            kernel->out()->print("address: ");
-            itoa(mmap->addr, hexval+2, 16);
-            kernel->out()->print(hexval);
-
-            kernel->out()->print(" length: ");
-            itoa(mmap->len, hexval+2, 16);
-            kernel->out()->print(hexval);
-
-            kernel->out()->print(" type: ");
-            itoa(mmap->type, hexval+2, 16);
-            kernel->out()->println(hexval);
+            printf("address: %x length: %x type: %x\n", (unsigned int)mmap->addr, (unsigned int)mmap->len, (unsigned int)mmap->type);
         }
     }
 }

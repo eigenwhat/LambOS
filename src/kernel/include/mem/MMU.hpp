@@ -10,7 +10,7 @@ public:
     int pfree(void *startOfMemoryRange, size_t numberOfPages = 1);
     void install();
 private:
-	void _flush() { asm volatile("movl %0, %%cr3" : : "r"(_pageDirectory.address())); }
+    void _flush();
     PageFrameAllocator _pageFrameAllocator;
     PageTable _pageDirectory;
 };

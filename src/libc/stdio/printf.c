@@ -54,7 +54,6 @@ incomprehensible_conversion:
         char specifier = *format;
 
         char sbuf[64];
-        int num;
         switch(specifier) {
             case 'c':
                 ++format;
@@ -68,16 +67,16 @@ incomprehensible_conversion:
                 break;
             case 'd':
                 format++;
-                num = (int) va_arg(parameters, int);
+                int num = (int) va_arg(parameters, int);
                 itoa(num, sbuf, 10);
                 print(sbuf, strlen(sbuf));
                 break;
             case 'x':
                 format++;
-                num = (int) va_arg(parameters, int);
+                unsigned int hexnum = (unsigned int) va_arg(parameters, unsigned int);
                 sbuf[0] = '0';
                 sbuf[1] = 'x';
-                itoa(num, sbuf+2, 16);
+                itoa(hexnum, sbuf+2, 16);
                 print(sbuf, strlen(sbuf));
                 break;
             default:

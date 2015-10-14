@@ -1,6 +1,6 @@
 #pragma once
 #include <cpu/X86CPU.hpp>
-#include "Keyboard.hpp"
+#include <device/input/Keyboard.hpp>
 #include <util/RingBuffer.hpp>
 
 class PS2Keyboard : public Keyboard
