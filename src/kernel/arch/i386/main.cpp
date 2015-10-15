@@ -20,16 +20,19 @@
 // ====================================================
 extern uint32_t kernel_end;
 VGA4BitColor defaultTextColor = COLOR_LIGHT_GREY;
+
 Kernel *kernel = NULL;
 uint8_t kern_mem[sizeof(Kernel)];
+uint8_t mmu_mem[sizeof(MMU)];
+uint8_t x86cpu_mem[sizeof(X86CPU)];
+
 uint8_t term_mem[sizeof(VGATextConsole)];
 uint8_t tout_mem[sizeof(ConsoleOutputStream)];
 uint8_t stdout_mem[sizeof(PrintStream)];
-uint8_t mmu_mem[sizeof(MMU)];
-uint8_t x86cpu_mem[sizeof(X86CPU)];
-//uint8_t dbgout_mem[sizeof(PrintStream)];
-//uint8_t bochsout_mem[sizeof(BochsDebugOutputStream)];
-//PrintStream *debugOut;
+
+uint8_t dbgout_mem[sizeof(PrintStream)];
+uint8_t bochsout_mem[sizeof(BochsDebugOutputStream)];
+PrintStream *debugOut;
 
 extern "C" {
 
@@ -52,8 +55,8 @@ int log_test(const char *printstr, int success);
 // ====================================================
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
-//    OutputStream *stream = new (bochsout_mem) BochsDebugOutputStream();
-//    debugOut = new (dbgout_mem) PrintStream(*stream);
+    OutputStream *stream = new (bochsout_mem) BochsDebugOutputStream();
+    debugOut = new (dbgout_mem) PrintStream(*stream);
     init_context();
 
     if(magic != 0x2BADB002) {
@@ -69,12 +72,10 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
 void init_system()
 {
-    puts("puts() test");
-    printf("printf test #%d\n", 2);
     kernel->console()->setForegroundColor(COLOR_WHITE);
-    kernel->out()->println("\n* * *");
+    puts("\n* * *");
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
-    kernel->out()->print("Kernel exited. Maybe you should write the rest of the operating system?");
+    puts("Kernel exited. Maybe you should write the rest of the operating system?");
     kernel->console()->setCursorVisible(true);
 
     Keyboard *kb = new PS2Keyboard((X86CPU&)*(kernel->cpu()));

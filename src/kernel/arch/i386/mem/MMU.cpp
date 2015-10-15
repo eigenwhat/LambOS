@@ -99,11 +99,10 @@ void MMU::install()
 
 void *MMU::palloc(size_t numberOfPages)
 {
-    uint32_t pde;
-    uint32_t pte;
-    void *retval = NULL;
     size_t contiguousFoundPages = 0;
-    for(pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
+    size_t retpde, retpte;
+    void *retval = NULL;
+    for(size_t pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
         PageEntry directoryEntry = _pageDirectory.entryAtIndex(pde);
         PageTable table = PageTableForDirectoryIndex(pde);
         
@@ -117,30 +116,47 @@ void *MMU::palloc(size_t numberOfPages)
         }
 
         // look through page table
-        for (pte = 0; pte < 1024; ++pte) {
+        for (size_t pte = 0; pte < 1024; ++pte) {
             PageEntry entry = table.entryAtIndex(pte);
             if (!entry.getFlag(kPresentBit)) { // found a page that isn't present (is available)
                 if(contiguousFoundPages == 0) { // this is the first available page, set our return pointer to it
-                    retval = (void*) ((pde << 22) | (pte << 12));
+                    retpde = pde;
+                    retpte = pte;
                 }
 
                 ++contiguousFoundPages;
-                // we got our pages, let's mark them present
-                if(contiguousFoundPages == numberOfPages) {
-                    for(size_t k = pte; k > pte - numberOfPages; --k) {
-                        entry = PageEntry(_pageFrameAllocator.alloc());
-                        entry.setFlags(kPresentBit | kReadWriteBit);
-                        table.setEntry(k, entry);
-                    }
+                if(contiguousFoundPages == numberOfPages) { // done
+                    retval = (void*) ((retpde << 22) | (retpte << 12));
                     break;
                 }
             } else if (retval && contiguousFoundPages) { // current page is used, reset our contiguous page count
                 contiguousFoundPages = 0;
-                retval = NULL;
             }
         }
     }
 
+    if (retval) { // if we succeeded in finding space
+        size_t pagesLeft = numberOfPages;
+        size_t currpde = retpde;
+        size_t currpte = retpte;
+       
+        while (pagesLeft > 0) { // map the pages
+            PageTable table = PageTableForDirectoryIndex(currpde);
+            PageEntry entry = PageEntry(_pageFrameAllocator.alloc());
+            entry.setFlags(kPresentBit | kReadWriteBit);
+            table.setEntry(currpte, entry);
+
+            ++currpte;
+            --pagesLeft;
+
+            // move to next PDE if needed
+            if (currpte > 1023) {
+                ++currpde;
+                currpte = 0;
+            }
+        }
+    }
+    
     _flush();
     
     return retval;

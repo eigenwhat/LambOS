@@ -9,7 +9,6 @@
   .globl isr\intnum
   isr\intnum:
     cli
-    xchg %bx, %bx
     pushl $0                     // Push a dummy error code.
     pushl $\intnum               // Push the interrupt number.
     jmp isr_common_stub
