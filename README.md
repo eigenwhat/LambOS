@@ -10,5 +10,6 @@ LambOS is a hobby operating system with three intentions:
 
 Name
 ----
-Don't ask.
+An allegory to the humble OS developer, naive and optimistic before hitting the confidence buzzsaw that is bare metal programming.
 
+Or maybe it's just a pun on my old boss's NetID.
