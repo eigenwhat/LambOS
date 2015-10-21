@@ -6,7 +6,7 @@
 class Object
 {
 public:
-	Object() : _referenceCount(0) {}
+	Object() : _referenceCount(1) {}
 	virtual ~Object() {}
 	void retain() const { ++_referenceCount; }
 	void release() const {
