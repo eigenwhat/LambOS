@@ -4,6 +4,7 @@
 #include <cpu/multiboot.h>
 #include <Kernel.hpp>
 #include <cpu/X86CPU.hpp>
+#include <cpu/X86RealTimeClock.hpp>
 #include <mem/MMU.hpp>
 #include <device/display/VGATextConsole.hpp>
 #include <io/PrintStream.hpp>
@@ -14,6 +15,7 @@
 #include <io/BochsDebugOutputStream.hpp>
 #include <stdio.h>
 #include <io/debug.h>
+
 
 // ====================================================
 // Globals
@@ -73,6 +75,10 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 void init_system()
 {
     kernel->console()->setForegroundColor(COLOR_WHITE);
+    puts("\n* * *");
+    X86RealTimeClock clock;
+    DateTime now = clock.currentTime();
+    printf("The current date and time is %d/%d/%d %d:%d:%d", now.month, now.monthday, now.year + (now.century * 100), now.hours, now.minutes, now.seconds);
     puts("\n* * *");
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
     puts("Kernel exited. Maybe you should write the rest of the operating system?");
