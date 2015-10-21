@@ -12,6 +12,8 @@ public:
 	InterruptDescriptorTable *idt() { return &_idt; }
 	virtual void enableInterrupts();
 	virtual void disableInterrupts() { asm volatile ("cli"); }
+    virtual void maskIRQ(unsigned char IRQ);
+    virtual void unmaskIRQ(unsigned char IRQ);
 private:
 	GlobalDescriptorTable _gdt;
 	InterruptDescriptorTable _idt;

@@ -39,6 +39,7 @@ private:
 PS2Keyboard::PS2Keyboard(X86CPU &cpu) : _buffer(128), _cpu(cpu) 
 {
     _cpu.idt()->setISR(kIntKeyboardIRQ, new KeyboardISR(*this));
+    _cpu.unmaskIRQ(1);
     memset(_keysPressed, 0, sizeof(bool) * 256);
 }
 
