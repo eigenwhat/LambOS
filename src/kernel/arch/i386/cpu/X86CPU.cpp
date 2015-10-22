@@ -1,8 +1,8 @@
 #include <cpu/X86CPU.hpp>
-#include <io/BochsDebugOutputStream.hpp>
 #include <sys/asm.h>
 #include <string.h>
 #include <stdlib.h>
+#include <io/debug.h>
 
 void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2);
 
@@ -126,12 +126,11 @@ offset2 - same for slave PIC: offset2..offset2+7
 */
 void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2)
 {
-    OutputStream *bdos = new BochsDebugOutputStream;
     for(int i = pic1; i < pic1 + 8; ++i) {
-        idt.setISR(i, new IRQHandler(*bdos));
+        idt.setISR(i, new IRQHandler(*debugOut));
     }
     for(int i = pic2; i < pic2 + 8; ++i) {
-        idt.setISR(i, new IRQHandler(*bdos));
+        idt.setISR(i, new IRQHandler(*debugOut));
     }
 
     outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);    // starts the initialization sequence (in cascade mode)

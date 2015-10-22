@@ -1,10 +1,10 @@
 #include <stdlib.h>
 #include <new>
 #include <sys/asm.h>
-#include <io/BochsDebugOutputStream.hpp>
 #include <cpu/InterruptDescriptorTable.hpp>
 #include <Kernel.hpp>
 #include <cpu/X86CPU.hpp>
+#include <io/debug.h>
 #include "isr.h"
 
 //======================================================
@@ -66,12 +66,10 @@ void InterruptDescriptorTable::encodeEntry(uint8_t entryNumber, IDTEntry source)
 }
 
 uint8_t isr_mem[sizeof(StubISR)];
-uint8_t bochs_out_mem[sizeof(BochsDebugOutputStream)];
 
 void InterruptDescriptorTable::encodeISRs()
 {
-   BochsDebugOutputStream *out = new (bochs_out_mem) BochsDebugOutputStream;
-   StubISR *defaultISR = new (isr_mem) StubISR(*out);
+   StubISR *defaultISR = new (isr_mem) StubISR(*debugOut);
    ADDISR(0, defaultISR);
    ADDISR(1, defaultISR);
    ADDISR(2, defaultISR);
