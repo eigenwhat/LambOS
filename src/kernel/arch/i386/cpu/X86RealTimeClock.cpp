@@ -4,9 +4,10 @@
 #define kCMOSSetRegister 0x70
 #define kCMOSReadAddress 0x71
 
-enum {
+enum
+{
     cmos_address = 0x70,
-    cmos_data    = 0x71
+    cmos_data = 0x71
 };
 
 uint8_t get_rtc_register(int reg)
@@ -22,7 +23,7 @@ uint8_t get_update_in_progress_flag()
 
 uint8_t convert_bcd_if_needed(uint8_t value)
 {
-    if(!(get_rtc_register(0x0B) & 0x04)) {
+    if (!(get_rtc_register(0x0B) & 0x04)) {
         value = (value & 0x0F) + ((value / 16) * 10);
     }
 

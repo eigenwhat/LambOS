@@ -5,7 +5,8 @@
 
 __BEGIN_DECLS
 
-typedef enum interrupt_number {
+typedef enum interrupt_number
+{
     kIntDivideByZero = 0,
     kIntDebugger,
     kIntNMI,

@@ -12,7 +12,9 @@ public:
     KeyboardInputStream(Keyboard &keyboard) : _keyboard(keyboard) {}
     virtual int read();
     friend class KeyboardISR;
+
 private:
     void pushScanCode(uint8_t code);
+
     Keyboard &_keyboard;
 };

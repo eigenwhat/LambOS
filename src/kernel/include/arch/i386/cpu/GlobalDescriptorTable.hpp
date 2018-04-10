@@ -1,4 +1,5 @@
 #pragma once
+
 #include <stddef.h>
 #include <stdint.h>
 
@@ -9,26 +10,33 @@ extern "C" void set_gdt(void *gdt, size_t size);
 class GDTEntry
 {
 public:
-	GDTEntry() : base(0), limit(0), type(0) {}
-	GDTEntry(uint32_t base, uint32_t limit, uint32_t type) : base(base), limit(limit), type(type) {}
-	friend class GlobalDescriptorTable;
+    GDTEntry() : base(0), limit(0), type(0) {}
+
+    GDTEntry(uint32_t base, uint32_t limit, uint32_t type) : base(base), limit(limit), type(type) {}
+
+    friend class GlobalDescriptorTable;
+
 private:
-	uint32_t base;
-	uint32_t limit;
-	uint8_t type;
+    uint32_t base;
+    uint32_t limit;
+    uint8_t type;
 };
 
 class GlobalDescriptorTable
 {
 public:
-	void encodeEntry(uint8_t entryNumber, GDTEntry source);
-	void install() { set_gdt(this->gdt, sizeof(uint64_t)*GDT_SIZE); }
-	void installTSS(uint8_t entryIndex);
+    void encodeEntry(uint8_t entryNumber, GDTEntry source);
+
+    void install() { set_gdt(this->gdt, sizeof(uint64_t) * GDT_SIZE); }
+
+    void installTSS(uint8_t entryIndex);
+
 private:
-	uint64_t gdt[GDT_SIZE];
+    uint64_t gdt[GDT_SIZE];
 };
 
-typedef struct tss_entry {
+typedef struct tss_entry
+{
     uint32_t prev_tss;
     uint32_t esp0;
     uint32_t ss0;

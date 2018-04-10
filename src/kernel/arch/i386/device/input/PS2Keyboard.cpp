@@ -7,8 +7,8 @@
 
 static KeyCode scan1_to_key[70] = {
     kKeyNull,       kKeyEscape,   kKey1,         kKey2,         kKey3,          kKey4,           kKey5,           kKey6,            kKey7,        kKey8,
-    kKey9,          kKey0,        kKeyDash,      kKeyEquals,    kKeyBackspace,  kKeyTab,         kKeyQ,           kKeyW,            kKeyE,        kKeyR, 
-    kKeyT,          kKeyY,        kKeyU,         kKeyI,         kKeyO,          kKeyP,           kKeyLeftBracket, kKeyRightBracket, kKeyEnter,    kKeyLeftControl, 
+    kKey9,          kKey0,        kKeyDash,      kKeyEquals,    kKeyBackspace,  kKeyTab,         kKeyQ,           kKeyW,            kKeyE,        kKeyR,
+    kKeyT,          kKeyY,        kKeyU,         kKeyI,         kKeyO,          kKeyP,           kKeyLeftBracket, kKeyRightBracket, kKeyEnter,    kKeyLeftControl,
     kKeyA,          kKeyS,        kKeyD,         kKeyF,         kKeyG,          kKeyH,           kKeyJ,           kKeyK,            kKeyL,        kKeySemicolon,
     kKeyApostrophe, kKeyBacktick, kKeyLeftShift, kKeyBackslash, kKeyZ,          kKeyX,           kKeyC,           kKeyV,            kKeyB,        kKeyN,
     kKeyM,          kKeyComma,    kKeyPeriod,    kKeySlash,     kKeyRightShift, kKeyPadAsterisk, kKeyLeftAlt,     kKeySpace,        kKeyCapsLock, kKeyF1,
@@ -25,18 +25,21 @@ class KeyboardISR : public InterruptServiceRoutine
 {
 public:
     KeyboardISR(PS2Keyboard &keyboard) : _keyboard(keyboard) {}
-    virtual void operator()(RegisterTable&) {
-        while(inb(KEY_PENDING) & 2);
+
+    virtual void operator()(RegisterTable &)
+    {
+        while (inb(KEY_PENDING) & 2);
         uint8_t scancode = inb(KBD_DEVICE);
 
         _keyboard.pushScanCode(scancode);
         outb(0x20, 0x20);
     }
+
 private:
     PS2Keyboard &_keyboard;
 };
 
-PS2Keyboard::PS2Keyboard(X86CPU &cpu) : _buffer(128), _cpu(cpu) 
+PS2Keyboard::PS2Keyboard(X86CPU &cpu) : _buffer(128), _cpu(cpu)
 {
     _cpu.idt()->setISR(kIntKeyboardIRQ, new KeyboardISR(*this));
     _cpu.unmaskIRQ(1);
@@ -51,9 +54,9 @@ void PS2Keyboard::pushScanCode(uint8_t scancode)
 KeyEvent PS2Keyboard::read()
 {
     KeyEvent retval;
-    while(_buffer.isEmpty());
+    while (_buffer.isEmpty());
     int scancode = _buffer.dequeue();
-    if((scancode & 128) == 128) {
+    if ((scancode & 128) == 128) {
         retval.type = kKeyEventReleased;
     } else {
         retval.type = kKeyEventPressed;
@@ -61,7 +64,7 @@ KeyEvent PS2Keyboard::read()
 
     scancode = scancode & 0x7F;
 
-    if(scancode < 70) {
+    if (scancode < 70) {
         retval.keyCode = scan1_to_key[scancode];
     } else {
         retval.keyCode = kKeyNull;

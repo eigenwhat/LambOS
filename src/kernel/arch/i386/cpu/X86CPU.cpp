@@ -40,13 +40,13 @@ X86CPU::X86CPU()
     _tss.esp0 = 0x0;
     _tss.iomap_base = sizeof(_tss);
 
-    _gdt.encodeEntry(5, GDTEntry((uint32_t)&_tss, sizeof(_tss), 0x89));
+    _gdt.encodeEntry(5, GDTEntry((uint32_t) & _tss, sizeof(_tss), 0x89));
 
     // Set up IDT
     _idt.encodeISRs();
 }
 
-void X86CPU::install() 
+void X86CPU::install()
 {
     // install GDT
     _gdt.install();
@@ -61,7 +61,7 @@ void X86CPU::install()
 void X86CPU::enableInterrupts()
 {
     static bool pic_initialized = false;
-    if(!pic_initialized) {
+    if (!pic_initialized) {
         init_pics(_idt, kIntIRQ0, kIntIRQ8);
         pic_initialized = true;
     }
@@ -74,7 +74,7 @@ void X86CPU::maskIRQ(unsigned char IRQ)
     uint16_t port;
     uint8_t value;
 
-    if(IRQ < 8) {
+    if (IRQ < 8) {
         port = PIC1_DATA;
     } else {
         port = PIC2_DATA;
@@ -89,7 +89,7 @@ void X86CPU::unmaskIRQ(unsigned char IRQ)
     uint16_t port;
     uint8_t value;
 
-    if(IRQ < 8) {
+    if (IRQ < 8) {
         port = PIC1_DATA;
     } else {
         port = PIC2_DATA;
@@ -101,21 +101,25 @@ void X86CPU::unmaskIRQ(unsigned char IRQ)
 
 class IRQHandler : public InterruptServiceRoutine
 {
-    public:
-        IRQHandler(OutputStream &out) : _out(out) {}
-        virtual void operator()(RegisterTable &registers) {
-            char hexval[33];
-            _out.write((uint8_t*)"(IRQ) int 0x", 12);
-            itoa(registers.int_no, hexval, 16);
-            _out.write((uint8_t*)hexval, 2);
-            _out.write((uint8_t*)", err 0x", 8);
-            itoa(registers.err_code, hexval, 16);
-            _out.write((uint8_t*)hexval, 2);
-            _out.write('\n');
-            outb(0x20, 0x20);
-        }
-    private:
-        OutputStream &_out;
+public:
+    IRQHandler(OutputStream &out) : _out(out)
+    {}
+
+    virtual void operator()(RegisterTable &registers)
+    {
+        char hexval[33];
+        _out.write((uint8_t *) "(IRQ) int 0x", 12);
+        itoa(registers.int_no, hexval, 16);
+        _out.write((uint8_t *) hexval, 2);
+        _out.write((uint8_t *) ", err 0x", 8);
+        itoa(registers.err_code, hexval, 16);
+        _out.write((uint8_t *) hexval, 2);
+        _out.write('\n');
+        outb(0x20, 0x20);
+    }
+
+private:
+    OutputStream &_out;
 };
 
 /*
@@ -126,16 +130,16 @@ offset2 - same for slave PIC: offset2..offset2+7
 */
 void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2)
 {
-    for(int i = pic1; i < pic1 + 8; ++i) {
+    for (int i = pic1; i < pic1 + 8; ++i) {
         idt.setISR(i, new IRQHandler(*debugOut));
     }
-    for(int i = pic2; i < pic2 + 8; ++i) {
+    for (int i = pic2; i < pic2 + 8; ++i) {
         idt.setISR(i, new IRQHandler(*debugOut));
     }
 
-    outb(PIC1_COMMAND, ICW1_INIT+ICW1_ICW4);    // starts the initialization sequence (in cascade mode)
+    outb(PIC1_COMMAND, ICW1_INIT + ICW1_ICW4);    // starts the initialization sequence (in cascade mode)
     io_wait();
-    outb(PIC2_COMMAND, ICW1_INIT+ICW1_ICW4);
+    outb(PIC2_COMMAND, ICW1_INIT + ICW1_ICW4);
     io_wait();
     outb(PIC1_DATA, pic1);                      // ICW2: Master PIC vector offset
     io_wait();
@@ -152,7 +156,7 @@ void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2)
     io_wait();
 
     // Mask all IRQs. IRQ handlers should unmask them as part of their install sequence.
-    outb(PIC1_DATA,0xff);
-    outb(PIC2_DATA,0xff);
+    outb(PIC1_DATA, 0xff);
+    outb(PIC2_DATA, 0xff);
 }
 

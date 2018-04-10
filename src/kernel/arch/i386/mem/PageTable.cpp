@@ -7,20 +7,20 @@
 //======================================================
 void PageTable::clear()
 {
-	for(int i = 0; i < 1024; i++)
-    {
+    for (int i = 0; i < 1024; i++) {
         _tableAddress[i] = 0;
     }
 }
 
-PageEntry PageTable::entryAtIndex(uint16_t index) 
-{ 
-	PageEntry entry(_tableAddress[index]);
-	entry.setFlags(_tableAddress[index]);
-	return entry;
+PageEntry PageTable::entryAtIndex(uint16_t index)
+{
+    PageEntry entry(_tableAddress[index]);
+    entry.setFlags(_tableAddress[index]);
+    return entry;
 }
 
-void PageTable::setEntry(uint16_t index, PageEntry entry) { 
+void PageTable::setEntry(uint16_t index, PageEntry entry)
+{
     _tableAddress[index] = entry._entry;
     invlpg(entry.address());
 }

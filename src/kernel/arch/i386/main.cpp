@@ -57,11 +57,11 @@ int log_test(const char *printstr, int success);
 // ====================================================
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
-    OutputStream *stream = new (bochsout_mem) BochsDebugOutputStream();
-    debugOut = new (dbgout_mem) PrintStream(*stream);
+    OutputStream *stream = new(bochsout_mem) BochsDebugOutputStream();
+    debugOut = new(dbgout_mem) PrintStream(*stream);
     init_context();
 
-    if(magic != 0x2BADB002) {
+    if (magic != 0x2BADB002) {
         kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
     }
 
@@ -78,32 +78,33 @@ void init_system()
     puts("\n* * *");
     X86RealTimeClock clock;
     DateTime now = clock.currentTime();
-    printf("The current date and time is %d/%d/%d %d:%d:%d", now.month, now.monthday, now.year + (now.century * 100), now.hours, now.minutes, now.seconds);
+    printf("The current date and time is %d/%d/%d %d:%d:%d", now.month, now.monthday, now.year + (now.century * 100),
+           now.hours, now.minutes, now.seconds);
     puts("\n* * *");
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
     puts("Kernel exited. Maybe you should write the rest of the operating system?");
     kernel->console()->setCursorVisible(true);
 
-    Keyboard *kb = new PS2Keyboard((X86CPU&)*(kernel->cpu()));
+    Keyboard *kb = new PS2Keyboard((X86CPU & ) * (kernel->cpu()));
     KeyboardInputStream *in = new KeyboardInputStream(*kb);
 
-    while(true) {
+    while (true) {
         kernel->out()->write(in->read());
     }
 }
 
 void init_context()
 {
-    kernel = new (kern_mem) Kernel;
-    Console *term = new (term_mem) VGATextConsole;
-    ConsoleOutputStream *tOut = new (tout_mem) ConsoleOutputStream(*term);
+    kernel = new(kern_mem) Kernel;
+    Console *term = new(term_mem) VGATextConsole;
+    ConsoleOutputStream *tOut = new(tout_mem) ConsoleOutputStream(*term);
     kernel->setConsole(term);
-    kernel->setOut(new (stdout_mem) PrintStream(*tOut));
+    kernel->setOut(new(stdout_mem) PrintStream(*tOut));
 }
 
 int install_cpu()
 {
-    kernel->setCPU(new (x86cpu_mem) X86CPU);
+    kernel->setCPU(new(x86cpu_mem) X86CPU);
     kernel->cpu()->install();
 
     return true;
@@ -111,7 +112,7 @@ int install_cpu()
 
 int install_mmu(uint32_t mmap_addr, uint32_t mmap_length)
 {
-    kernel->setMMU(new (mmu_mem) MMU(mmap_addr, mmap_length));
+    kernel->setMMU(new(mmu_mem) MMU(mmap_addr, mmap_length));
     kernel->mmu()->install();
 
     return true;
@@ -122,22 +123,22 @@ void read_multiboot(multiboot_info_t *info)
     int result;
 
     result = check_flag(info, "Checking for reported memory size...", MULTIBOOT_INFO_MEMORY);
-    if(result) {
+    if (result) {
         printf("%dKiB lower memory.\n", info->mem_lower);
         printf("%dKiB upper memory.\n", info->mem_upper);
     }
 
     result = check_flag(info, "Checking for reported memory map...", MULTIBOOT_INFO_MEM_MAP);
 
-    if(!result) {
+    if (!result) {
         kernel->panic("Fatal ERROR: Cannot install paging due to missing memory map.");
     } else {
         multiboot_memory_map_t *mmap;
-        for (mmap = (multiboot_memory_map_t *) info->mmap_addr; 
-            (uint32_t) mmap < info->mmap_addr + info->mmap_length;
-            mmap = (multiboot_memory_map_t *) ((uint32_t) mmap + mmap->size + sizeof (mmap->size)))
-        {
-            printf("address: %x length: %x type: %x\n", (unsigned int)mmap->addr, (unsigned int)mmap->len, (unsigned int)mmap->type);
+        for (mmap = (multiboot_memory_map_t *) info->mmap_addr;
+             (uint32_t) mmap < info->mmap_addr + info->mmap_length;
+             mmap = (multiboot_memory_map_t * )((uint32_t) mmap + mmap->size + sizeof(mmap->size))) {
+            printf("address: %x length: %x type: %x\n", (unsigned int) mmap->addr, (unsigned int) mmap->len,
+                   (unsigned int) mmap->type);
         }
     }
 }
@@ -145,7 +146,7 @@ void read_multiboot(multiboot_info_t *info)
 int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
 {
     kernel->console()->moveTo(kernel->console()->row(), 0);
-    for(uint32_t i = 0; i < kernel->console()->width(); ++i) {
+    for (uint32_t i = 0; i < kernel->console()->width(); ++i) {
         kernel->console()->putChar(' ');
     }
     kernel->console()->moveTo(kernel->console()->row() - 1, 0);
@@ -153,11 +154,11 @@ int log_result(const char *printstr, int success, const char *ackstr, const char
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->console()->writeString(printstr);
 
-    if(kernel->console()->column() > kernel->console()->width() - 6) {
+    if (kernel->console()->column() > kernel->console()->width() - 6) {
         kernel->console()->writeString("\n");
     }
-    
-    if(success) {
+
+    if (success) {
         kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(ackstr) + 3));
         kernel->console()->writeString("[");
         kernel->console()->setForegroundColor(COLOR_GREEN);

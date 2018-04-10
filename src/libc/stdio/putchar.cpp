@@ -7,7 +7,7 @@ int putchar(int ic)
 {
     char c = (char) ic;
     kernel->out()->print(c);
-    
+
     return ic;
 }
 

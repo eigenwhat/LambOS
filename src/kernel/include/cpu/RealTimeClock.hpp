@@ -3,7 +3,8 @@
 #include <stddef.h>
 #include <stdint.h>
 
-struct DateTime {
+struct DateTime
+{
     uint8_t seconds;
     uint8_t minutes;
     uint8_t hours;
@@ -14,7 +15,8 @@ struct DateTime {
     uint8_t century;
 };
 
-class RealTimeClock {
+class RealTimeClock
+{
 public:
     virtual DateTime currentTime() = 0;
 };
