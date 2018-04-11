@@ -62,6 +62,7 @@ incomprehensible_conversion:
                 print(str, &written, s, strlen(s));
                 break;
             case 'd':
+            case 'i':
                 format++;
                 int num = (int) va_arg(parameters, int);
                 itoa(num, sbuf, 10);
