@@ -1,4 +1,4 @@
-.PHONY: all clean go
+.PHONY: all clean go-bochs go-qemu go
 
 all:
 	@cd src; $(MAKE)
@@ -6,6 +6,11 @@ all:
 clean:
 	@cd src; $(MAKE) clean
 
-go: 
+go-bochs: 
 	@bochs -f bochsrc.bxrc -q; rm none
+
+go-qemu:
+	@qemu-system-i386 -cdrom bin/lambos.iso -m 32
+
+go: go-qemu
 
