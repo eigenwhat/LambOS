@@ -21,16 +21,16 @@ public:
     virtual size_t width();
     virtual size_t height();
     virtual void setCursorVisible(bool isVisible);
-    virtual size_t column() { return console_column; }
-    virtual size_t row() { return console_row; }
+    virtual size_t column() { return _consoleColumn; }
+    virtual size_t row() { return _consoleRow; }
 
 private:
     void scroll(size_t lines);
     virtual void putCharAt(char c, uint8_t color, size_t x, size_t y);
 
-    bool cursorIsVisible;
-    size_t console_row;
-    size_t console_column;
-    uint8_t console_color;
-    uint16_t *console_buffer;
+    bool _cursorIsVisible;
+    size_t _consoleRow;
+    size_t _consoleColumn;
+    uint8_t _consoleColor;
+    uint16_t *_consoleBuffer;
 };

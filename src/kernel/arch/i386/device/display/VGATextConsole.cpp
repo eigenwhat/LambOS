@@ -29,22 +29,22 @@ void move_cursor_to(size_t row, size_t col)
 //======================================================
 // VGATextConsole
 //======================================================
-VGATextConsole::VGATextConsole() : console_row(0), console_column(0)
+VGATextConsole::VGATextConsole() : _consoleRow(0), _consoleColumn(0)
 {
-    console_color = COLOR_LIGHT_GREY | COLOR_BLACK << 4;
-    console_buffer = (uint16_t *) 0xB8000;
+    _consoleColor = COLOR_LIGHT_GREY | COLOR_BLACK << 4;
+    _consoleBuffer = (uint16_t *) 0xB8000;
     setCursorVisible(false);
     clear();
 }
 
 void VGATextConsole::clear()
 {
-    console_row = 0;
-    console_column = 0;
+    _consoleRow = 0;
+    _consoleColumn = 0;
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
             const size_t index = y * VGA_WIDTH + x;
-            console_buffer[index] = make_vgaentry(' ', console_color);
+            _consoleBuffer[index] = make_vgaentry(' ', _consoleColor);
         }
     }
 
@@ -53,75 +53,75 @@ void VGATextConsole::clear()
 
 void VGATextConsole::setColor(uint8_t color)
 {
-    this->console_color = color;
+    this->_consoleColor = color;
 }
 
 void VGATextConsole::setForegroundColor(uint32_t fg)
 {
-    this->console_color = (this->console_color & 0xF0) | fg;
+    this->_consoleColor = (this->_consoleColor & 0xF0) | fg;
 }
 
 void VGATextConsole::setBackgroundColor(uint32_t bg)
 {
-    this->console_color = (this->console_color & 0x0F) | (bg << 4);
+    this->_consoleColor = (this->_consoleColor & 0x0F) | (bg << 4);
 }
 
 void VGATextConsole::putCharAt(char c, uint8_t color, size_t x, size_t y)
 {
 
     const size_t index = y * VGA_WIDTH + x;
-    console_buffer[index] = make_vgaentry(c, color);
+    _consoleBuffer[index] = make_vgaentry(c, color);
 }
 
 void VGATextConsole::putChar(char c)
 {
     if (c == '\n') {
-        console_column = 0;
-        if (++console_row == VGA_HEIGHT) {
+        _consoleColumn = 0;
+        if (++_consoleRow == VGA_HEIGHT) {
             scroll(1);
             moveTo(VGA_HEIGHT - 1, 0);
         }
     } else {
-        putCharAt(c, console_color, console_column, console_row);
-        if (++console_column == VGA_WIDTH) {
-            console_column = 0;
-            if (++console_row == VGA_HEIGHT) {
+        putCharAt(c, _consoleColor, _consoleColumn, _consoleRow);
+        if (++_consoleColumn == VGA_WIDTH) {
+            _consoleColumn = 0;
+            if (++_consoleRow == VGA_HEIGHT) {
                 scroll(1);
                 moveTo(VGA_HEIGHT - 1, 0);
             }
         }
     }
 
-    moveTo(console_row, console_column);
+    moveTo(_consoleRow, _consoleColumn);
 }
 
 void VGATextConsole::scroll(size_t lines)
 {
     if (lines) {
-        size_t old_row = console_row;
-        memcpy(console_buffer, console_buffer + (VGA_WIDTH * lines), 2 * (VGA_WIDTH * (VGA_HEIGHT - lines)));
-        console_row = VGA_HEIGHT - lines;
-        for (uint8_t j = console_row; j < VGA_HEIGHT; ++j) {
+        size_t old_row = _consoleRow;
+        memcpy(_consoleBuffer, _consoleBuffer + (VGA_WIDTH * lines), 2 * (VGA_WIDTH * (VGA_HEIGHT - lines)));
+        _consoleRow = VGA_HEIGHT - lines;
+        for (uint8_t j = _consoleRow; j < VGA_HEIGHT; ++j) {
             for (uint8_t i = 0; i < VGA_WIDTH; ++i) {
-                putCharAt(' ', console_color, i, j);
+                putCharAt(' ', _consoleColor, i, j);
             }
         }
-        console_row = old_row;
+        _consoleRow = old_row;
     }
 }
 
 void VGATextConsole::moveTo(size_t row, size_t col)
 {
-    if (cursorIsVisible) {
+    if (_cursorIsVisible) {
         move_cursor_to(row, col);
     }
-    console_row = row;
-    console_column = col;
+    _consoleRow = row;
+    _consoleColumn = col;
 }
 
 void VGATextConsole::writeString(const char *data)
 {
-    bool moveCursor = cursorIsVisible;
+    bool moveCursor = _cursorIsVisible;
     if (moveCursor) {
         setCursorVisible(false);
     }
@@ -146,10 +146,10 @@ size_t VGATextConsole::height()
 
 void VGATextConsole::setCursorVisible(bool isVisible)
 {
-    cursorIsVisible = isVisible;
-    if (!cursorIsVisible) {
+    _cursorIsVisible = isVisible;
+    if (!_cursorIsVisible) {
         move_cursor_to(0xFF, 0xFF);
     } else {
-        move_cursor_to(console_row, console_column);
+        move_cursor_to(_consoleRow, _consoleColumn);
     }
 }
