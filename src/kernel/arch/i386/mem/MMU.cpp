@@ -72,7 +72,7 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
         PageEntry entry(address);
         entry.setFlag(kPresentBit);
         // make sure pages for read only data are marked read only
-        if (i < highMemoryBegin || i > readOnlyEnd) {
+        if (i < highMemoryBegin && i > readOnlyEnd) {
             entry.setFlag(kReadWriteBit);
         }
         firstTable.setEntry(i, entry);
