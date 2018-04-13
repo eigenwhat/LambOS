@@ -8,6 +8,7 @@
 #include <sys/asm.h>
 
 #define kPDESelfMapIndex 1023
+#define kVGAPage (0xB8000/0x1000)
 
 //==========================================================
 // Externs
@@ -72,7 +73,7 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
         PageEntry entry(address);
         entry.setFlag(kPresentBit);
         // make sure pages for read only data are marked read only
-        if (i < highMemoryBegin && i > readOnlyEnd) {
+        if (i > readOnlyEnd || i == kVGAPage) {
             entry.setFlag(kReadWriteBit);
         }
         firstTable.setEntry(i, entry);
