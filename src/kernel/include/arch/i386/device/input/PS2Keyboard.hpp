@@ -1,6 +1,6 @@
 #pragma once
 
-#include <cpu/X86CPU.hpp>
+#include <arch/i386/cpu/X86CPU.hpp>
 #include <device/input/Keyboard.hpp>
 #include <util/RingBuffer.hpp>
 

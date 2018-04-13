@@ -1,13 +1,18 @@
 ARCH=i386
 OBJDIR=../bin
-INCLUDEDIR=./include
 CC=i586-elf-gcc
 CPP=i586-elf-g++
 CFLAGS=-std=gnu99 $(COMMONFLAGS)
-COMMONFLAGS=-I./kernel/include -I./kernel/include/arch/$(ARCH) -I$(INCLUDEDIR) -I$(INCLUDEDIR)/libc -I$(INCLUDEDIR)/libcpp -ffreestanding -O2 -Wall -Wextra -fstack-protector-all
+COMMONFLAGS=${KERNEL_INCLUDES} ${LIBC_INCLUDES} ${LIBCPP_INCLUDES} ${LIBSYS_INCLUDES} -ffreestanding -O2 -Wall -Wextra -Werror -fstack-protector-all
 CPPFLAGS=-std=c++11 $(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
+
+ARCH_INCLUDES=-I./kernel/include/arch/$(ARCH)
+KERNEL_INCLUDES=-I./kernel/include
+LIBC_INCLUDES=-I./libc/include
+LIBCPP_INCLUDES=-I./libcpp/include
+LIBSYS_INCLUDES=-I./libsys/include
 
 _LIBC_OBJS=string.o itoa.o ctype.o putchar.o printf.o
 _LIBCPP_OBJS=_lang.o
@@ -20,13 +25,13 @@ _KOBJS= $(_MMU_OBJS) $(_CPU_OBJS) main.o Kernel.o VGATextConsole.o KeyboardInput
 _OBJS=$(_LIBC_OBJS) $(_LIBCPP_OBJS) $(_LIBSYS_OBJS) $(_KOBJS)
 OBJS=$(patsubst %,$(OBJDIR)/%,$(_OBJS))
 
-ARCH_PATH=kernel/arch/$(ARCH)
+ARCH_PATH=kernel/src/arch/$(ARCH)
 
-_LIBC_VPATH=libc libc/stdlib libc/stdio
-_LIBCPP_VPATH=libcpp
-_LIBSYS_VPATH=libsys
+_LIBC_VPATH=libc/src libc/src/stdlib libc/src/stdio
+_LIBCPP_VPATH=libcpp/src
+_LIBSYS_VPATH=libsys/src/io
 _ARCH_VPATH=$(ARCH_PATH) $(ARCH_PATH)/cpu $(ARCH_PATH)/mem $(ARCH_PATH)/device $(ARCH_PATH)/device/display $(ARCH_PATH)/device/input
-_KERNEL_VPATH=kernel kernel/device/display kernel/device/input kernel/cpu kernel/cpu/x86 kernel/mem
+_KERNEL_VPATH=kernel/src kernel/src/device/display kernel/src/device/input kernel/src/cpu kernel/src/cpu/x86 kernel/src/mem
 VPATH=$(_ARCH_VPATH) $(_LIBC_VPATH) $(_LIBCPP_VPATH) $(_LIBSYS_VPATH) $(_KERNEL_VPATH)
 
 .PHONY: all clean

@@ -2,9 +2,10 @@
 
 #include <stddef.h>
 #include <stdint.h>
-#include <cpu/GlobalDescriptorTable.hpp>
-#include <cpu/InterruptDescriptorTable.hpp>
+
 #include <cpu/CPU.hpp>
+#include "GlobalDescriptorTable.hpp"
+#include "InterruptDescriptorTable.hpp"
 
 class X86CPU : public CPU
 {

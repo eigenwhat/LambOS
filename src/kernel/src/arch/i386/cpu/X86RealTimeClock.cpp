@@ -1,4 +1,5 @@
-#include <cpu/X86RealTimeClock.hpp>
+#include <arch/i386/cpu/X86RealTimeClock.hpp>
+
 #include <sys/asm.h>
 
 #define kCMOSSetRegister 0x70

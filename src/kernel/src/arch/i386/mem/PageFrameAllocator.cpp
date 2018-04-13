@@ -1,6 +1,6 @@
 #include <string.h>
 #include <mem/PageFrameAllocator.hpp>
-#include <cpu/multiboot.h>
+#include <arch/i386/cpu/multiboot.h>
 #include <Kernel.hpp>
 #include <stdio.h>
 

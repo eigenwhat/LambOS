@@ -60,7 +60,6 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
     PageTable firstTable((uint32_t * )(_pageFrameAllocator.alloc()));
 
     // identity map current used address space
-    uint32_t highMemoryBegin = 0x100000 / 0x1000;
     uint32_t readOnlyEnd = (uint32_t) & readonly_end / 0x1000;
     uint32_t lastUsedPage = (uint32_t) firstTable.address() / 0x1000;
 

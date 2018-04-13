@@ -1,20 +1,21 @@
 #include <new>
 #include <string.h>
 #include <stdlib.h>
-#include <cpu/multiboot.h>
-#include <Kernel.hpp>
-#include <cpu/X86CPU.hpp>
-#include <cpu/X86RealTimeClock.hpp>
-#include <mem/MMU.hpp>
-#include <device/display/VGATextConsole.hpp>
-#include <io/PrintStream.hpp>
-#include <device/display/ConsoleOutputStream.hpp>
-#include <device/input/PS2Keyboard.hpp>
-#include <device/input/KeyboardInputStream.hpp>
-#include <mem/liballoc.h>
-#include <io/BochsDebugOutputStream.hpp>
 #include <stdio.h>
+
+#include <arch/i386/cpu/multiboot.h>
+#include <arch/i386/cpu/X86CPU.hpp>
+#include <arch/i386/cpu/X86RealTimeClock.hpp>
+#include <arch/i386/device/input/PS2Keyboard.hpp>
+#include <device/display/ConsoleOutputStream.hpp>
+#include <device/display/VGATextConsole.hpp>
+#include <device/input/KeyboardInputStream.hpp>
+#include <io/BochsDebugOutputStream.hpp>
+#include <io/PrintStream.hpp>
 #include <io/debug.h>
+#include <mem/liballoc.h>
+#include <mem/MMU.hpp>
+#include <Kernel.hpp>
 
 
 // ====================================================

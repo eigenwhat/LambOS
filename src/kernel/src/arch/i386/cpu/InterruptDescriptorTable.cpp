@@ -1,10 +1,13 @@
+#include <arch/i386/cpu/InterruptDescriptorTable.hpp>
+
 #include <stdlib.h>
 #include <new>
-#include <sys/asm.h>
-#include <cpu/InterruptDescriptorTable.hpp>
-#include <Kernel.hpp>
-#include <cpu/X86CPU.hpp>
+
+#include <arch/i386/cpu/X86CPU.hpp>
 #include <io/debug.h>
+#include <sys/asm.h>
+#include <Kernel.hpp>
+
 #include "isr.h"
 
 //======================================================

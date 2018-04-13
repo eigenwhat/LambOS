@@ -1,3 +1,6 @@
+#pragma once
+
+#include <device/display/Console.hpp>
 #include <io/OutputStream.hpp>
 
 class ConsoleOutputStream : public OutputStream

@@ -1,4 +1,4 @@
-#include <cpu/GlobalDescriptorTable.hpp>
+#include <arch/i386/cpu/GlobalDescriptorTable.hpp>
 
 //======================================================
 // GlobalDescriptorTable
