@@ -6,3 +6,5 @@ stoof/
 none
 
 .idea
+
+cmake-build-debug/

@@ -1,7 +1,12 @@
 cmake_minimum_required(VERSION 3.5)
-project(libc VERSION 0.1)
+project(lambos-libc VERSION 0.1)
 
-set(LIBC_LIBRARY libc)
+if (NOT DEFINED LIBC_TARGET)
+    message (WARNING "LIBC_TARGET not defined in project root. Defining it now...")
+    set(LIBC_TARGET lambos-libc)
+    set(LIBC_TARGET ${LIBC_TARGET} PARENT_SCOPE)
+endif ()
+
 set (STDIO_SOURCES
     src/stdio/printf.c
     src/stdio/putchar.cpp)
@@ -15,10 +20,10 @@ set (SOURCES
     src/ctype.c
     src/string.c)
 
-add_library(${LIBC_LIBRARY} STATIC ${SOURCES})
-target_include_directories(${LIBC_LIBRARY} PUBLIC include)
-set_property(TARGET ${LIBC_LIBRARY} PROPERTY CXX_STANDARD 11)
-target_compile_options(${LIBC_LIBRARY} PRIVATE
-    -ffreestanding -O2 -Wall -Wextra -Werror -fstack-protector-all
-    $<$<LANG:C>:-std=gnu99>
-    $<$<LANG:CXX>:-fno-exceptions -fno-rtti>)
+add_library(${LIBC_TARGET} STATIC ${SOURCES})
+target_include_directories(${LIBC_TARGET} PUBLIC include)
+set_property(TARGET ${LIBC_TARGET} PROPERTY CXX_STANDARD 11)
+target_compile_options(${LIBC_TARGET} PRIVATE
+    $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}> $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>)
+
+target_link_libraries(${LIBC_TARGET} ${KERNEL_HEADERS_TARGET})
