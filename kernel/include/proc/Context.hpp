@@ -2,7 +2,7 @@
 #include <device/display/Console.hpp>
 #include <io/PrintStream.hpp>
 
-class Context : virtual public Object
+class Context : public Object
 {
 public:
     Context() : _console(NULL), _out(NULL) { }
