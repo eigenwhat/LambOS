@@ -1,5 +1,5 @@
 ARCH=i386
-OBJDIR=../bin
+OBJDIR=bin
 CC=i586-elf-gcc
 CPP=i586-elf-g++
 CFLAGS=-std=gnu99 $(COMMONFLAGS)

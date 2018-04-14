@@ -1,10 +1,10 @@
 .PHONY: all clean go-bochs go-qemu go
 
 all:
-	@cd src; $(MAKE)
+	@$(MAKE) --file=Makefile2
 
 clean:
-	@cd src; $(MAKE) clean
+	@$(MAKE) --file=Makefile2 clean
 
 go-bochs: 
 	@bochs -f bochsrc.bxrc -q; rm none
