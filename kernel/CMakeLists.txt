@@ -1,8 +1,11 @@
 cmake_minimum_required(VERSION 3.5)
-project(lambos VERSION 0.1 LANGUAGES C CXX ASM-ATT)
+project(lambos)
 
-set(KERNEL_TARGET lambos-kernel)
-set(KERNEL_TARGET ${KERNEL_TARGET} PARENT_SCOPE)
+if (NOT DEFINED KERNEL_TARGET)
+    set(KERNEL_TARGET lambos-kernel)
+    message (WARNING "KERNEL_TARGET was not set by project root. Defaulting to '${KERNEL_TARGET}'.")
+    set(KERNEL_TARGET ${KERNEL_TARGET} PARENT_SCOPE)
+endif ()
 
 set(I386_SOURCES
     src/arch/i386/cpu/GlobalDescriptorTable.cpp
@@ -31,8 +34,9 @@ set (SOURCES
     src/Kernel.cpp)
 
 add_executable(${KERNEL_TARGET} ${SOURCES})
-target_include_directories(${KERNEL_TARGET} PRIVATE include ../libsys/include)
-target_link_libraries(${KERNEL_TARGET} ${KERNEL_HEADERS_TARGET})
+target_include_directories(${KERNEL_TARGET} PUBLIC include)
+target_include_directories(${KERNEL_TARGET} INTERFACE $<TARGET_PROPERTY:${LIBSYS_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
+#target_link_libraries(${KERNEL_TARGET} ${KERNEL_HEADERS_TARGET})
 set_property(TARGET ${KERNEL_TARGET} PROPERTY OUTPUT_NAME kernel.bin)
 
 # set compilation options

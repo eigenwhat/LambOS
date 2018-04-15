@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.5)
 project(lambos)
 
 if (NOT DEFINED LIBSYS_TARGET)
-    message (WARNING "LIBSYS_TARGET not defined in project root. Defining it now...")
     set(LIBSYS_TARGET lambos-libsys)
+    message (WARNING "LIBSYS_TARGET was not set by project root. Defaulting to '${LIBSYS_TARGET}'.")
     set(LIBSYS_TARGET ${LIBSYS_TARGET} PARENT_SCOPE)
 endif ()
 
