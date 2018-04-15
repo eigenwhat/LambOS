@@ -27,9 +27,9 @@ void PageTable::setEntry(uint16_t index, PageEntry entry)
 
 void PageTable::install()
 {
-    asm("movl %1, %0;"
-        "movl %0, %%cr3;"
-        "movl %%cr0, %0;"
-        "orl 0x80000001, %0;"
-        "movl %0, %%cr0" : : "r"(0), "r"(_tableAddress));
+    // TODO: Figure out why using %eax here instead of %0 is so important as to otherwise break paging on QEMU
+    asm("movl %0, %%cr3\n"
+        "mov %%cr0, %%eax\n"
+        "orl $0x80000000, %%eax\n"
+        "mov %%eax, %%cr0\n" :: "r"(_tableAddress) : "%eax");
 }
