@@ -49,7 +49,7 @@ void PS2Keyboard::pushScanCode(uint8_t scancode)
 KeyEvent PS2Keyboard::read()
 {
     KeyEvent retval;
-    while (_buffer.isEmpty());
+    while (_buffer.isEmpty()) { halt(); }
     int scancode = _buffer.dequeue();
     if ((scancode & 128) == 128) {
         retval.type = kKeyEventReleased;

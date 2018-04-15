@@ -7,6 +7,11 @@
 
 __BEGIN_DECLS
 
+static inline void halt()
+{
+    asm volatile("hlt");
+}
+
 static inline void outb(uint16_t port, uint8_t val)
 {
     asm volatile( "outb %0, %1"
