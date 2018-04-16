@@ -6,24 +6,31 @@
 #include <mem/MMU.hpp>
 #include <cpu/CPU.hpp>
 
-class Kernel : public virtual Context
+class Kernel : public Context
 {
-public:
-    Kernel() : _cpu(NULL), _mmu(NULL) {}
-
-    // accessors/mutators
-    void setMMU(MMU *mmu) { _mmu = mmu; }
+  public:
+    /** Returns the kernel's representation of the memory management unit. */
     MMU *mmu() { return this->_mmu; }
 
-    void setCPU(CPU *cpu) { _cpu = cpu; }
+    /** Returns the kernel's representation of the CPU. */
     CPU *cpu() { return this->_cpu; }
 
-    // methods
+    /**
+     * Kills the system.
+     *
+     * @param errorMessage A descriptive message regarding the error that has occurred, or at least
+     *                     some words of comfort.
+     */
     void panic(const char *errorMessage);
 
-private:
-    CPU *_cpu;
-    MMU *_mmu;
+  protected:
+    Kernel(CPU *cpu, MMU *mmu) : _cpu(cpu), _mmu(mmu) {}
+    void setCPU(CPU *cpu) { _cpu = cpu; }
+    void setMMU(MMU *mmu) { _mmu = mmu; }
+
+  private:
+    CPU *_cpu = nullptr;
+    MMU *_mmu = nullptr;
 };
 
 extern Kernel *kernel;

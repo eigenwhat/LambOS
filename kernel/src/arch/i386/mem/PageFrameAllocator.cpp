@@ -15,13 +15,13 @@ PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length,
     for (mmap = (multiboot_memory_map_t *) mmap_addr;
          (uint32_t) mmap < mmap_addr + mmap_length;
          mmap = (multiboot_memory_map_t * )((uint32_t) mmap + mmap->size + sizeof(mmap->size))) {
-        uint32_t page_offset = mmap->addr / 0x1000;
-        uint32_t num_pages = mmap->len / 0x1000;
+        uint64_t page_offset = mmap->addr / 0x1000;
+        uint64_t num_pages = mmap->len / 0x1000;
         printf("page_offset=%d,num_pages=%d\n", page_offset, num_pages);
         if (mmap->type == 1) {
-            for (uint32_t i = page_offset; i < page_offset + num_pages; ++i) {
-                int bitmap_index = i / 8;
-                _bitmapUsable[bitmap_index] &= ~(1 << (i % 8));
+            for (uint64_t i = page_offset; i < page_offset + num_pages; ++i) {
+                uint64_t bitmap_index = i / 8;
+                _bitmapUsable[bitmap_index] &= ~(1u << (i % 8));
             }
         }
     }

@@ -7,6 +7,8 @@ if (NOT DEFINED KERNEL_TARGET)
     set(KERNEL_TARGET ${KERNEL_TARGET} PARENT_SCOPE)
 endif ()
 
+file(GLOB_RECURSE INCLUDE_FILES include/*.h include/*.hpp)
+
 set(I386_SOURCES
         src/arch/i386/cpu/GlobalDescriptorTable.cpp
         src/arch/i386/cpu/InterruptDescriptorTable.cpp
@@ -20,6 +22,7 @@ set(I386_SOURCES
         src/arch/i386/mem/MMU.cpp
         src/arch/i386/mem/PageFrameAllocator.cpp
         src/arch/i386/mem/PageTable.cpp
+        src/arch/i386/X86Kernel.cpp
         src/arch/i386/main.cpp)
 
 set (LIBALLOC_SOURCES
@@ -33,7 +36,7 @@ set (SOURCES
         src/device/input/PS2Keyboard.cpp
         src/Kernel.cpp)
 
-add_executable(${KERNEL_TARGET} ${SOURCES})
+add_executable(${KERNEL_TARGET} ${SOURCES} ${INCLUDE_FILES})
 target_include_directories(${KERNEL_TARGET} PUBLIC include)
 target_include_directories(${KERNEL_TARGET} INTERFACE $<TARGET_PROPERTY:${LIBSYS_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
 #target_link_libraries(${KERNEL_TARGET} ${KERNEL_HEADERS_TARGET})

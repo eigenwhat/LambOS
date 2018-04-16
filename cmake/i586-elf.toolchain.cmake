@@ -2,9 +2,6 @@
 
 set (CMAKE_SYSTEM_NAME Generic)
 
-#set (CMAKE_C_COMPILER /home/martin/.cross/bin/i586-elf-gcc)
-#set (CMAKE_CXX_COMPILER /home/martin/.cross/bin/i586-elf-g++)
-#set (CMAKE_ASM_ATT_COMPILER /home/martin/.cross/bin/i586-elf-as)
 set (CMAKE_C_COMPILER i586-elf-gcc)
 set (CMAKE_CXX_COMPILER i586-elf-g++)
 set (CMAKE_ASM_ATT_COMPILER i586-elf-as)

@@ -5,7 +5,8 @@
 #include <arch/i386/cpu/multiboot.h>
 #include <arch/i386/cpu/X86CPU.hpp>
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
-#include <device/input/PS2Keyboard.hpp>
+#include <arch/i386/device/input/PS2KeyboardISR.hpp>
+#include <arch/i386/X86Kernel.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
 #include <device/display/VGATextConsole.hpp>
 #include <device/input/KeyboardInputStream.hpp>
@@ -13,8 +14,6 @@
 #include <io/PrintStream.hpp>
 #include <io/debug.h>
 #include <mem/MMU.hpp>
-#include <Kernel.hpp>
-#include <arch/i386/device/input/PS2KeyboardISR.hpp>
 
 
 // ====================================================
@@ -24,13 +23,7 @@ extern uint32_t kernel_end;
 VGA4BitColor defaultTextColor = COLOR_LIGHT_GREY;
 
 Kernel *kernel = NULL;
-uint8_t kern_mem[sizeof(Kernel)];
-uint8_t mmu_mem[sizeof(MMU)];
-uint8_t x86cpu_mem[sizeof(X86CPU)];
-
-uint8_t term_mem[sizeof(VGATextConsole)];
-uint8_t tout_mem[sizeof(ConsoleOutputStream)];
-uint8_t stdout_mem[sizeof(PrintStream)];
+uint8_t kern_mem[sizeof(X86Kernel)];
 
 uint8_t dbgout_mem[sizeof(PrintStream)];
 uint8_t bochsout_mem[sizeof(BochsDebugOutputStream)];
@@ -41,9 +34,6 @@ extern "C" {
 // ====================================================
 // Function prototypes
 // ====================================================
-int install_cpu();
-int install_mmu(uint32_t mmap_addr, uint32_t mmap_length);
-void init_context();
 void init_system();
 void read_multiboot(multiboot_info_t *info);
 
@@ -57,17 +47,25 @@ int log_test(const char *printstr, int success);
 // ====================================================
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
+    // Get this party started
+    kernel = new(kern_mem) X86Kernel;
+
+    // Set up output to bochs as a debug output stream
     OutputStream *stream = new(bochsout_mem) BochsDebugOutputStream();
     debugOut = new(dbgout_mem) PrintStream(*stream);
-    init_context();
 
     if (magic != 0x2BADB002) {
         kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
     }
 
     read_multiboot(info);
-    log_task("Installing CPU descriptor tables...", install_cpu());
-    log_task("Setting up memory management unit...", install_mmu(info->mmap_addr, info->mmap_length));
+
+    kernel->cpu()->install();
+    log_task("Installing CPU descriptor tables...", true);
+
+    ((X86Kernel*)kernel)->installMMU(info->mmap_addr, info->mmap_length);
+    log_task("Setting up memory management unit...", true);
+
     kernel->cpu()->enableInterrupts();
     init_system();
 }
@@ -93,31 +91,6 @@ void init_system()
     while (true) {
         kernel->out()->write(in->read());
     }
-}
-
-void init_context()
-{
-    kernel = new(kern_mem) Kernel;
-    Console *term = new(term_mem) VGATextConsole;
-    ConsoleOutputStream *tOut = new(tout_mem) ConsoleOutputStream(*term);
-    kernel->setConsole(term);
-    kernel->setOut(new(stdout_mem) PrintStream(*tOut));
-}
-
-int install_cpu()
-{
-    kernel->setCPU(new(x86cpu_mem) X86CPU);
-    kernel->cpu()->install();
-
-    return true;
-}
-
-int install_mmu(uint32_t mmap_addr, uint32_t mmap_length)
-{
-    kernel->setMMU(new(mmu_mem) MMU(mmap_addr, mmap_length));
-    kernel->mmu()->install();
-
-    return true;
 }
 
 void read_multiboot(multiboot_info_t *info)
