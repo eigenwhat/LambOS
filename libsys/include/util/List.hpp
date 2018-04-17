@@ -1,5 +1,7 @@
 #pragma once
 
+#include <util/Queue.hpp>
+
 template<typename T>
 class List : public virtual Queue<T>
 {

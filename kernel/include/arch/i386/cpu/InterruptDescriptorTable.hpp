@@ -11,6 +11,7 @@ extern "C" void set_idt(void *idt, size_t size);
 
 struct InterruptServiceRoutine
 {
+    virtual ~InterruptServiceRoutine() {}
     virtual void operator()(RegisterTable &) = 0;
 };
 
