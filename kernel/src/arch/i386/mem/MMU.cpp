@@ -1,6 +1,6 @@
 #include <Kernel.hpp>
 #include <stdlib.h>
-#include <stdio.h>
+#include <cstdio>
 #include <new>
 #include <mem/MMU.hpp>
 #include <mem/PageFrameAllocator.hpp>

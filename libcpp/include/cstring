@@ -1,0 +1,22 @@
+//
+// Created by Martin Miralles-Cordal on 4/16/18.
+//
+
+#ifndef LAMBOS_CSTRING
+#define LAMBOS_CSTRING
+
+#include <string.h>
+
+namespace std {
+
+using ::strlen;
+using ::strcpy;
+using ::strncpy;
+
+using ::memset;
+using ::memcpy;
+using ::memmove;
+
+}
+
+#endif //LAMBOS_CSTRING

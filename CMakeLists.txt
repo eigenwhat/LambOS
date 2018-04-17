@@ -51,7 +51,11 @@ else ()
     find_program(BOCHS bochs)
     if (BOCHS)
         # build bochsrc to run off of
-        set(BOCHS_BIOS_PATH /usr/share/bochs)
+        if (UNIX)
+            set(BOCHS_BIOS_PATH /usr/share/bochs)
+        else ()
+            set(BOCHS_BIOS_PATH "\$BXSHARE")
+        endif()
         set (BOCHS_ATA0_PATH ${ISO_PATH})
         configure_file(${CMAKE_SOURCE_DIR}/bochsrc.in ${CMAKE_BINARY_DIR}/.bochsrc)
 

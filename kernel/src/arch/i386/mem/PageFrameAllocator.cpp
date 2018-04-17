@@ -2,7 +2,7 @@
 #include <mem/PageFrameAllocator.hpp>
 #include <arch/i386/cpu/multiboot.h>
 #include <Kernel.hpp>
-#include <stdio.h>
+#include <cstdio>
 
 #define FRAME_TO_INDEX(frame) (((frame) & k4KPageAddressMask) / 0x1000)
 

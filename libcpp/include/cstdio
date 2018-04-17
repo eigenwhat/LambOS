@@ -1,0 +1,22 @@
+//
+// Created by Martin Miralles-Cordal on 4/16/18.
+//
+
+#ifndef LAMBOS_CSTDIO
+#define LAMBOS_CSTDIO
+
+#include <stdio.h>
+
+namespace std {
+
+using ::putchar;
+using ::puts;
+
+using ::printf;
+using ::sprintf;
+using ::vprintf;
+using ::vsprintf;
+
+}
+
+#endif //LAMBOS_CSTDIO

@@ -1,6 +1,6 @@
 #include <mem/PageTable.hpp>
 #include <sys/asm.h>
-#include <stdio.h>
+#include <cstdio>
 
 //======================================================
 // PageTable
