@@ -1,7 +1,4 @@
 #include <device/input/KeyboardInputStream.hpp>
-#include <sys/asm.h>
-#include <sys/keys.h>
-#include <ctype.h>
 
 char key_to_char[128] = {
         0,
@@ -29,12 +26,12 @@ int KeyboardInputStream::read()
 {
     KeyEvent event;
     do {
-        event = _keyboard.read();
+        event = _keyboard->read();
     } while (event.type != kKeyEventPressed || key_to_char[event.keyCode] == 0);
 
     char ret = key_to_char[event.keyCode];
 
-    if (_keyboard.keyIsPressed(kKeyLeftShift) || _keyboard.keyIsPressed(kKeyRightShift)) {
+    if (_keyboard->keyIsPressed(kKeyLeftShift) || _keyboard->keyIsPressed(kKeyRightShift)) {
         ret = key_to_char_shift[event.keyCode];
     }
 

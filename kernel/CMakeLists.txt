@@ -8,30 +8,30 @@ if (NOT DEFINED KERNEL_TARGET)
 endif ()
 
 set(I386_SOURCES
-    src/arch/i386/cpu/GlobalDescriptorTable.cpp
-    src/arch/i386/cpu/InterruptDescriptorTable.cpp
-    src/arch/i386/cpu/X86CPU.cpp
-    src/arch/i386/cpu/X86RealTimeClock.cpp
-    src/arch/i386/cpu/boot.s
-    src/arch/i386/cpu/interrupt.s
-    src/arch/i386/cpu/set_gdt.s
-    src/arch/i386/cpu/set_idt.s
-    src/arch/i386/device/display/VGATextConsole.cpp
-    src/arch/i386/device/input/KeyboardInputStream.cpp
-    src/arch/i386/device/input/PS2Keyboard.cpp
-    src/arch/i386/mem/MMU.cpp
-    src/arch/i386/mem/PageFrameAllocator.cpp
-    src/arch/i386/mem/PageTable.cpp
-    src/arch/i386/main.cpp)
+        src/arch/i386/cpu/GlobalDescriptorTable.cpp
+        src/arch/i386/cpu/InterruptDescriptorTable.cpp
+        src/arch/i386/cpu/X86CPU.cpp
+        src/arch/i386/cpu/X86RealTimeClock.cpp
+        src/arch/i386/cpu/boot.s
+        src/arch/i386/cpu/interrupt.s
+        src/arch/i386/cpu/set_gdt.s
+        src/arch/i386/cpu/set_idt.s
+        src/arch/i386/device/display/VGATextConsole.cpp
+        src/arch/i386/mem/MMU.cpp
+        src/arch/i386/mem/PageFrameAllocator.cpp
+        src/arch/i386/mem/PageTable.cpp
+        src/arch/i386/main.cpp)
 
 set (LIBALLOC_SOURCES
-    src/mem/liballoc.c
-    src/mem/liballoc_hook.cpp)
+        src/mem/liballoc.c
+        src/mem/liballoc_hook.cpp)
 
 set (SOURCES
-    ${I386_SOURCES}
-    ${LIBALLOC_SOURCES}
-    src/Kernel.cpp)
+        ${I386_SOURCES}
+        ${LIBALLOC_SOURCES}
+        src/device/input/KeyboardInputStream.cpp
+        src/device/input/PS2Keyboard.cpp
+        src/Kernel.cpp)
 
 add_executable(${KERNEL_TARGET} ${SOURCES})
 target_include_directories(${KERNEL_TARGET} PUBLIC include)

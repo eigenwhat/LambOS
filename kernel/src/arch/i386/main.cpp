@@ -1,21 +1,20 @@
 #include <new>
 #include <string.h>
-#include <stdlib.h>
 #include <stdio.h>
 
 #include <arch/i386/cpu/multiboot.h>
 #include <arch/i386/cpu/X86CPU.hpp>
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
-#include <arch/i386/device/input/PS2Keyboard.hpp>
+#include <device/input/PS2Keyboard.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
 #include <device/display/VGATextConsole.hpp>
 #include <device/input/KeyboardInputStream.hpp>
 #include <io/BochsDebugOutputStream.hpp>
 #include <io/PrintStream.hpp>
 #include <io/debug.h>
-#include <mem/liballoc.h>
 #include <mem/MMU.hpp>
 #include <Kernel.hpp>
+#include <arch/i386/device/input/PS2KeyboardISR.hpp>
 
 
 // ====================================================
@@ -86,8 +85,10 @@ void init_system()
     puts("Kernel exited. Maybe you should write the rest of the operating system?");
     kernel->console()->setCursorVisible(true);
 
-    Keyboard *kb = new PS2Keyboard((X86CPU & ) * (kernel->cpu()));
-    KeyboardInputStream *in = new KeyboardInputStream(*kb);
+    auto *kb = new PS2Keyboard();
+    PS2KeyboardISR::install(*(X86CPU*)kernel->cpu(), kb);
+    auto *in = new KeyboardInputStream(kb);
+    kb->release();
 
     while (true) {
         kernel->out()->write(in->read());
