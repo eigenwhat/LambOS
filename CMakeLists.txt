@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(lambos VERSION 0.1 LANGUAGES C CXX ASM-ATT)
 
 set (COMMON_COMPILER_FLAGS -ffreestanding -O2 -Wall -Wextra -Werror -fstack-protector-all)

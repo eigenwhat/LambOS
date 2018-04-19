@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(lambos)
 
 if (NOT DEFINED KERNEL_TARGET)
@@ -43,7 +43,7 @@ target_include_directories(${KERNEL_TARGET} INTERFACE $<TARGET_PROPERTY:${LIBSYS
 set_property(TARGET ${KERNEL_TARGET} PROPERTY OUTPUT_NAME kernel.bin)
 
 # set compilation options
-set_property(TARGET ${KERNEL_TARGET} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${KERNEL_TARGET} PROPERTY CXX_STANDARD 17)
 target_compile_options(${KERNEL_TARGET} PRIVATE
         $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}> $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>)
 

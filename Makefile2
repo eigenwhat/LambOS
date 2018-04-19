@@ -4,7 +4,7 @@ CC=i586-elf-gcc
 CPP=i586-elf-g++
 CFLAGS=-std=gnu99 $(COMMONFLAGS)
 COMMONFLAGS=${KERNEL_INCLUDES} ${LIBC_INCLUDES} ${LIBCPP_INCLUDES} ${LIBSYS_INCLUDES} -ffreestanding -O2 -Wall -Wextra -Werror -fstack-protector-all
-CPPFLAGS=-std=c++11 $(COMMONFLAGS) -fno-exceptions -fno-rtti
+CPPFLAGS=-std=c++17 $(COMMONFLAGS) -fno-exceptions -fno-rtti
 ASM=i586-elf-as
 BOOT=$(OBJDIR)/boot.o
 

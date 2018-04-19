@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 3.8)
 project(lambos)
 
 if (NOT DEFINED LIBCPP_TARGET)
@@ -15,7 +15,7 @@ set (SOURCES
 add_library(${LIBCPP_TARGET} STATIC ${SOURCES} ${INCLUDE_FILES})
 target_include_directories(${LIBCPP_TARGET} PUBLIC include)
 target_include_directories(${LIBCPP_TARGET} PRIVATE $<TARGET_PROPERTY:${KERNEL_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
-set_property(TARGET ${LIBCPP_TARGET} PROPERTY CXX_STANDARD 11)
+set_property(TARGET ${LIBCPP_TARGET} PROPERTY CXX_STANDARD 17)
 target_compile_options(${LIBCPP_TARGET} PRIVATE
         $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}> $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>)
 target_link_libraries(${LIBCPP_TARGET} PUBLIC ${LIBC_TARGET})
