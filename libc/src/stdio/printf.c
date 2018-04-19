@@ -10,13 +10,13 @@
  * @param data The data to write to the buffer.
  * @param data_length The number of bytes to write.
  */
-typedef void (*print_func)(char *buf, int *offset, const char *data, size_t data_length);
+typedef void (*print_func)(char *buf, int *offset, char const *data, size_t data_length);
 
 /* Generic sprintf-like function that takes in a function pointer for handling any "printing". 
  *
  * This lets us separate the parsing logic from the result format, making the actual printf
  * family of functions fairly easy to implement (stub + customized print function). */
-static int vsprintf_internal(char *str, const char *format, va_list parameters, print_func print)
+static int vsprintf_internal(char *str, char const *format, va_list parameters, print_func print)
 {
     int written = 0;
     size_t amount;
@@ -34,7 +34,7 @@ print_c:
             continue;
         }
 
-        const char *format_begun_at = format;
+        char const *format_begun_at = format;
 
         if ( *(++format) == '%' ) {
             goto print_c;
@@ -58,7 +58,7 @@ incomprehensible_conversion:
                 break;
             case 's':
                 format++;
-                const char *s = va_arg(parameters, const char *);
+                char const *s = va_arg(parameters, char const *);
                 print(str, &written, s, strlen(s));
                 break;
             case 'd':
@@ -86,7 +86,7 @@ incomprehensible_conversion:
 
 /***** sprintf() *****/
 
-static void sprintf_print(char *buf, int *ptr, const char *data, size_t len)
+static void sprintf_print(char *buf, int *ptr, char const *data, size_t len)
 {
     for (size_t i = 0; i < len; ++i) {
         buf[*ptr] = data[i];
@@ -97,12 +97,12 @@ static void sprintf_print(char *buf, int *ptr, const char *data, size_t len)
     buf[*ptr] = '\0';
 }
 
-int vsprintf(char *str, const char * restrict format, va_list parameters)
+int vsprintf(char *str, char const * restrict format, va_list parameters)
 {
     return vsprintf_internal(str, format, parameters, sprintf_print);
 }
 
-int sprintf(char *str, const char * restrict format, ...)
+int sprintf(char *str, char const * restrict format, ...)
 {
     va_list parameters;
     va_start(parameters, format);
@@ -114,25 +114,25 @@ int sprintf(char *str, const char * restrict format, ...)
 
 /***** printf() *****/
 
-static void printf_print(__attribute__((unused))char *buf, int *ptr, const char *data, size_t data_length)
+static void printf_print(__attribute__((unused))char *buf, int *ptr, char const *data, size_t data_length)
 {
     for ( size_t i = 0; i < data_length; i++ ) {
-        putchar((int) ((const unsigned char*) data)[i]);
+        putchar((int) ((unsigned char const *) data)[i]);
         *ptr += 1;
     }
 }
 
-int puts(const char *string)
+int puts(char const *string)
 {
     return printf("%s\n", string);
 }
 
-int vprintf(const char * restrict format, va_list parameters)
+int vprintf(char const * restrict format, va_list parameters)
 {
     return vsprintf_internal(0, format, parameters, printf_print);
 }
 
-int printf(const char * restrict format, ...)
+int printf(char const * restrict format, ...)
 {
     va_list parameters;
     va_start(parameters, format);

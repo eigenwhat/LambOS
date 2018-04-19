@@ -16,7 +16,7 @@ public:
     virtual void setBackgroundColor(uint32_t bg);
     virtual void putChar(char c);
     virtual void moveTo(size_t row, size_t col);
-    virtual void writeString(const char *data);
+    virtual void writeString(char const *data);
     virtual void clear();
     virtual size_t width();
     virtual size_t height();

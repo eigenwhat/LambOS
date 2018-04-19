@@ -112,7 +112,7 @@ static void *liballoc_memset(void *s, int c, size_t n)
     return s;
 }
 
-static void *liballoc_memcpy(void *s1, const void *s2, size_t n)
+static void *liballoc_memcpy(void *s1, void const *s2, size_t n)
 {
     char *cdest;
     char *csrc;

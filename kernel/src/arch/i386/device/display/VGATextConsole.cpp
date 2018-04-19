@@ -2,8 +2,8 @@
 #include <sys/asm.h>
 #include <device/display/VGATextConsole.hpp>
 
-static const size_t VGA_WIDTH = 80;
-static const size_t VGA_HEIGHT = 25;
+static size_t const VGA_WIDTH = 80;
+static size_t const VGA_HEIGHT = 25;
 
 //======================================================
 // Helper functions
@@ -43,7 +43,7 @@ void VGATextConsole::clear()
     _consoleColumn = 0;
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
-            const size_t index = y * VGA_WIDTH + x;
+            size_t const index = y * VGA_WIDTH + x;
             _consoleBuffer[index] = make_vgaentry(' ', _consoleColor);
         }
     }
@@ -69,7 +69,7 @@ void VGATextConsole::setBackgroundColor(uint32_t bg)
 void VGATextConsole::putCharAt(char c, uint8_t color, size_t x, size_t y)
 {
 
-    const size_t index = y * VGA_WIDTH + x;
+    size_t const index = y * VGA_WIDTH + x;
     _consoleBuffer[index] = make_vgaentry(c, color);
 }
 
@@ -119,7 +119,7 @@ void VGATextConsole::moveTo(size_t row, size_t col)
     _consoleColumn = col;
 }
 
-void VGATextConsole::writeString(const char *data)
+void VGATextConsole::writeString(char const *data)
 {
     bool moveCursor = _cursorIsVisible;
     if (moveCursor) {

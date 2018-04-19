@@ -41,7 +41,7 @@ template <typename T> class ArcPtr {
 
     T *operator->() const { return _ptr; }
 
-    ArcPtr &operator=(const ArcPtr &r) noexcept
+    ArcPtr &operator=(ArcPtr const &r) noexcept
     {
         reset(r.get());
         return *this;

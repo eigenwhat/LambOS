@@ -15,8 +15,8 @@
 //==========================================================
 extern uint32_t kernel_end;
 extern uint32_t readonly_end;
-extern "C" int log_task(const char *printstr, int success);
-extern "C" int log_test(const char *printstr, int success);
+extern "C" int log_task(char const *printstr, int success);
+extern "C" int log_test(char const *printstr, int success);
 
 //==========================================================
 // Prototypes

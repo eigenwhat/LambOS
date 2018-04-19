@@ -21,7 +21,7 @@ class Kernel : public Context
      * @param errorMessage A descriptive message regarding the error that has occurred, or at least
      *                     some words of comfort.
      */
-    void panic(const char *errorMessage);
+    void panic(char const *errorMessage);
 
   protected:
     Kernel(CPU *cpu, MMU *mmu) : _cpu(cpu), _mmu(mmu) {}

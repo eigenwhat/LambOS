@@ -1,7 +1,7 @@
 #include <io/PrintStream.hpp>
 #include <stdlib.h>
 
-void PrintStream::print(const char *str)
+void PrintStream::print(char const *str)
 {
     char currLetter;
     while((currLetter = *str++)) print(currLetter);

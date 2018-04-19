@@ -7,12 +7,12 @@
 __BEGIN_DECLS
 
 int putchar(int);
-int puts(const char*);
-int printf(const char * __restrict, ...);
-int sprintf(char *str, const char * __restrict, ...);
+int puts(char const*);
+int printf(char const * __restrict, ...);
+int sprintf(char *str, char const * __restrict, ...);
 
-int vprintf(const char * __restrict, va_list parameters);
-int vsprintf(char *str, const char * __restrict, va_list parameters);
+int vprintf(char const * __restrict, va_list parameters);
+int vsprintf(char *str, char const * __restrict, va_list parameters);
      
 __END_DECLS
 

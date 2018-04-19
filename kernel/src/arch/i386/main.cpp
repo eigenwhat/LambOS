@@ -32,10 +32,10 @@ extern "C" {
 void init_system();
 void read_multiboot(multiboot_info_t *info);
 
-int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr);
-int log_task(const char *printstr, int success);
-int check_flag(multiboot_info_t *info, const char *printstr, uint32_t flag);
-int log_test(const char *printstr, int success);
+int log_result(char const *printstr, int success, char const *ackstr, char const *nakstr);
+int log_task(char const *printstr, int success);
+int check_flag(multiboot_info_t *info, char const *printstr, uint32_t flag);
+int log_test(char const *printstr, int success);
 
 // ====================================================
 // Functions
@@ -113,7 +113,7 @@ void read_multiboot(multiboot_info_t *info)
     }
 }
 
-int log_result(const char *printstr, int success, const char *ackstr, const char *nakstr)
+int log_result(char const *printstr, int success, char const *ackstr, char const *nakstr)
 {
     kernel->console()->moveTo(kernel->console()->row(), 0);
     for (uint32_t i = 0; i < kernel->console()->width(); ++i) {
@@ -147,17 +147,17 @@ int log_result(const char *printstr, int success, const char *ackstr, const char
     return success;
 }
 
-int log_task(const char *printstr, int success)
+int log_task(char const *printstr, int success)
 {
     return log_result(printstr, success, "DONE", "FAIL");
 }
 
-int check_flag(multiboot_info_t *info, const char *printstr, uint32_t flag)
+int check_flag(multiboot_info_t *info, char const *printstr, uint32_t flag)
 {
     return log_result(printstr, info->flags & flag, "FOUND", "FAIL");
 }
 
-int log_test(const char *printstr, int success)
+int log_test(char const *printstr, int success)
 {
     return log_result(printstr, success, "PASS", "FAIL");
 }

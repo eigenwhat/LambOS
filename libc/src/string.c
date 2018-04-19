@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 
-size_t strlen(const char* str)
+size_t strlen(char const* str)
 {
     size_t ret = 0;
     while ( str[ret] != 0 )
@@ -10,14 +10,14 @@ size_t strlen(const char* str)
     return ret;
 }
 
-char *strcpy(char *dst, const char *src)
+char *strcpy(char *dst, char const *src)
 {
     char *retval = dst;
     while((*dst++ = *src++));
     return retval;
 }
 
-char *strncpy(char *dst, const char *src, size_t num)
+char *strncpy(char *dst, char const *src, size_t num)
 {
     char *retval = dst;
     while((num--) && (*dst++ = *src++));
@@ -34,15 +34,15 @@ void *memset(void *ptr, int value, size_t num)
     return ptr;
 }
 
-void *memcpy(void *dst, const void *src, size_t num)
+void *memcpy(void *dst, void const *src, size_t num)
 {
     return memmove(dst, src, num);
 }
 
-void *memmove(void *dst, const void *src, size_t num)
+void *memmove(void *dst, void const *src, size_t num)
 {
     uint8_t *c_dst = (uint8_t *)dst;
-    const uint8_t *c_src = (const uint8_t *)src;
+    uint8_t const *c_src = (uint8_t const *)src;
     if(dst > src && dst < src + num) {
         c_src += num;
         c_dst += num;
