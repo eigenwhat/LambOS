@@ -7,6 +7,15 @@ set (CXX_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -fno-exceptions -fno-rtti)
 
 set (CMAKE_EXE_LINKER_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
 
+# options
+
+# By default, bochs will just figure out on its own what display library to use.
+option(BOCHS_USE_X "Tell bochs to use X display library" OFF)
+option(BOCHS_USE_SDL "Tell bochs to use the SDL display library" OFF)
+option(BOCHS_USE_SDL2 "Tell bochs to use the SDL2 display library" OFF)
+option(BOCHS_USE_WIN32 "Tell bochs to use the Win32 display library" OFF)
+option(BOCHS_USE_GUI_DEBUG "Tell bochs to use the GUI debugger if able. Requires specifying a display library." OFF)
+
 # Define all target names here, as they're somewhat interdependent.
 # kernel target name
 set(KERNEL_TARGET lambos-kernel)
@@ -51,11 +60,26 @@ else ()
     find_program(BOCHS bochs)
     if (BOCHS)
         # build bochsrc to run off of
-        if (UNIX)
-            set(BOCHS_BIOS_PATH /usr/share/bochs)
-        else ()
-            set(BOCHS_BIOS_PATH "\$BXSHARE")
-        endif()
+        set(BOCHS_BIOS_PATH "\$BXSHARE")
+
+        if (BOCHS_USE_X)
+            set(BOCHS_DISPLAY_LIBRARY x)
+        elseif (BOCHS_USE_SDL)
+            set(BOCHS_DISPLAY_LIBRARY sdl)
+        elseif (BOCHS_USE_SDL2)
+            set(BOCHS_DISPLAY_LIBRARY sdl2)
+        elseif (BOCHS_USE_WIN32)
+            set(BOCHS_DISPLAY_LIBRARY win32)
+        endif ()
+
+        if (BOCHS_DISPLAY_LIBRARY)
+            if (BOCHS_USE_GUI_DEBUG)
+                set(BOCHS_DISPLAY_OPTIONS "display_library: ${BOCHS_DISPLAY_LIBRARY}, options=\"gui_debug\"")
+            else ()
+                set(BOCHS_DISPLAY_OPTIONS "display_library: ${BOCHS_DISPLAY_LIBRARY}")
+            endif ()
+        endif ()
+
         set (BOCHS_ATA0_PATH ${ISO_PATH})
         configure_file(${CMAKE_SOURCE_DIR}/bochsrc.in ${CMAKE_BINARY_DIR}/.bochsrc)
 
