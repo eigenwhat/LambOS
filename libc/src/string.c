@@ -21,8 +21,6 @@ char *strncpy(char *dst, char const *src, size_t num)
 {
     char *retval = dst;
     while((num--) && (*dst++ = *src++));
-    for(; num--; *dst++ = 0);
-
     return retval;
 }
 
