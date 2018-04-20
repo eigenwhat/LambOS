@@ -10,7 +10,7 @@
 #include <device/input/KeyboardInputStream.hpp>
 #include <io/BochsDebugOutputStream.hpp>
 #include <io/debug.h>
-#include <arch/i386/device/storage/AtapiDevice.hpp>
+#include <arch/i386/device/storage/AtaDevice.hpp>
 
 // ====================================================
 // Globals
@@ -106,7 +106,7 @@ void read_ata()
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->console()->writeString("\nPATA Device Information\n");
     kernel->console()->setForegroundColor(defaultTextColor);
-    AtapiDevice devices[4] { {true, true}, {true, false}, {false, true}, {false, false} };
+    AtaDevice devices[4] { {true, true}, {true, false}, {false, true}, {false, false} };
     for (auto &device : devices) {
         printf(" * Device %s -- %s\n",
                device.isPrimary() ? "Primary" : "Secondary",

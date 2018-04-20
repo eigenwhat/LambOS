@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <cstring>
 
+/** Representation of an ATA or ATAPI device. */
 class AtaDevice : public Device
 {
   public:
@@ -15,15 +16,34 @@ class AtaDevice : public Device
         Unknown
     };
 
+    /**
+     * Gets the type of device in the given slot.
+     * @param primary Whether it's primary or secondary.
+     * @param master Whether it's master or slave.
+     * @return The probed type.
+     */
+    static Type typeOf(bool primary, bool master);
+
+    /**
+     * Constructs a blank ATA device representation for the given slot.
+     * @param primary Whether it's primary or secondary.
+     * @param master Whether it's master or slave.
+     */
     AtaDevice(bool primary, bool master) : _primary(primary)
-            , _slaveBit(static_cast<uint16_t>(master ? 0 : 1))
-            , _ioPort(static_cast<uint16_t>(_primary ? 0x1F0 : 0x170))
-            , _controlPort(static_cast<uint16_t>(_primary ? 0x3F6 : 0x376))
+            , _slaveBit(slaveBit(master)), _ioPort(ioPort(primary)), _controlPort(controlPort(primary))
     {
-        std::memset(_serial, 0, 21);
-        std::memset(_firmware, 0, 9);
-        std::memset(_model, 0, 41);
+        // Strings from IDENTIFY are not null terminated, but instead space padded to fill their full buffer size.
+        // So, we store a buffer+1 size string and set the last byte to null. Voila!
+        _serial[20] = 0;
+        _firmware[8] = 0;
+        _model[40] = 0;
     }
+//
+//    /**
+//     * Performs various operations to prepare the device for actual use.
+//     * @return true if successful, false otherwise.
+//     */
+//    virtual bool initialize();
 
     /**
      * Returns whether the device is primary or secondary. Relevant only for P-ATA/P-ATAPI.
@@ -35,8 +55,12 @@ class AtaDevice : public Device
      * Returns whether the device is a master or slave. Relevant only for P-ATA/P-ATAPI.
      * @return True if master, false if slave.
      */
-    bool isMaster() const { return !slaveBit(); }
+    bool isMaster() const { return !_slaveBit; }
 
+    /**
+     * Returns whether or not there is a device attached in this slot.
+     * @return True if a device is there, false otherwise.
+     */
     virtual bool isAttached() const;
 
     /**
@@ -63,11 +87,13 @@ class AtaDevice : public Device
      */
     Type type();
 
-  protected:
-    bool _identified = false;
-    char _serial[21];
-    char _firmware[9];
-    char _model[41];
+  private:
+    // ====================================================
+    // ATA base ports and bits
+    // ====================================================
+    static uint8_t slaveBit(bool master) { return static_cast<uint8_t>(master ? 0 : 1); }
+    static uint16_t ioPort(bool primary) { return static_cast<uint16_t>(primary ? 0x1F0 : 0x170); }
+    static uint16_t controlPort(bool primary) { return static_cast<uint16_t>(primary ? 0x3F6 : 0x376); }
 
     // ====================================================
     // ATA IO port offsets (port = ioPort() + kFoo)
@@ -110,15 +136,6 @@ class AtaDevice : public Device
     /** Indicates an error occurred. Send a new command to clear it (or nuke it with a Software Reset). */
     static constexpr uint8_t kAtaStatusBitError         = 0x01; // bit 0
 
-    /** Returns 1 if the device is a slave, 0 otherwise. */
-    uint16_t slaveBit() const { return _slaveBit; }
-
-    /** Returns the base IO port to use for this device. */
-    uint16_t ioPort() const { return _ioPort; }
-
-    /** Returns the device control IO port to use for this device. */
-    uint16_t controlPort() const { return _controlPort; }
-
     /**
      * Waits for the device to not be busy, then returns the status.
      * @param timeout The number of attempts to make (1 attempt ~ 100ns). Set to -1 for no timeout.
@@ -138,9 +155,21 @@ class AtaDevice : public Device
     /** Waits roughly 400ns by polling 4 times. */
     void ioWait() const;
 
-  private:
+    /** Identifies the device's name, model, firmware. */
+    void identify();
+
+    /** ATAPI-specific identify method. */
+    void atapiIdentify();
+
+    /** Plain ATA specific identify method. */
+    void ataIdentify();
+
     bool const _primary;
     uint16_t const _slaveBit;
     uint16_t const _ioPort;
     uint16_t const _controlPort;
+    bool _identified = false;
+    char _serial[21];
+    char _firmware[9];
+    char _model[41];
 };
