@@ -10,6 +10,7 @@
 #include <device/input/KeyboardInputStream.hpp>
 #include <io/BochsDebugOutputStream.hpp>
 #include <io/debug.h>
+#include <arch/i386/device/storage/AtapiDevice.hpp>
 
 // ====================================================
 // Globals
@@ -30,6 +31,7 @@ extern "C" {
 // Function prototypes
 // ====================================================
 void init_system();
+void read_ata();
 void read_multiboot(multiboot_info_t *info);
 
 int log_result(char const *printstr, int success, char const *ackstr, char const *nakstr);
@@ -67,6 +69,8 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
 void init_system()
 {
+    read_ata();
+
     kernel->console()->setForegroundColor(COLOR_WHITE);
     puts("\n* * *");
     X86RealTimeClock clock;
@@ -80,8 +84,11 @@ void init_system()
         printf("%d", t);
     }
     puts("\n* * *");
+
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
-    puts("Kernel exited. Maybe you should write the rest of the operating system?");
+    printf("Kernel exited. Maybe you should write the rest of the operating system?");
+    kernel->console()->setForegroundColor(defaultTextColor);
+    putchar('\n');
     kernel->console()->setCursorVisible(true);
 
     auto *kb = new PS2Keyboard();
@@ -91,6 +98,46 @@ void init_system()
 
     while (true) {
         kernel->out()->write(in->read());
+    }
+}
+
+void read_ata()
+{
+    kernel->console()->setForegroundColor(COLOR_WHITE);
+    kernel->console()->writeString("\nPATA Device Information\n");
+    kernel->console()->setForegroundColor(defaultTextColor);
+    AtapiDevice devices[4] { {true, true}, {true, false}, {false, true}, {false, false} };
+    for (auto &device : devices) {
+        printf(" * Device %s -- %s\n",
+               device.isPrimary() ? "Primary" : "Secondary",
+               device.isMaster() ? "Master" : "Slave");
+
+        if (!device.isAttached()) {
+            puts("    [Not attached]");
+            continue;
+        }
+
+        printf("    Name: %s\n", device.model());
+        printf("    Type: ");
+        switch (device.type()) {
+            case AtaDevice::Type::PATA:
+                puts("PATA");
+                break;
+            case AtaDevice::Type::PATAPI:
+                puts("PATAPI");
+                break;
+            case AtaDevice::Type::SATA:
+                puts("SATA");
+                break;
+            case AtaDevice::Type::SATAPI:
+                puts("SATAPI");
+                break;
+            case AtaDevice::Type::Unknown:
+                puts("Unknown");
+                break;
+        }
+        printf("    Serial: %s\n", device.serial());
+        printf("    FW: %s\n", device.firmware());
     }
 }
 

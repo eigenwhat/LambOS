@@ -19,6 +19,8 @@ set(I386_SOURCES
         src/arch/i386/cpu/set_gdt.s
         src/arch/i386/cpu/set_idt.s
         src/arch/i386/device/display/VGATextConsole.cpp
+        src/arch/i386/device/storage/AtaDevice.cpp
+        src/arch/i386/device/storage/AtapiDevice.cpp
         src/arch/i386/mem/MMU.cpp
         src/arch/i386/mem/PageFrameAllocator.cpp
         src/arch/i386/mem/PageTable.cpp
