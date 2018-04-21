@@ -3,6 +3,8 @@
 #include <device/Device.hpp>
 #include <stdint.h>
 #include <cstring>
+#include "AtaDeviceDescriptor.hpp"
+#include "AtapiCommand.hpp"
 
 /** Representation of an ATA or ATAPI device. */
 class AtaDevice : public Device
@@ -30,20 +32,7 @@ class AtaDevice : public Device
      * @param master Whether it's master or slave.
      */
     AtaDevice(bool primary, bool master) : _primary(primary)
-            , _slaveBit(slaveBit(master)), _ioPort(ioPort(primary)), _controlPort(controlPort(primary))
-    {
-        // Strings from IDENTIFY are not null terminated, but instead space padded to fill their full buffer size.
-        // So, we store a buffer+1 size string and set the last byte to null. Voila!
-        _serial[20] = 0;
-        _firmware[8] = 0;
-        _model[40] = 0;
-    }
-//
-//    /**
-//     * Performs various operations to prepare the device for actual use.
-//     * @return true if successful, false otherwise.
-//     */
-//    virtual bool initialize();
+            , _slaveBit(slaveBit(master)), _ioPort(ioPort(primary)), _controlPort(controlPort(primary)) {}
 
     /**
      * Returns whether the device is primary or secondary. Relevant only for P-ATA/P-ATAPI.
@@ -80,6 +69,12 @@ class AtaDevice : public Device
      * @return A C string with the device's firmware version.
      */
     char const *firmware() override;
+
+    /**
+     * The size of the device's sectors.
+     * @return An unsigned 32-bit integer with the sector size in bytes.
+     */
+    uint32_t sectorSize() { return _descriptor.sectorSize(); }
 
     /**
      * The type of device. [P-ATA, P-ATAPI, S-ATA, S-ATAPI, unknown]
@@ -143,6 +138,7 @@ class AtaDevice : public Device
      */
     uint8_t waitForStatus(int timeout) const;
 
+    /** Performs the IO operations to soft reset the ATA device. */
     void softReset() const;
 
     /**
@@ -158,18 +154,21 @@ class AtaDevice : public Device
     /** Identifies the device's name, model, firmware. */
     void identify();
 
-    /** ATAPI-specific identify method. */
-    void atapiIdentify();
+    /**
+     * Sends an ATA PACKET command plus the corresponding ATAPI command.
+     * @param cmd The AtapiCommand to send
+     * @param bufSize The size of the PIO buffer, in BYTES.
+     * @param buf The buffer to read WORDS (uint16_t) into.
+     * @return true if success, false if error
+     */
+    bool performPioAtapiOperation(const AtapiCommand &cmd, size_t bufSize, uint16_t *buf);
 
-    /** Plain ATA specific identify method. */
-    void ataIdentify();
+    void pioRead(uint16_t *buf, size_t wordcount);
 
     bool const _primary;
     uint16_t const _slaveBit;
     uint16_t const _ioPort;
     uint16_t const _controlPort;
     bool _identified = false;
-    char _serial[21];
-    char _firmware[9];
-    char _model[41];
+    AtaDeviceDescriptor _descriptor;
 };

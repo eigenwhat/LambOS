@@ -138,6 +138,14 @@ void read_ata()
         }
         printf("    Serial: %s\n", device.serial());
         printf("    FW: %s\n", device.firmware());
+        switch (device.type()) {
+            case AtaDevice::Type::PATAPI:
+            case AtaDevice::Type::SATAPI:
+                printf("    Sector size: %d bytes\n", device.sectorSize());
+                break;
+            default:
+                break;
+        }
     }
 }
 

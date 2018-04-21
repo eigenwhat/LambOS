@@ -4,51 +4,7 @@
 
 namespace {
 
-void fixAtaWordString(char *str, size_t len)
-{
-    // ATAPI info is read one 16-bit word at a time, which means strings got scrambled by little-endian
-    // (e.g. str is 214365 instead of 123456)
-    for (size_t i = 0; i < len; i += 2) {
-        uint8_t tmp = str[i + 1];
-        str[i + 1] = str[i];
-        str[i] = tmp;
-    }
-}
 
-typedef struct
-{
-    uint16_t flags;
-    uint16_t unused1[9];
-    char serial[20];
-    uint16_t unused2[3];
-    char firmware[8];
-    char model[40];
-    uint16_t sectors_per_int;
-    uint16_t unused3;
-    uint16_t capabilities[2];
-    uint16_t unused4[2];
-    uint16_t valid_ext_data;
-    uint16_t unused5[5];
-    uint16_t size_of_rw_mult;
-    uint32_t sectors_28;
-    uint16_t unused6[38];
-    uint64_t sectors_48;
-    uint16_t unused7[152];
-} __attribute__((packed)) ata_identify_t;
-
-class AtapiCommand
-{
-  public:
-    union Packet {
-        uint8_t command_bytes[12];
-        uint16_t command_words[6];
-    };
-
-    Packet &packet() { return _packet; }
-
-  private:
-    Packet _packet;
-};
 
 }
 
@@ -75,7 +31,7 @@ char const *AtaDevice::model()
         identify();
     }
 
-    return _model;
+    return _descriptor.model();
 }
 
 char const *AtaDevice::serial()
@@ -84,7 +40,7 @@ char const *AtaDevice::serial()
         identify();
     }
 
-    return _serial;
+    return _descriptor.serial();
 }
 
 char const *AtaDevice::firmware()
@@ -93,7 +49,7 @@ char const *AtaDevice::firmware()
         identify();
     }
 
-    return _firmware;
+    return _descriptor.firmware();
 }
 
 AtaDevice::Type AtaDevice::type()
@@ -186,24 +142,68 @@ void AtaDevice::identify()
 
     // read in device information
     uint16_t identity[256];
-    ata_identify_t *idstruct = (ata_identify_t *) identity;
-    for (int i = 0; i < 256; ++i) {
-        identity[i] = inw(_ioPort);
+    pioRead(identity, 256);
+
+    _descriptor.readIdentity(identity);
+    _identified = true;
+
+    if (type() == Type::PATAPI) {
+        uint16_t data[4];
+        performPioAtapiOperation(AtapiCommand::readCapacityCommand(), sizeof(data), data);
+        _descriptor.readAtapiCapacity(data);
+    }
+}
+
+bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, size_t bufSize, uint16_t *buf)
+{
+    uint8_t status = 0;
+
+    // Set PIO
+    outb(_ioPort + kAtaRegisterFeatureInfo, 0x00);
+
+    // set maximum size for requested data
+    outb(_ioPort + kAtaRegisterLbaMid, static_cast<uint8_t>(bufSize & 0xFF));
+    outb(_ioPort + kAtaRegisterLbaHigh, static_cast<uint8_t>(bufSize >> 8));
+
+    // send PACKET cmd
+    outb(_ioPort + kAtaRegisterCommand, 0xA0);
+
+    // poll
+    while (1) {
+        status = inb(_ioPort + kAtaRegisterStatus);
+        if ((status & kAtaStatusBitError)) { puts("ATAPI early error; unsure"); return false; }
+        if (!(status & kAtaStatusBitBusy) && (status & kAtaStatusBitReady)) break;
     }
 
-    // hello endianness, my old friend...
-    fixAtaWordString(idstruct->serial, 20);
-    fixAtaWordString(idstruct->firmware, 8);
-    fixAtaWordString(idstruct->model, 40);
+    // send the ATAPI command packet
+    for (int i = 0; i < 6; ++i) {
+        outw(_ioPort, cmd.packet().words[i]);
+    }
 
-    // transfer info to permanent, sane home
-    strncpy(_serial, idstruct->serial, 20);
-    strncpy(_firmware, idstruct->firmware, 8);
-    strncpy(_model, idstruct->model, 40);
+    // poll
+    while (1) {
+        status = inb(_ioPort + kAtaRegisterStatus);
+        if ((status & kAtaStatusBitError)) { puts("ATAPI error; no medium?"); return false; }
+        if (!(status & kAtaStatusBitBusy) && (status & kAtaStatusBitReady)) break;
+        if ((status & kAtaStatusBitDRQ)) break;
+    }
 
-    printf("Sectors (48): %d\n", (int)idstruct->sectors_48);
-    printf("Sectors (28): %d\n", (int)idstruct->sectors_28);
+    // check if there's data to read
+    if ((status & kAtaStatusBitDRQ)) {
+        // get actual size of data. We could optimize our buffer size a bit here, but whatever.
+        uint16_t size_to_read = inb(_ioPort + kAtaRegisterLbaHigh) << 8;
+        size_to_read = size_to_read | inb(_ioPort + kAtaRegisterLbaMid);
+        pioRead(buf, size_to_read);
+    } else if (bufSize) {
+        puts("No data to read but we made a buffer. Really makes you think...");
+    }
 
+    return true;
+}
 
-    _identified = true;
+void AtaDevice::pioRead(uint16_t *buf, size_t wordcount)
+{
+    for (size_t i = 0; i < wordcount; ++i) {
+        buf[i] = inw(_ioPort);
+    }
 }
