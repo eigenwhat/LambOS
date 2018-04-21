@@ -71,8 +71,14 @@ void init_system()
     puts("\n* * *");
     X86RealTimeClock clock;
     DateTime now = clock.currentTime();
-    printf("The current date and time is %d/%d/%d %d:%d:%d", now.month, now.monthday, now.year + (now.century * 100),
-           now.hours, now.minutes, now.seconds);
+    printf("The current date and time is %d/%d/%d", now.month, now.monthday, now.year + (now.century * 100));
+    printf(" %d", now.hours);
+    uint8_t minsec[2] {now.minutes, now.seconds};
+    for (auto t : minsec) {
+        printf(":");
+        if (t < 10) printf("0");
+        printf("%d", t);
+    }
     puts("\n* * *");
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
     puts("Kernel exited. Maybe you should write the rest of the operating system?");
