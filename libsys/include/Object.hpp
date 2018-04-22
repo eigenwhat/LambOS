@@ -45,7 +45,28 @@ template <typename T> class Array : public Object
 template <typename T> class ArcPtr
 {
   public:
-    ArcPtr(T *ptr = nullptr) : _ptr(ptr) { if (ptr) ptr->retain(); }
+    /**
+     * Creates a new T on the heap, then constructs an ArcPtr<T> with it, then
+     * finally releases, making the ArcPtr the sole retainer.
+     * @tparam Args The types for one of T's constructors. (deducible)
+     * @param args The arguments for one of T's constructors.
+     * @return The ArcPtr.
+     */
+    template <typename ... Args>
+    static ArcPtr<T> make(Args && ...args)
+    {
+        ArcPtr<T> ptr(new T(args...), false);
+        return ptr;
+    }
+
+    ArcPtr(T *ptr = nullptr, bool initialRetain = true) : _ptr(ptr)
+    {
+        if (ptr && initialRetain) ptr->retain();
+    }
+
+    ArcPtr(const ArcPtr &other) : ArcPtr(other.get()) {}
+
+    ArcPtr(ArcPtr &&other) = default;
 
     ~ArcPtr() { reset(nullptr); }
 
