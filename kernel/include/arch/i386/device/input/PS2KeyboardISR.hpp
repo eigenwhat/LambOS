@@ -16,7 +16,7 @@ class PS2KeyboardISR : public InterruptServiceRoutine
      * @param keyboard The PS2Keyboard driver object to send events to.
      */
     static void install(X86CPU &cpu, PS2Keyboard *keyboard) {
-        cpu.idt()->setISR(kIntKeyboardIRQ, new PS2KeyboardISR(keyboard));
+        cpu.idt()->setISR(InterruptNumber::kKeyboardIRQ, new PS2KeyboardISR(keyboard));
         cpu.unmaskIRQ(1);
     }
 

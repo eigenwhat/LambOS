@@ -63,7 +63,8 @@ void X86CPU::enableInterrupts()
 {
     static bool pic_initialized = false;
     if (!pic_initialized) {
-        init_pics(_idt, kIntIRQ0, kIntIRQ8);
+        init_pics(_idt, static_cast<int>(InterruptNumber::kIRQ0),
+                        static_cast<int>(InterruptNumber::kIRQ8));
         pic_initialized = true;
     }
 
@@ -132,10 +133,10 @@ offset2 - same for slave PIC: offset2..offset2+7
 void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2)
 {
     for (int i = pic1; i < pic1 + 8; ++i) {
-        idt.setISR(i, new IRQHandler(*debugOut));
+        idt.setISR(static_cast<InterruptNumber>(i), new IRQHandler(*debugOut));
     }
     for (int i = pic2; i < pic2 + 8; ++i) {
-        idt.setISR(i, new IRQHandler(*debugOut));
+        idt.setISR(static_cast<InterruptNumber>(i), new IRQHandler(*debugOut));
     }
 
     outb(PIC1_COMMAND, ICW1_INIT + ICW1_ICW4);    // starts the initialization sequence (in cascade mode)

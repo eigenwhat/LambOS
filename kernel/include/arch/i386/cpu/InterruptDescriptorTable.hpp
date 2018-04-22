@@ -3,7 +3,7 @@
 #include <stddef.h>
 #include <stdint.h>
 #include "RegisterTable.h"
-#include "intdefs.h"
+#include "InterruptNumber.hpp"
 
 extern "C" void set_idt(void *idt, size_t size);
 
@@ -42,9 +42,15 @@ public:
 
     void install() { set_idt(this->idt, sizeof(uint64_t) * IDT_SIZE); }
 
-    void callISR(uint8_t interruptNumber, RegisterTable &registers) { (*isr[interruptNumber])(registers); }
+    void callISR(InterruptNumber interruptNumber, RegisterTable &registers)
+    {
+        (*isr[static_cast<int>(interruptNumber)])(registers);
+    }
 
-    void setISR(uint8_t interruptNumber, InterruptServiceRoutine *routine) { isr[interruptNumber] = routine; }
+    void setISR(InterruptNumber interruptNumber, InterruptServiceRoutine *routine)
+    {
+        isr[static_cast<int>(interruptNumber)] = routine;
+    }
 
 private:
     InterruptServiceRoutine *isr[IDT_SIZE];

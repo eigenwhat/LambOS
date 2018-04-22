@@ -55,10 +55,10 @@ static constexpr const char *exception_messages[32] = {
       isr[(num)] = (isrf);\
    } while(0)
 
-struct StubISR : InterruptServiceRoutine
+class StubISR : public InterruptServiceRoutine
 {
-    StubISR(PrintStream &out) : _out(out)
-    {}
+  public:
+    StubISR(PrintStream &out) : _out(out) {}
 
     virtual void operator()(RegisterTable &registers)
     {
@@ -74,10 +74,19 @@ private:
     PrintStream &_out;
 };
 
+class PanicISR : public InterruptServiceRoutine
+{
+  public:
+    virtual void operator()(RegisterTable &registers)
+    {
+        kernel->panic(exception_messages[registers.int_no]);
+    }
+};
+
 extern "C" void interrupt_handler(RegisterTable registers)
 {
     X86CPU *cpu = (X86CPU *) kernel->cpu();
-    cpu->idt()->callISR(registers.int_no, registers);
+    cpu->idt()->callISR(static_cast<InterruptNumber>(registers.int_no), registers);
 }
 
 //======================================================
@@ -105,31 +114,34 @@ void InterruptDescriptorTable::encodeEntry(uint8_t entryNumber, IDTEntry source)
     target[5] = source.type_attr;
 }
 
-uint8_t isr_mem[sizeof(StubISR)];
+uint8_t stub_isr_mem[sizeof(StubISR)];
+uint8_t panic_isr_mem[sizeof(PanicISR)];
 
 void InterruptDescriptorTable::encodeISRs()
 {
-    StubISR *defaultISR = new(isr_mem) StubISR(*debugOut);
-    ADDISR(0, defaultISR);
-    ADDISR(1, defaultISR);
-    ADDISR(2, defaultISR);
-    ADDISR(3, defaultISR);
-    ADDISR(4, defaultISR);
-    ADDISR(5, defaultISR);
-    ADDISR(6, defaultISR);
-    ADDISR(7, defaultISR);
-    ADDISR(8, defaultISR);
-    ADDISR(9, defaultISR);
-    ADDISR(10, defaultISR);
-    ADDISR(11, defaultISR);
-    ADDISR(12, defaultISR);
-    ADDISR(13, defaultISR);
-    ADDISR(14, defaultISR);
+    StubISR *defaultISR = new(stub_isr_mem) StubISR(*debugOut);
+    PanicISR *panicISR = new(panic_isr_mem) PanicISR;
+
+    ADDISR(0, defaultISR);  // kDivideByZero
+    ADDISR(1, defaultISR);  // kDebugger
+    ADDISR(2, defaultISR);  // kNMI
+    ADDISR(3, defaultISR);  // kBreakpoint
+    ADDISR(4, defaultISR);  // kOverflow
+    ADDISR(5, defaultISR);  // kBounds
+    ADDISR(6, defaultISR);  // kInvalidOpcode
+    ADDISR(7, defaultISR);  // kCoprocessorNotAvailable
+    ADDISR(8, panicISR);    // kDoubleFault
+    ADDISR(9, defaultISR);  // kCoprocessorSegmentOverrun
+    ADDISR(10, defaultISR); // kInvalidTSS
+    ADDISR(11, defaultISR); // kSegmentNotPresent
+    ADDISR(12, defaultISR); // kStackFault
+    ADDISR(13, defaultISR); // kGeneralProtectionFault
+    ADDISR(14, defaultISR); // kPageFault
     ADDISR(15, defaultISR);
-    ADDISR(16, defaultISR);
-    ADDISR(17, defaultISR);
-    ADDISR(18, defaultISR);
-    ADDISR(19, defaultISR);
+    ADDISR(16, defaultISR); // kMathFault
+    ADDISR(17, defaultISR); // kAlignmentCheck
+    ADDISR(18, defaultISR); // kMachineCheck
+    ADDISR(19, defaultISR); // kSIMDFloatingPointException
     ADDISR(20, defaultISR);
     ADDISR(21, defaultISR);
     ADDISR(22, defaultISR);
