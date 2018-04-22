@@ -42,12 +42,13 @@ X86CPU::X86CPU()
 
     _gdt.encodeEntry(5, GDTEntry((uint32_t) & _tss, sizeof(_tss), GDTEntry::Type::TSS));
 
-    // Set up IDT
-    _idt.encodeISRs();
 }
 
 void X86CPU::install()
 {
+    // Set up IDT
+    _idt.encodeISRs();
+
     // install GDT
     _gdt.install();
 

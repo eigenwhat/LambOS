@@ -7,8 +7,44 @@
 #include <io/debug.h>
 #include <sys/asm.h>
 #include <Kernel.hpp>
+#include <cstdio>
 
 #include "isr.h"
+
+static constexpr const char *exception_messages[32] = {
+        "Division by zero",
+        "Debug",
+        "Non-maskable interrupt",
+        "Breakpoint",
+        "Detected overflow",
+        "Out-of-bounds",
+        "Invalid opcode",
+        "No coprocessor",
+        "Double fault",
+        "Coprocessor segment overrun",
+        "Bad TSS",
+        "Segment not present",
+        "Stack fault",
+        "General protection fault",
+        "Page fault",
+        "Unknown interrupt",
+        "Coprocessor fault",
+        "Alignment check",
+        "Machine check",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved",
+        "Reserved"
+};
 
 //======================================================
 // ISR functions
@@ -21,23 +57,21 @@
 
 struct StubISR : InterruptServiceRoutine
 {
-    StubISR(OutputStream &out) : _out(out)
+    StubISR(PrintStream &out) : _out(out)
     {}
 
     virtual void operator()(RegisterTable &registers)
     {
-        char hexval[33];
-        _out.write((uint8_t *) "int 0x", 6);
-        itoa(registers.int_no, hexval, 16);
-        _out.write((uint8_t *) hexval, 2);
-        _out.write((uint8_t *) ", err 0x", 8);
-        itoa(registers.err_code, hexval, 16);
-        _out.write((uint8_t *) hexval, 2);
-        _out.write('\n');
+        _out.println("==== LAMBOS ISR CALLED ====");
+        _out.print(exception_messages[registers.int_no]);
+        char message[33];
+        sprintf(message, " (%x): err %x", registers.int_no, registers.err_code);
+        _out.println(message);
+        _out.println("==== CARRY ON, CITIZEN ====");
     }
 
 private:
-    OutputStream &_out;
+    PrintStream &_out;
 };
 
 extern "C" void interrupt_handler(RegisterTable registers)
