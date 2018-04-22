@@ -1,12 +1,30 @@
 #pragma once
 #include <util/Queue.hpp>
 
+/**
+ * A RingBuffer is a Queue of fixed size. If an object is enqueued while the
+ * queue is full, the frontmost (oldest) object is erased to make room.
+ * @tparam T The type of object to store. Since the space for the whole buffer
+ *           is reserved up front, T must be default-constructible.
+ */
 template <typename T>
 class RingBuffer : public virtual Queue<T>
 {
 public:
-    explicit RingBuffer(size_t capacity) : _capacity(capacity), _front(0), _back(0), _size(0) { _buffer = new T[capacity]; }
-    bool enqueue(T item) {
+    explicit RingBuffer(size_t capacity)
+            : _capacity(capacity), _front(0), _back(0), _size(0)
+            , _buffer(new T[capacity])
+    {}
+
+    /**
+     * Adds an element to the back of the queue. If the buffer is full, the
+     * frontmost element is removed in order to make space. (The newly enqueued
+     * item still goes in the back.)
+     * @param item The item to enqueue.
+     * @return `true` if the operation succeeded, `false` otherwise.
+     */
+    bool enqueue(T item) override
+    {
         _buffer[_back] = item;
         _back = _next(_back);
         if(_front == _back) {
@@ -17,9 +35,16 @@ public:
 
         return true;
     }
-    T dequeue() {
+
+    /**
+     * Removes the frontmost element from the queue and returns it.
+     * @return The frontmost element. If the queue is empty, the return value is
+     *         undefined.
+     */
+    T dequeue() override
+    {
         if(isEmpty()) {
-            return 0;
+            return T{};
         } else {
             int retIndex = _front;
             _front = _next(_front);
@@ -27,27 +52,41 @@ public:
             return _buffer[retIndex];
         }
     }
-    T peek() { 
-        if(isEmpty()) {
-            return 0;
-        } else {
-            return _buffer[_front];
-        }
-    }
 
-    bool isEmpty() {
-        return size() == 0;
-    }
+    /**
+     * Returns the frontmost element in the queue.
+     * @return The frontmost element. If the queue is empty, the return value is
+     *         undefined.
+     */
+    T peek() const override { return isEmpty() ? T{} : _buffer[_front]; }
 
-    size_t size() { return _size; }
+    /**
+     * Returns whether or not the collection is empty.
+     * @return `true` if empty, `false` otherwise.
+     */
+    bool isEmpty() const override { return size() == 0; }
 
-    void clear() {
-        _front = _back;
-    }
+    /**
+     * Returns the number of elements in the buffer.
+     * @return The number of elements in the buffer.
+     */
+    size_t size() const override { return _size; }
 
-    bool remove(T) {
-        return false; // can't delete from buffer!
-    }
+    /**
+     * Removes an item from the buffer.
+     * @note This is presently a no-op.
+     * @return `true` if the operation succeeded, `false` otherwise.
+     */
+    bool remove(T) override { return false; }
+
+    /**
+     * The maximum capacity of the buffer.
+     * @return The maximum capacity of the buffer.
+     */
+    size_t capacity() const { return _capacity; }
+
+    /** Empties the buffer. */
+    void clear() { _front = _back; }
 
 private:
     size_t _next(size_t current) { return (current + 1) % _capacity; }
