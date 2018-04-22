@@ -82,6 +82,16 @@ class AtaDevice : public Device
      */
     Type type();
 
+    /**
+     * Reads in a sector.
+     * @param address The linear block address of the sector to read.
+     * @param buf The buffer to store the fetched data in. It should be at least
+     *            the size of the device sector.
+     * @param sectors The number of sectors to read. Defaults to 1.
+     * @return true if successful, false otherwise.
+     */
+    bool read(uint64_t address, uint16_t *buf, size_t sectors = 1);
+
   private:
     // ====================================================
     // ATA base ports and bits
@@ -157,13 +167,13 @@ class AtaDevice : public Device
     /**
      * Sends an ATA PACKET command plus the corresponding ATAPI command.
      * @param cmd The AtapiCommand to send
-     * @param bufSize The size of the PIO buffer, in BYTES.
      * @param buf The buffer to read WORDS (uint16_t) into.
+     * @param bufSize The size of the PIO buffer, in BYTES.
      * @return true if success, false if error
      */
-    bool performPioAtapiOperation(const AtapiCommand &cmd, size_t bufSize, uint16_t *buf);
+    bool performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize);
 
-    void pioRead(uint16_t *buf, size_t wordcount);
+    void pioRead(uint16_t *buf, uint16_t wordcount);
 
     bool const _primary;
     uint16_t const _slaveBit;

@@ -1,12 +1,7 @@
 #include <arch/i386/device/storage/AtaDevice.hpp>
 #include <sys/asm.h>
 #include <cstdio>
-
-namespace {
-
-
-
-}
+#include <Kernel.hpp>
 
 AtaDevice::Type AtaDevice::typeOf(bool primary, bool master)
 {
@@ -66,6 +61,29 @@ AtaDevice::Type AtaDevice::type()
     if (cl==0 && ch == 0) return Type::PATA;
     if (cl==0x3c && ch==0xc3) return Type::SATA;
     return Type::Unknown;
+}
+
+bool AtaDevice::read(uint64_t address, uint16_t *buf, size_t sectors)
+{
+    if (sectors == 0) return false;
+
+    const size_t maxByteCount = sectorSize() * sectors;
+    outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit << 4);
+    ioWait();
+
+    switch (type()) {
+        case Type::PATAPI:
+        case Type::SATAPI:
+            // send READ(12)
+            return performPioAtapiOperation(AtapiCommand::read12Command(address, sectors), buf, maxByteCount);
+        case Type::PATA:
+        case Type::SATA:
+            // should send something, but for now...
+            kernel->panic("Attempted to read from unsupported ATA device.");
+            return false;
+        default:
+            return false;
+    }
 }
 
 uint8_t AtaDevice::waitForStatus(int timeout) const
@@ -149,12 +167,12 @@ void AtaDevice::identify()
 
     if (type() == Type::PATAPI) {
         uint16_t data[4];
-        performPioAtapiOperation(AtapiCommand::readCapacityCommand(), sizeof(data), data);
+        performPioAtapiOperation(AtapiCommand::readCapacityCommand(), data, sizeof(data));
         _descriptor.readAtapiCapacity(data);
     }
 }
 
-bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, size_t bufSize, uint16_t *buf)
+bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize)
 {
     uint8_t status = 0;
 
@@ -201,7 +219,7 @@ bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, size_t bufSize
     return true;
 }
 
-void AtaDevice::pioRead(uint16_t *buf, size_t wordcount)
+void AtaDevice::pioRead(uint16_t *buf, uint16_t wordcount)
 {
     for (size_t i = 0; i < wordcount; ++i) {
         buf[i] = inw(_ioPort);

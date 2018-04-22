@@ -60,7 +60,41 @@ enum class ScsiCommandCode : uint8_t
 AtapiCommand AtapiCommand::readCapacityCommand()
 {
     AtapiCommand cmd;
+
+    // set command
     cmd._packet.bytes[0] = (uint8_t)ScsiCommandCode::kReadCapacity;
+
+    // blank rest
     std::memset(cmd._packet.bytes+1, 0, 11);
+
+    return cmd;
+}
+
+AtapiCommand AtapiCommand::read12Command(uint32_t lba, uint32_t length)
+{
+    AtapiCommand cmd;
+
+    // set command
+    cmd._packet.bytes[0] = (uint8_t)ScsiCommandCode::kRead12;
+
+    // blank reserved byte
+    cmd._packet.bytes[1] = 0;
+
+    // insert LBA into command packet in big-endian.
+    cmd._packet.bytes[2] = static_cast<uint8_t>((lba >> 0x18) & 0xFF);
+    cmd._packet.bytes[3] = static_cast<uint8_t>((lba >> 0x10) & 0xFF);
+    cmd._packet.bytes[4] = static_cast<uint8_t>((lba >> 0x8) & 0xFF);
+    cmd._packet.bytes[5] = static_cast<uint8_t>(lba & 0xFF);
+
+    // set transfer length
+    cmd._packet.bytes[6] = static_cast<uint8_t>((length >> 0x18) & 0xFF);
+    cmd._packet.bytes[7] = static_cast<uint8_t>((length >> 0x10) & 0xFF);
+    cmd._packet.bytes[8] = static_cast<uint8_t>((length >> 0x8) & 0xFF);
+    cmd._packet.bytes[9] = static_cast<uint8_t>(length & 0xFF);
+
+    // blank rest
+    cmd._packet.bytes[10] = 0;
+    cmd._packet.bytes[11] = 0;
+
     return cmd;
 }
