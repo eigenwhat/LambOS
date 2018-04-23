@@ -21,7 +21,9 @@ set (SOURCES
     src/string.c)
 
 add_library(${LIBC_TARGET} STATIC ${SOURCES})
+target_link_libraries(${LIBC_TARGET} gcc)
 target_include_directories(${LIBC_TARGET} PUBLIC include)
+target_include_directories(${LIBC_TARGET} PRIVATE src)
 target_include_directories(${LIBC_TARGET} PRIVATE $<TARGET_PROPERTY:${KERNEL_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
 set_property(TARGET ${LIBC_TARGET} PROPERTY CXX_STANDARD 17)
 target_compile_options(${LIBC_TARGET} PRIVATE

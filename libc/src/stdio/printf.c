@@ -4,6 +4,8 @@
 #include <string.h>
 #include <stdlib.h>
 
+#include "xtoa.h"
+
 /* Function pointer for the print function passed into `vsprintf_internal()`.
  * @param buf The buffer to write to.
  * @param offset (OUT) The offset marking the end of the data in the buffer.
@@ -47,9 +49,58 @@ incomprehensible_conversion:
             goto print_c;
         }
 
-        char specifier = *format;
+        enum {
+            kLengthDefault,
+            kLength_h,
+            kLength_hh,
+            kLength_l,
+            kLength_ll,
+            kLength_j,
+            kLength_z,
+            kLength_t,
+            kLength_L
+        } length = kLengthDefault;
+
+        const int lengthSpecifierEnd = 2;
+        for (int i = 0; i < lengthSpecifierEnd; ++i) {
+            // process length sub-specifier
+            switch (*format) {
+                case 'l':
+                    ++format;
+                    length = length == kLength_l ? kLength_ll : kLength_ll;
+                    break;
+                case 'h':
+                    ++format;
+                    length = length == kLength_h ? kLength_hh : kLength_h;
+                    break;
+                case 'j':
+                    ++format;
+                    length = kLength_j;
+                    i = lengthSpecifierEnd;
+                    break;
+                case 'z':
+                    ++format;
+                    length = kLength_z;
+                    i = lengthSpecifierEnd;
+                    break;
+                case 't':
+                    ++format;
+                    length = kLength_t;
+                    i = lengthSpecifierEnd;
+                    break;
+                case 'L':
+                    ++format;
+                    length = kLength_L;
+                    i = lengthSpecifierEnd;
+                    break;
+                default:
+                    i = lengthSpecifierEnd;
+                    break;
+            }
+        }
 
         char sbuf[64];
+        const char specifier = *format;
         switch(specifier) {
             case 'c':
                 ++format;
@@ -57,19 +108,31 @@ incomprehensible_conversion:
                 print(str, &written, &c, sizeof(c));
                 break;
             case 's':
-                format++;
+                ++format;
                 char const *s = va_arg(parameters, char const *);
                 print(str, &written, s, strlen(s));
                 break;
             case 'd':
             case 'i':
-                format++;
-                int num = (int) va_arg(parameters, int);
-                itoa(num, sbuf, 10);
+                ++format;
+                switch (length) {
+                    case kLength_ll:
+                        lltoa(va_arg(parameters, long long), sbuf, 10);
+                        break;
+                    case kLength_l:
+                    default:
+                        itoa(va_arg(parameters, int), sbuf, 10);
+                }
+                print(str, &written, sbuf, strlen(sbuf));
+                break;
+            case 'u':
+                ++format;
+                int u = (int) va_arg(parameters, int);
+                uitoa(u, sbuf, 10);
                 print(str, &written, sbuf, strlen(sbuf));
                 break;
             case 'x':
-                format++;
+                ++format;
                 unsigned int hexnum = (unsigned int) va_arg(parameters, unsigned int);
                 sbuf[0] = '0';
                 sbuf[1] = 'x';

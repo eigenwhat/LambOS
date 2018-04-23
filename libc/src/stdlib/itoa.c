@@ -1,51 +1,84 @@
 #include <stdlib.h>
 
-char *_itoa_unsigned(unsigned int value, char *str, int base)
-{
-    char *ptr = str;
-    int length = 0;
+#include "xtoa.h"
 
-    unsigned int valcpy = value;
+#define XTOA_U_INTERNAL(X_PREFIX) _u##X_PREFIX##toa_internal
+#define XTOA_S_INTERNAL(X_PREFIX) _##X_PREFIX##toa_internal
 
-    do {
-        ++length;
-        valcpy /= base;
-    } while(valcpy != 0);
-
-    ptr[length] = 0;
-    do {
-        --length;
-        uint8_t mod = value % base;
-        if(mod < 10) {
-            ptr[length] = '0' + mod;
-        } else {
-            ptr[length] = 'A' + mod - 10;
-        }
-        value /= base;
-    } while(value != 0);
-
-    return str;
+// Defines internal unsigned X handler. (does most of the actual stringifying)
+#define XTOA_WRITE_UNSIGNED(X_PREFIX, X_TYPE)                               \
+static char *                                                               \
+XTOA_U_INTERNAL(X_PREFIX)(unsigned X_TYPE value, char *str, int base)       \
+{                                                                           \
+    char *ptr = str;                                                        \
+    int length = 0;                                                         \
+                                                                            \
+    unsigned X_TYPE valcpy = value;                                         \
+    do {                                                                    \
+        ++length;                                                           \
+        valcpy = valcpy / (X_TYPE)base;                                     \
+    } while(valcpy != 0);                                                   \
+                                                                            \
+    ptr[length] = 0;                                                        \
+                                                                            \
+    do {                                                                    \
+        --length;                                                           \
+        uint8_t mod = value % base;                                         \
+        if(mod < 10) {                                                      \
+            ptr[length] = '0' + mod;                                        \
+        } else {                                                            \
+            ptr[length] = 'A' + mod - 10;                                   \
+        }                                                                   \
+        value /= base;                                                      \
+    } while(value != 0);                                                    \
+                                                                            \
+    return str;                                                             \
 }
 
-char *_itoa_signed(int value, char *str, int base)
-{
-    char *ptr = str;
-    int i = 0;
-    if(value < 0) {
-        ptr[i++] = '-';
-        value = -value;
-    }
-
-    _itoa_unsigned((unsigned int)value, str + i, base);
-
-    return str;
+// Defines internal signed X handler (requires matching XTOA_WRITE_UNSIGNED)
+#define XTOA_WRITE_SIGNED(X_PREFIX, X_TYPE)                                 \
+static char *XTOA_S_INTERNAL(X_PREFIX)(X_TYPE value, char *str, int base)   \
+{                                                                           \
+    char *ptr = str;                                                        \
+    int i = 0;                                                              \
+    if(value < 0) {                                                         \
+        ptr[i++] = '-';                                                     \
+        value = -value;                                                     \
+    }                                                                       \
+    XTOA_U_INTERNAL(X_PREFIX)((unsigned X_TYPE)value, str + i, base);       \
+    return str;                                                             \
 }
 
-char *itoa(int value, char *str, int base) {
-    base = CLAMP(base, 2, 32);
-    if(base != 10) {
-        return _itoa_unsigned((unsigned int)value, str, base);
-    } else {
-        return _itoa_signed(value, str, base);
-    }
+// Defines publicly facing xtoa function
+#define XTOA_MAIN(X_PREFIX, X_TYPE)                                         \
+char *X_PREFIX##toa(X_TYPE value, char *str, int base)                      \
+{                                                                           \
+    base = CLAMP(base, 2, 32);                                              \
+    if(base != 10) {                                                        \
+        return XTOA_U_INTERNAL(X_PREFIX)((unsigned X_TYPE)value, str, base);\
+    } else {                                                                \
+        return XTOA_S_INTERNAL(X_PREFIX)(value, str, base);                 \
+    }                                                                       \
 }
+
+// Defines publicly facing uxtoa function
+#define XTOA_UNSIGNED_MAIN(X_PREFIX, X_TYPE)                                \
+char *u##X_PREFIX##toa(unsigned X_TYPE value, char *str, int base)          \
+{                                                                           \
+    base = CLAMP(base, 2, 32);                                              \
+    return XTOA_U_INTERNAL(X_PREFIX)(value, str, base);                     \
+}
+
+#define XTOA(X_PREFIX, X_TYPE) \
+XTOA_WRITE_UNSIGNED(X_PREFIX, X_TYPE) \
+XTOA_WRITE_SIGNED(X_PREFIX, X_TYPE) \
+XTOA_MAIN(X_PREFIX, X_TYPE)
+
+
+// Signed type public functions
+XTOA(i, int)
+XTOA(l, long)
+XTOA(ll, long long)
+
+// Unsigned type public functions
+XTOA_UNSIGNED_MAIN(i, int)
