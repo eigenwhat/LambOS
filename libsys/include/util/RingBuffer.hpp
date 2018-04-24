@@ -75,6 +75,7 @@ public:
     /**
      * Removes an item from the buffer.
      * @note This is presently a no-op.
+     * @todo Investigate whether it's worth implementing.
      * @return `true` if the operation succeeded, `false` otherwise.
      */
     bool remove(T) override { return false; }
