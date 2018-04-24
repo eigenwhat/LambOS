@@ -7,7 +7,10 @@ if (NOT DEFINED LIBSYS_TARGET)
     set(LIBSYS_TARGET ${LIBSYS_TARGET} PARENT_SCOPE)
 endif ()
 
+file(GLOB_RECURSE GLOB_INCLUDES include/*.hpp include/*.h)
+
 set (SOURCES
+        ${GLOB_INCLUDES} # ok with globbing since they're not translation units
         src/io/PrintStream.cpp)
 
 add_library(${LIBSYS_TARGET} STATIC ${SOURCES})

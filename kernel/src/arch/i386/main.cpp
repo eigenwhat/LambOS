@@ -6,11 +6,12 @@
 #include <arch/i386/cpu/X86CPU.hpp>
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
 #include <arch/i386/device/input/PS2KeyboardISR.hpp>
+#include <arch/i386/device/storage/AtaDevice.hpp>
 #include <arch/i386/X86Kernel.hpp>
 #include <device/input/KeyboardInputStream.hpp>
 #include <io/BochsDebugOutputStream.hpp>
 #include <io/debug.h>
-#include <arch/i386/device/storage/AtaDevice.hpp>
+#include <util/Array.hpp>
 
 // ====================================================
 // Globals
