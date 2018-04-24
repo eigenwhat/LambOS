@@ -143,7 +143,8 @@ class AtaDevice : public Device
 
     /**
      * Waits for the device to not be busy, then returns the status.
-     * @param timeout The number of attempts to make (1 attempt ~ 100ns). Set to -1 for no timeout.
+     * @param timeout The number of attempts to make (1 attempt ~ 100ns). Set to
+     *                -1 for no timeout.
      * @return The device status.
      */
     uint8_t waitForStatus(int timeout) const;
@@ -173,7 +174,21 @@ class AtaDevice : public Device
      */
     bool performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize);
 
-    void pioRead(uint16_t *buf, uint16_t wordcount);
+    /**
+     * Reads in data via PIO from the device.
+     * @param buf The buffer to read WORDS into.
+     * @param bytesToRead The amount of data to read, in BYTES. Should be
+     *                    divisible by 2, as we read in 2-byte words.
+     */
+    void pioRead(uint16_t *buf, uint32_t bytesToRead);
+
+    /**
+     * Writes out data via PIO to the device.
+     * @param buf The buffer to read WORDS from.
+     * @param bytesToRead The amount of data to write, in BYTES. Should be
+     *                    divisible by 2, as we write out in 2-byte words.
+     */
+    void pioWrite(uint16_t *buf, uint32_t bytesToRead);
 
     bool const _primary;
     uint16_t const _slaveBit;

@@ -209,9 +209,9 @@ bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf,
     // check if there's data to read
     if ((status & kAtaStatusBitDRQ)) {
         // get actual size of data. We could optimize our buffer size a bit here, but whatever.
-        uint16_t size_to_read = inb(_ioPort + kAtaRegisterLbaHigh) << 8;
-        size_to_read = size_to_read | inb(_ioPort + kAtaRegisterLbaMid);
-        pioRead(buf, size_to_read);
+        uint16_t readSizeBytes = inb(_ioPort + kAtaRegisterLbaHigh) << 8;
+        readSizeBytes = readSizeBytes | inb(_ioPort + kAtaRegisterLbaMid);
+        pioRead(buf, readSizeBytes);
     } else if (bufSize) {
         puts("No data to read but we made a buffer. Really makes you think...");
     }
@@ -219,9 +219,18 @@ bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf,
     return true;
 }
 
-void AtaDevice::pioRead(uint16_t *buf, uint16_t wordcount)
+void AtaDevice::pioRead(uint16_t *buf, uint32_t bytesToRead)
 {
-    for (size_t i = 0; i < wordcount; ++i) {
+    uint32_t wordCount = bytesToRead / 2;
+    for (size_t i = 0; i < wordCount; ++i) {
         buf[i] = inw(_ioPort);
+    }
+}
+
+void AtaDevice::pioWrite(uint16_t *buf, uint32_t bytesToRead)
+{
+    uint32_t wordCount = bytesToRead / 2;
+    for (size_t i = 0; i < wordCount; ++i) {
+        outw(_ioPort, buf[i]);
     }
 }

@@ -141,7 +141,18 @@ void read_ata()
         switch (device.type()) {
             case AtaDevice::Type::PATAPI:
             case AtaDevice::Type::SATAPI:
-                printf("    Sector size: %d bytes\n", device.sectorSize());
+                printf("    Sector size: %u bytes\n", device.sectorSize());
+                {
+                    // Check for ISO9660 for reading in sector 0x10 and looking
+                    // for the 'CD001' string at offsets 1-6.
+                    const auto start = 0x10;
+                    Array<uint8_t> buf{device.sectorSize()};
+                    device.read(start, (uint16_t *)buf.get());
+                    Array<char> cd001{6};
+                    memset(cd001.get(), 0, 6);
+                    strncpy(cd001, (char*)buf.get() + 1, 5);
+                    printf("    Check for ISO9660: '%s'\n", cd001.get());
+                }
                 break;
             default:
                 break;
@@ -168,7 +179,7 @@ void read_multiboot(multiboot_info_t *info)
         for (mmap = (multiboot_memory_map_t *) info->mmap_addr;
              (uint32_t) mmap < info->mmap_addr + info->mmap_length;
              mmap = (multiboot_memory_map_t * )((uint32_t) mmap + mmap->size + sizeof(mmap->size))) {
-            printf("address: %x length: %x type: %x\n", (unsigned int) mmap->addr, (unsigned int) mmap->len,
+            printf("block: [%x-%x) (len: %x) type: %x\n", (unsigned int) mmap->addr, (unsigned int)(mmap->addr+mmap->len), (unsigned int) mmap->len,
                    (unsigned int) mmap->type);
         }
     }
