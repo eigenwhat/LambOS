@@ -20,24 +20,6 @@ private:
     mutable int _referenceCount;
 };
 
-template <typename T> class Array : public Object
-{
-  public:
-    Array(size_t size) : _array(new T[size]) {}
-    ~Array() { delete[] _array; }
-
-    T *get() { return _array; }
-    const T *get() const { return _array; }
-    operator const T*() const { return get(); }
-    operator T*() { return get(); }
-
-    T & operator[](size_t idx) { return _array[idx]; }
-    T const & operator[](size_t idx) const { return _array[idx]; }
-
-  private:
-    T *_array;
-};
-
 /**
  * Fucky version of shared_ptr, except it only works on objects of Object type.
  * I'd SFINAE but lol no stdlib yet.
