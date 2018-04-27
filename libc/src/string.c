@@ -24,6 +24,18 @@ char *strncpy(char *dst, char const *src, size_t num)
     return retval;
 }
 
+int strcmp(char const *str1, char const *str2)
+{
+    while (*str1 && *str2 && (*str1++ == *str2++));
+    return *(const unsigned char *)str1 - *(const unsigned char *)str2;
+}
+
+int strncmp(char const *str1, char const *str2, size_t num)
+{
+    while ((num--) && *str1 && *str2 && (*str1++ == *str2++));
+    return *(const unsigned char *)str1 - *(const unsigned char *)str2;
+}
+
 void *memset(void *ptr, int value, size_t num)
 {
     uint8_t *dst = (uint8_t *)ptr;

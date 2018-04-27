@@ -12,6 +12,8 @@ namespace std {
 using ::strlen;
 using ::strcpy;
 using ::strncpy;
+using ::strcmp;
+using ::strncmp;
 
 using ::memset;
 using ::memcpy;
