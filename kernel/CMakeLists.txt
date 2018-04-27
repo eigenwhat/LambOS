@@ -33,6 +33,7 @@ set (LIBALLOC_SOURCES
 set (SOURCES
         ${I386_SOURCES}
         ${LIBALLOC_SOURCES}
+        src/fs/iso9660/Iso9660.cpp
         src/device/input/KeyboardInputStream.cpp
         src/device/input/PS2Keyboard.cpp
         src/device/storage/AtaDeviceDescriptor.cpp

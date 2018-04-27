@@ -6,12 +6,13 @@
 #include <arch/i386/cpu/X86CPU.hpp>
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
 #include <arch/i386/device/input/PS2KeyboardISR.hpp>
-#include <arch/i386/device/storage/AtaDevice.hpp>
+#include <arch/i386/device/storage/X86AtaDevice.hpp>
 #include <arch/i386/X86Kernel.hpp>
 #include <device/input/KeyboardInputStream.hpp>
 #include <io/BochsDebugOutputStream.hpp>
 #include <io/debug.h>
 #include <util/Array.hpp>
+#include <fs/iso9660/Iso9660.hpp>
 
 // ====================================================
 // Globals
@@ -107,7 +108,7 @@ void read_ata()
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->console()->writeString("\nPATA Device Information\n");
     kernel->console()->setForegroundColor(defaultTextColor);
-    AtaDevice devices[4] { {true, true}, {true, false}, {false, true}, {false, false} };
+    X86AtaDevice devices[4] { {true, true}, {true, false}, {false, true}, {false, false} };
     for (auto &device : devices) {
         printf(" * Device %s -- %s\n",
                device.isPrimary() ? "Primary" : "Secondary",
@@ -121,40 +122,33 @@ void read_ata()
         printf("    Name: %s\n", device.model());
         printf("    Type: ");
         switch (device.type()) {
-            case AtaDevice::Type::PATA:
+            case X86AtaDevice::Type::PATA:
                 puts("PATA");
                 break;
-            case AtaDevice::Type::PATAPI:
+            case X86AtaDevice::Type::PATAPI:
                 puts("PATAPI");
                 break;
-            case AtaDevice::Type::SATA:
+            case X86AtaDevice::Type::SATA:
                 puts("SATA");
                 break;
-            case AtaDevice::Type::SATAPI:
+            case X86AtaDevice::Type::SATAPI:
                 puts("SATAPI");
                 break;
-            case AtaDevice::Type::Unknown:
+            case X86AtaDevice::Type::Unknown:
                 puts("Unknown");
                 break;
         }
         printf("    Serial: %s\n", device.serial());
         printf("    FW: %s\n", device.firmware());
         switch (device.type()) {
-            case AtaDevice::Type::PATAPI:
-            case AtaDevice::Type::SATAPI:
+            case X86AtaDevice::Type::PATAPI:
+            case X86AtaDevice::Type::SATAPI: {
                 printf("    Sector size: %u bytes\n", device.sectorSize());
-                {
-                    // Check for ISO9660 for reading in sector 0x10 and looking
-                    // for the 'CD001' string at offsets 1-6.
-                    const auto start = 0x10;
-                    Array<uint8_t> buf{device.sectorSize()};
-                    device.read(start, (uint16_t *)buf.get());
-                    Array<char> cd001{6};
-                    memset(cd001.get(), 0, 6);
-                    strncpy(cd001, (char*)buf.get() + 1, 5);
-                    printf("    Check for ISO9660: '%s'\n", cd001.get());
-                }
+                printf("    Checking for ISO9660... ");
+                bool isIso9660 = Iso9660::instance().hasFileSystem(device);
+                puts(isIso9660 ? "yes!" : "no");
                 break;
+            }
             default:
                 break;
         }

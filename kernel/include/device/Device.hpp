@@ -1,7 +1,9 @@
 #pragma once
 
+#include <Object.hpp>
+
 /** Abstract interface for a device on the machine. */
-class Device
+class Device : public Object
 {
   public:
     /**
