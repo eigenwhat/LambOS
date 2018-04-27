@@ -40,6 +40,7 @@ else ()
     #@cp -r iso $(OBJDIR)/iso
     #@cp $(OBJDIR)/kernel.bin $(OBJDIR)/iso/boot/
     #grub-mkrescue --output=$(OBJDIR)/lambos.iso $(OBJDIR)/iso
+    file (REMOVE ${CMAKE_SOURCE_DIR}/iso)
     file (COPY ${CMAKE_SOURCE_DIR}/iso DESTINATION ${CMAKE_BINARY_DIR})
     set (ISO_TARGET grub-bootable-iso)
     set (ISO_PATH ${CMAKE_BINARY_DIR}/lambos.iso)

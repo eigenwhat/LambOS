@@ -1,23 +1,16 @@
 #pragma once
 
 #include <device/Device.hpp>
+#include <device/storage/AtaDevice.hpp>
 #include <stdint.h>
 #include <cstring>
-#include "AtaDeviceDescriptor.hpp"
-#include "AtapiCommand.hpp"
+#include "device/storage/AtaDeviceDescriptor.hpp"
+#include "device/storage/AtapiCommand.hpp"
 
-/** Representation of an ATA or ATAPI device. */
-class AtaDevice : public Device
+/** Representation of an ATA or ATAPI device for X86. */
+class X86AtaDevice : public AtaDevice
 {
   public:
-    enum class Type {
-        PATA,
-        SATA,
-        PATAPI,
-        SATAPI,
-        Unknown
-    };
-
     /**
      * Gets the type of device in the given slot.
      * @param primary Whether it's primary or secondary.
@@ -31,26 +24,26 @@ class AtaDevice : public Device
      * @param primary Whether it's primary or secondary.
      * @param master Whether it's master or slave.
      */
-    AtaDevice(bool primary, bool master) : _primary(primary)
+    X86AtaDevice(bool primary, bool master) : _primary(primary)
             , _slaveBit(slaveBit(master)), _ioPort(ioPort(primary)), _controlPort(controlPort(primary)) {}
 
     /**
      * Returns whether the device is primary or secondary. Relevant only for P-ATA/P-ATAPI.
      * @return true if primary, false otherwise.
      */
-    bool isPrimary() const { return _primary; }
+    bool isPrimary() const override { return _primary; }
 
     /**
      * Returns whether the device is a master or slave. Relevant only for P-ATA/P-ATAPI.
      * @return True if master, false if slave.
      */
-    bool isMaster() const { return !_slaveBit; }
+    bool isMaster() const override { return !_slaveBit; }
 
     /**
      * Returns whether or not there is a device attached in this slot.
      * @return True if a device is there, false otherwise.
      */
-    virtual bool isAttached() const;
+    virtual bool isAttached() const override;
 
     /**
      * The name of the device as reported by the device.
@@ -74,13 +67,13 @@ class AtaDevice : public Device
      * The size of the device's sectors.
      * @return An unsigned 32-bit integer with the sector size in bytes.
      */
-    uint32_t sectorSize() { return _descriptor.sectorSize(); }
+    uint32_t sectorSize() const override { return _descriptor.sectorSize(); }
 
     /**
      * The type of device. [P-ATA, P-ATAPI, S-ATA, S-ATAPI, unknown]
      * @return The Type enum value for this device.
      */
-    Type type();
+    Type type() const override;
 
     /**
      * Reads in a sector.
@@ -90,7 +83,7 @@ class AtaDevice : public Device
      * @param sectors The number of sectors to read. Defaults to 1.
      * @return true if successful, false otherwise.
      */
-    bool read(uint64_t address, uint16_t *buf, size_t sectors = 1);
+    bool read(uint64_t address, uint16_t *buf, size_t sectors = 1) override;
 
   private:
     // ====================================================
@@ -195,5 +188,5 @@ class AtaDevice : public Device
     uint16_t const _ioPort;
     uint16_t const _controlPort;
     bool _identified = false;
-    AtaDeviceDescriptor _descriptor;
+    AtaDeviceDescriptor _descriptor{true};
 };

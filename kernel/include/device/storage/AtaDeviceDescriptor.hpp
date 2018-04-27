@@ -6,9 +6,13 @@ class AtaDeviceDescriptor : public Object
 {
   public:
     /**
-     * @param rawInfo The 512 byte (uint16_t[256]) identity information as received from the IO bus.
+     *
+     * @param isLittleEndian `true` if architecture uses little-endian.
+     * @param rawInfo The 512 byte (uint16_t[256]) identity information as
+     *                received from the IO bus.
      */
-    AtaDeviceDescriptor(uint16_t *rawInfo = nullptr) { readIdentity(rawInfo); }
+    AtaDeviceDescriptor(bool isLittleEndian, uint16_t *rawInfo = nullptr)
+            :_littleEndian(isLittleEndian) { readIdentity(rawInfo); }
 
     /**
      * @param rawInfo The 512 byte (uint16_t[256]) identity information as received from the IO bus.
@@ -52,6 +56,7 @@ class AtaDeviceDescriptor : public Object
     uint32_t sectorSize() const { return _sectorSize; }
 
   private:
+    bool _littleEndian;
     char _firmware[9];
     char _model[41];
     char _serial[21];

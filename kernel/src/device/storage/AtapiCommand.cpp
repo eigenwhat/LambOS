@@ -1,4 +1,4 @@
-#include <arch/i386/device/storage/AtapiCommand.hpp>
+#include <device/storage/AtapiCommand.hpp>
 
 namespace {
 

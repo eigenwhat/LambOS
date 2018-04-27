@@ -1,15 +1,15 @@
-#include <arch/i386/device/storage/AtaDevice.hpp>
+#include <arch/i386/device/storage/X86AtaDevice.hpp>
 #include <sys/asm.h>
 #include <cstdio>
 #include <Kernel.hpp>
 
-AtaDevice::Type AtaDevice::typeOf(bool primary, bool master)
+X86AtaDevice::Type X86AtaDevice::typeOf(bool primary, bool master)
 {
     // stack initialization is cheap, so IDGAF
-    return AtaDevice(primary, master).type();
+    return X86AtaDevice(primary, master).type();
 }
 
-bool AtaDevice::isAttached() const
+bool X86AtaDevice::isAttached() const
 {
     softReset(); /* waits until master drive is ready again */
     outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit << 4);
@@ -20,7 +20,7 @@ bool AtaDevice::isAttached() const
     return waitForStatus(-1) != 0;
 }
 
-char const *AtaDevice::model()
+char const *X86AtaDevice::model()
 {
     if (!_identified) {
         identify();
@@ -29,7 +29,7 @@ char const *AtaDevice::model()
     return _descriptor.model();
 }
 
-char const *AtaDevice::serial()
+char const *X86AtaDevice::serial()
 {
     if (!_identified) {
         identify();
@@ -38,7 +38,7 @@ char const *AtaDevice::serial()
     return _descriptor.serial();
 }
 
-char const *AtaDevice::firmware()
+char const *X86AtaDevice::firmware()
 {
     if (!_identified) {
         identify();
@@ -47,7 +47,7 @@ char const *AtaDevice::firmware()
     return _descriptor.firmware();
 }
 
-AtaDevice::Type AtaDevice::type()
+X86AtaDevice::Type X86AtaDevice::type() const
 {
     softReset(); /* waits until master drive is ready again */
     outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit<<4);
@@ -63,7 +63,7 @@ AtaDevice::Type AtaDevice::type()
     return Type::Unknown;
 }
 
-bool AtaDevice::read(uint64_t address, uint16_t *buf, size_t sectors)
+bool X86AtaDevice::read(uint64_t address, uint16_t *buf, size_t sectors)
 {
     if (sectors == 0) return false;
 
@@ -86,7 +86,7 @@ bool AtaDevice::read(uint64_t address, uint16_t *buf, size_t sectors)
     }
 }
 
-uint8_t AtaDevice::waitForStatus(int timeout) const
+uint8_t X86AtaDevice::waitForStatus(int timeout) const
 {
     uint8_t status;
     if (timeout > 0) {
@@ -98,7 +98,7 @@ uint8_t AtaDevice::waitForStatus(int timeout) const
     return status;
 }
 
-uint8_t AtaDevice::waitUntilReady(bool errorCheck) const
+uint8_t X86AtaDevice::waitUntilReady(bool errorCheck) const
 {
     uint8_t status = 0;
 
@@ -116,7 +116,7 @@ uint8_t AtaDevice::waitUntilReady(bool errorCheck) const
     return 0;
 }
 
-void AtaDevice::ioWait() const
+void X86AtaDevice::ioWait() const
 {
     inb(_ioPort + 0x0C);
     inb(_ioPort + 0x0C);
@@ -124,14 +124,14 @@ void AtaDevice::ioWait() const
     inb(_ioPort + 0x0C);
 }
 
-void AtaDevice::softReset() const
+void X86AtaDevice::softReset() const
 {
     outb(_controlPort, 0x04);
     ioWait();
     outb(_controlPort, 0x00);
 }
 
-void AtaDevice::identify()
+void X86AtaDevice::identify()
 {
     // Set features register. 0 = PIO, 1 = DMA.
     outb(_ioPort + 1, 0);
@@ -172,7 +172,7 @@ void AtaDevice::identify()
     }
 }
 
-bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize)
+bool X86AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize)
 {
     uint8_t status = 0;
 
@@ -219,7 +219,7 @@ bool AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf,
     return true;
 }
 
-void AtaDevice::pioRead(uint16_t *buf, uint32_t bytesToRead)
+void X86AtaDevice::pioRead(uint16_t *buf, uint32_t bytesToRead)
 {
     uint32_t wordCount = bytesToRead / 2;
     for (size_t i = 0; i < wordCount; ++i) {
@@ -227,7 +227,7 @@ void AtaDevice::pioRead(uint16_t *buf, uint32_t bytesToRead)
     }
 }
 
-void AtaDevice::pioWrite(uint16_t *buf, uint32_t bytesToRead)
+void X86AtaDevice::pioWrite(uint16_t *buf, uint32_t bytesToRead)
 {
     uint32_t wordCount = bytesToRead / 2;
     for (size_t i = 0; i < wordCount; ++i) {

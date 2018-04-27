@@ -1,4 +1,4 @@
-#include <arch/i386/device/storage/AtaDeviceDescriptor.hpp>
+#include <device/storage/AtaDeviceDescriptor.hpp>
 
 #include <cstring>
 
@@ -58,9 +58,11 @@ void AtaDeviceDescriptor::readIdentity(uint16_t *rawInfo)
     _model[40] = 0;
 
     // hello endianness, my old friend...
-    fixAtaWordString(ataInfo.serial, 20);
-    fixAtaWordString(ataInfo.firmware, 8);
-    fixAtaWordString(ataInfo.model, 40);
+    if (_littleEndian) {
+        fixAtaWordString(ataInfo.serial, 20);
+        fixAtaWordString(ataInfo.firmware, 8);
+        fixAtaWordString(ataInfo.model, 40);
+    }
 
     // transfer info to permanent, sane home
     strncpy(_serial, ataInfo.serial, 20);
@@ -75,9 +77,13 @@ void AtaDeviceDescriptor::readIdentity(uint16_t *rawInfo)
 
 void AtaDeviceDescriptor::readAtapiCapacity(uint16_t *rawInfo)
 {
+    if (rawInfo == nullptr) {
+        return;
+    }
+
     uint32_t lba, blocks;
     memcpy(&lba, &rawInfo[0], sizeof(uint32_t));
-    _atapiEndLba = endianSwap(lba);
+    _atapiEndLba = _littleEndian ? endianSwap(lba) : lba;
     memcpy(&blocks, &rawInfo[2], sizeof(uint32_t));
-    _sectorSize = endianSwap(blocks);
+    _sectorSize = _littleEndian ? endianSwap(blocks) : blocks;
 }

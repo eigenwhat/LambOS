@@ -19,13 +19,12 @@ set(I386_SOURCES
         src/arch/i386/cpu/set_gdt.s
         src/arch/i386/cpu/set_idt.s
         src/arch/i386/device/display/VGATextConsole.cpp
-        src/arch/i386/device/storage/AtaDeviceDescriptor.cpp
-        src/arch/i386/device/storage/AtaDevice.cpp
+        src/arch/i386/device/storage/X86AtaDevice.cpp
         src/arch/i386/mem/MMU.cpp
         src/arch/i386/mem/PageFrameAllocator.cpp
         src/arch/i386/mem/PageTable.cpp
         src/arch/i386/X86Kernel.cpp
-        src/arch/i386/main.cpp src/arch/i386/device/storage/AtapiCommand.cpp include/arch/i386/device/storage/AtapiCommand.hpp)
+        src/arch/i386/main.cpp)
 
 set (LIBALLOC_SOURCES
         src/mem/liballoc.c
@@ -36,6 +35,8 @@ set (SOURCES
         ${LIBALLOC_SOURCES}
         src/device/input/KeyboardInputStream.cpp
         src/device/input/PS2Keyboard.cpp
+        src/device/storage/AtaDeviceDescriptor.cpp
+        src/device/storage/AtapiCommand.cpp
         src/Kernel.cpp)
 
 add_executable(${KERNEL_TARGET} ${SOURCES} ${INCLUDE_FILES})
