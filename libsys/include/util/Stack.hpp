@@ -16,7 +16,7 @@ class Stack : public virtual Collection<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    virtual bool push(T obj) = 0;
+    virtual bool push(const T &obj) = 0;
 
     /**
      * Removes an element from the top of the Stack.
@@ -35,5 +35,5 @@ class Stack : public virtual Collection<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool insert(T obj) override { return push(obj); }
+    bool insert(const T &obj) override { return push(obj); }
 };
