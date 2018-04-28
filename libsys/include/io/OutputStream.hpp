@@ -2,6 +2,9 @@
 
 #include <Object.hpp>
 
+#include <stddef.h>
+#include <stdint.h>
+
 class OutputStream : public Object
 {
 public:
