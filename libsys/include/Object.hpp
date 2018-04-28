@@ -54,7 +54,8 @@ template <typename T> class ArcPtr
 
     T *get() const { return _ptr; }
 
-    void reset(T *newPtr) {
+    void reset(T *newPtr)
+    {
         if (_ptr) _ptr->release();
         _ptr = newPtr;
         if (_ptr) _ptr->retain();
@@ -68,12 +69,19 @@ template <typename T> class ArcPtr
         return *this;
     }
 
-    ArcPtr &operator=(ArcPtr &&r) noexcept {
+    ArcPtr &operator=(ArcPtr &&r) noexcept
+    {
         if (_ptr) _ptr->release();
         _ptr = r._ptr;
         r._ptr = nullptr;
         return *this;
     }
+
+    bool operator==(const ArcPtr &r) const { return _ptr == r._ptr; }
+
+    bool operator!=(const ArcPtr &r) const { return !operator==(r); }
+
+    explicit operator bool() const { return _ptr != nullptr; }
 
   private:
     T *_ptr;
@@ -90,4 +98,4 @@ class Autoreleaser
 };
 
 /** Handy autorelease macro that almost looks like a language construct. */
-#define autorelease(object) Autoreleaser autorelease__COUNTER__((object));
+#define autorelease(object) Autoreleaser autorelease__COUNTER__((object))
