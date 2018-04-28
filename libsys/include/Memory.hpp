@@ -89,6 +89,8 @@ template <typename T> class ArcPtr
 
     T *operator->() const { return _ptr; }
 
+    T& operator*() const { return *_ptr; }
+
     ArcPtr &operator=(ArcPtr const &r) noexcept
     {
         reset(r.get());

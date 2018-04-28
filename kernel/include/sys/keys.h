@@ -12,8 +12,15 @@ typedef enum keycode_t {
     kKeyTab, kKeyQ, kKeyW, kKeyE, kKeyR, kKeyT, kKeyY, kKeyU, kKeyI, kKeyO, kKeyP, kKeyLeftBracket, kKeyRightBracket, kKeyBackslash,
     kKeyCapsLock, kKeyA, kKeyS, kKeyD, kKeyF, kKeyG, kKeyH, kKeyJ, kKeyK, kKeyL, kKeySemicolon, kKeyApostrophe, kKeyEnter,
     kKeyLeftShift, kKeyZ, kKeyX, kKeyC, kKeyV, kKeyB, kKeyN, kKeyM, kKeyComma, kKeyPeriod, kKeySlash, kKeyRightShift,
-    kKeyLeftControl, kKeyLeftAlt, kKeyLeftSuper, kKeySpace, kKeyRightSuper, kKeyRightAlt, kKeyRightControl,
-    kKeyPadAsterisk, kKeyNumLock
+    kKeyLeftControl, kKeyLeftSuper, kKeyLeftAlt, kKeySpace, kKeyRightAlt, kKeyRightSuper, kKeyMenu, kKeyRightControl,
+    kKeyPrintScreen, kKeyScrollLock, kKeyPauseBreak,
+    kKeyInsert, kKeyHome, kKeyPageUp,                kKeyNumLock, kKeyPadSlash, kKeyPadAsterisk, kKeyPadMinus,
+    kKeyDelete, kKeyEnd, kKeyPageDown,               kKeyPad7, kKeyPad8, kKeyPad9, kKeyPadPlus,
+                                                     kKeyPad4, kKeyPad5, kKeyPad6,
+              kKeyUp,                                kKeyPad1, kKeyPad2, kKeyPad3, kKeyPadEnter,
+    kKeyLeft, kKeyDown, kKeyRight,                   kKeyPad0, kKeyPadPeriod,
+
+    kKeyCount
 } KeyCode;
 
 typedef struct keyevent_t {

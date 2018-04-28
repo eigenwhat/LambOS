@@ -11,7 +11,7 @@ public:
 
     virtual KeyEvent read();
 
-    virtual bool keyIsPressed(KeyCode key) { return _keysPressed[key]; }
+    virtual bool keyIsPressed(KeyCode key) const { return _keysPressed[key]; }
 
     friend class PS2KeyboardISR;
 
