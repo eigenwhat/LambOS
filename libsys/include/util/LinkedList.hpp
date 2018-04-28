@@ -2,10 +2,31 @@
 
 #include <util/List.hpp>
 
+/**
+ * A LinkedList is an ordered list where each element is contained in a node,
+ * and each node has a pointer to the next node which comes after it, forming a
+ * chain.
+ *
+ * LinkedLists are memory efficient in that the size of the list is equal to the
+ * LinkedList header and the number of nodes in the list. Array-based stores are
+ * costly to grow and shrink, due to their desire to maintain contiguousness,
+ * and thus each grow operation grows it by a large amount in anticipation for
+ * future insertions. They often don't shrink at all on removal, again to avoid
+ * future grow operations.
+ *
+ * It suffers in random access, as, unlike an array, the elements are not
+ * contiguous in memory, and therefore the whole list must be traversed from the
+ * beginning in order to find the nth element. It is also, to a much lesser
+ * extent, slower to iterate over than an array based store due to the need to
+ * dereference and jump all over the heap, whereas arrays are contiguous and may
+ * neatly fit in cache lines, etc.
+ *
+ * @tparam T The type of object the LinkedList holds.
+ */
 template <typename T> class LinkedList : public virtual List<T>
 {
   public:
-    LinkedList() {}
+    class Iterator;
 
     /**
      * Adds an element to the front of the List.
@@ -140,10 +161,23 @@ template <typename T> class LinkedList : public virtual List<T>
         return it->value;
     }
 
+    /** An iterator pointing to the first element in the list. */
+    Iterator begin() const
+    {
+        return Iterator{_first.get(), this};
+    }
+
+    /**
+     * An Iterator "past the end" of the list. When encountered, it means there
+     * is nothing else to read and iteration should stop.
+     *
+     * @return An iterator signifying the end of this LinkedList.
+     */
+    Iterator end() const { return Iterator{nullptr, this}; }
+
   private:
     struct Node : public Object {
         Node(const T &v) : value(v) {}
-        ~Node() { puts("Node destroyed!"); }
         T value;
         ArcPtr<Node> next = nullptr;
     };
@@ -151,4 +185,64 @@ template <typename T> class LinkedList : public virtual List<T>
     ArcPtr<Node> _first = nullptr;
     ArcPtr<Node> _last = nullptr;
     size_t _size = 0;
+
+  public:
+    class Iterator : public Object
+    {
+        friend class LinkedList;
+      public:
+        /**
+         * (pre-increment) Advances the iterator one element forward.
+         * @return A reference to the next Iterator in the Collection.
+         */
+        Iterator& operator++()
+        {
+            _obj = _obj->next.get();
+            return *this;
+        }
+
+        /**
+         * (post-increment) Advances the Iterator one element forward.
+         * @return An Iterator equal to this before the increment.
+         */
+        Iterator operator++(int)
+        {
+            Iterator it = *this;
+            this->operator++();
+            return it;
+        }
+
+        /**
+         * Retrieves a reference to the pointed-to element.
+         * @return A reference to the element the Iterator is pointing at. If it
+         *         isn't pointing to anything (e.g. end of the Collection), the
+         *         result is undefined.
+         */
+        const T& operator*() const { return _obj->value; }
+
+        /**
+         * Equality operator.
+         * @param rhs The iterator to compare to.
+         * @return `true` if they are equal, `false` otherwise.
+         */
+        bool operator==(const Iterator &rhs) const
+        {
+            return _obj == rhs._obj && _parent == rhs._parent;
+        }
+
+        /**
+         * Inequality operator. Equivalent to !(this == rhs).
+         * @param rhs The Iterator to compare to.
+         * @return `true` if they're not equal, `false` otherwise.
+         */
+        bool operator!=(const Iterator &rhs) const { return !operator==(rhs); }
+
+      private:
+        Iterator(Node const *node, LinkedList const *parent)
+                : _obj(node), _parent(parent)
+        {}
+
+        Node const *_obj;
+        LinkedList const *_parent;
+    };
 };
