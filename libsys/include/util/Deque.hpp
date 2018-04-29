@@ -30,5 +30,5 @@ template <typename T> class Deque : public virtual Stack<T>
      * Returns the element at the back of the Deque without removing it.
      * @return The object. If the Deque is empty, the return value is undefined.
      */
-    virtual T peekBack() const = 0;
+    virtual const T &peekBack() const = 0;
 };

@@ -4,8 +4,8 @@
 template <typename A, typename B> class Pair : public virtual Object
 {
   public:
-    using FirstType = typename A;
-    using SecondType = typename B;
+    using FirstType = A;
+    using SecondType = B;
 
     Pair(const A &a, const B &b) : first(a), second(b) {}
 
@@ -53,4 +53,4 @@ template <typename A, typename B> class Pair : public virtual Object
 };
 
 template <typename A, typename B>
-Pair MakePair(const A &a, const B &b) { return Pair{a, b}; };
+Pair<A, B> MakePair(const A &a, const B &b) { return Pair{a, b}; };

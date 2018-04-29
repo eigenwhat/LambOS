@@ -52,7 +52,7 @@ public:
      * @param object The object to add.
      * @return `true` if the Collection changed. `false` otherwise.
      */
-    virtual bool insert(const T &object) = 0;
+    virtual bool insert(ValueType const &object) = 0;
 
     /**
      * Removes the object from the Collection, reducing its size.
@@ -66,7 +66,7 @@ public:
      * @param object The object to remove.
      * @return `true` if the Collection changed. `false` otherwise.
      */
-    virtual bool remove(const T &object) = 0;
+    virtual bool remove(ValueType const &object) = 0;
 
     /** @} */
 };

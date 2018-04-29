@@ -28,7 +28,7 @@ class Stack : public virtual Collection<T>
      * Returns the element at the top of the Stack without removing it.
      * @return The object. If the Stack is empty, the return value is undefined.
      */
-    virtual T peek() const = 0;
+    virtual const T &peek() const = 0;
 
     /**
      * Adds an element to the top of the Stack. Equivalent to push(T).

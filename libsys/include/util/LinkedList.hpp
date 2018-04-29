@@ -73,7 +73,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * Returns the element at the front of the List without removing it.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    T peek() const override { return _first->value; }
+    const T &peek() const override { return _first->value; }
 
     /**
      * Adds an element to the back of the List.
@@ -117,7 +117,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * Returns the element at the back of the List without removing it.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    T peekBack() const override { return _last->value; }
+    const T &peekBack() const override { return _last->value; }
 
     /**
      * Returns whether or not the List is empty.

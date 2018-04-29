@@ -61,7 +61,7 @@ public:
      * @return The frontmost element. If the queue is empty, the return value is
      *         undefined.
      */
-    T peek() const override { return isEmpty() ? T{} : _buffer[_front]; }
+    const T &peek() const override { return isEmpty() ? *(T*)nullptr : _buffer[_front]; }
 
     /**
      * Returns whether or not the collection is empty.

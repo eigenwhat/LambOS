@@ -28,7 +28,7 @@ public:
      * Returns the element at the front of the queue without removing it.
      * @return The object. If the queue is empty, the return value is undefined.
      */
-    virtual T peek() const = 0;
+    virtual const T &peek() const = 0;
 
     /**
      * Adds an element to the back of the Queue. Equivalent to enqueue(T).
