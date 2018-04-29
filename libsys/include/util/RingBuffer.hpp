@@ -1,5 +1,8 @@
 #pragma once
+
 #include <util/Queue.hpp>
+
+#include <stdint.h>
 
 /**
  * A RingBuffer is a Queue of fixed size. If an object is enqueued while the

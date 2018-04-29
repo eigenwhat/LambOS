@@ -2,6 +2,8 @@
 
 #include <Object.hpp>
 
+#include <stddef.h>
+
 /**
  * The root template interface in the collections class hierarchy. Collections,
  * simply put, are groups of objects. Collections may vary by their internal
@@ -15,6 +17,8 @@ template<typename T>
 class Collection : public virtual Object
 {
 public:
+    using ValueType = T;
+
     /**
      * Returns whether or not the Collection is empty.
      * @return `true` if empty, `false` otherwise.

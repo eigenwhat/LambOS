@@ -39,9 +39,7 @@ template <typename T> class LinkedList : public virtual List<T>
             _first = ArcPtr<Node>::make(obj);
             _last = _first;
         } else {
-            auto oldFirst = _first;
-            _first = ArcPtr<Node>::make(obj);
-            _first->next = oldFirst;
+            _first = _first->insertBefore(obj);
         }
 
         ++_size;
@@ -61,7 +59,7 @@ template <typename T> class LinkedList : public virtual List<T>
             _first = nullptr;
             _last = nullptr;
         } else {
-            _first = _first->next;
+            _first = _first->remove()->next;
         }
 
         if (_size) {
@@ -75,10 +73,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * Returns the element at the front of the List without removing it.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    T peek() const override
-    {
-        return _first->value;
-    }
+    T peek() const override { return _first->value; }
 
     /**
      * Adds an element to the back of the List.
@@ -91,11 +86,38 @@ template <typename T> class LinkedList : public virtual List<T>
             return push(obj); // list is empty
         }
 
-        _last->next = ArcPtr<Node>::make(obj);
-        _last = _last->next;
+        _last = _last->insertAfter(obj);
         ++_size;
         return true;
     }
+
+    /**
+     * Removes an element from the back of the List.
+     * @return The object. If the List is empty, the return value is undefined.
+     */
+    T unqueue() override
+    {
+        auto oldLast = _last;
+
+        if (_first == _last) {
+            _first = nullptr;
+            _last = nullptr;
+        } else {
+            _last = _last->remove()->prev;
+        }
+
+        if (_size) {
+            --_size;
+        }
+
+        return oldLast->value;
+    }
+
+    /**
+     * Returns the element at the back of the List without removing it.
+     * @return The object. If the List is empty, the return value is undefined.
+     */
+    T peekBack() const override { return _last->value; }
 
     /**
      * Returns whether or not the List is empty.
@@ -124,19 +146,15 @@ template <typename T> class LinkedList : public virtual List<T>
         }
 
         auto it = _first;
-        if (_first->value == object) {
-            _first = _first->next;
-            --_size;
-            return true;
-        }
-
-        while (it->next != nullptr) {
-            if (it->next->value == object) {
-                auto next = it->next;
-                it->next = next->next;
+        while (it != nullptr) {
+            if (it->value == object) {
+                auto target = it->remove();
+                if (target == _first) _first = target->next;
+                if (target == _last) _last = target->prev;
                 --_size;
                 return true;
             }
+
             it = it->next;
         }
 
@@ -178,7 +196,52 @@ template <typename T> class LinkedList : public virtual List<T>
   private:
     struct Node : public Object {
         Node(const T &v) : value(v) {}
+
+        /**
+         * Inserts an object into the List positioned before this node.
+         * @param obj The object to add.
+         * @return The newly created node.
+         */
+        ArcPtr<Node> insertBefore(const T &obj)
+        {
+            auto n = ArcPtr<Node>::make(obj);
+            n->next = this;
+            n->prev = prev;
+            if (prev) prev->next = n;
+            prev = n;
+            return n;
+        }
+
+        /**
+         * Inserts an object into the List positioned after this node.
+         * @param obj The object to add.
+         * @return The newly created node.
+         */
+        ArcPtr<Node> insertAfter(const T &obj)
+        {
+            auto n = ArcPtr<Node>::make(obj);
+            n->prev = this;
+            n->next = next;
+            if (next) next->prev = n;
+            next = n;
+            return n;
+        }
+
+        /**
+         * Removes itself from the list. :(
+         * @return ArcPtr to itself.
+         */
+        ArcPtr<Node> remove()
+        {
+            // store this in an ArcPtr in case our neighbors are our sole owners
+            ArcPtr<Node> self = this;
+            if (prev) prev->next = next;
+            if (next) next->prev = prev;
+            return self;
+        }
+
         T value;
+        ArcPtr<Node> prev = nullptr;
         ArcPtr<Node> next = nullptr;
     };
 
