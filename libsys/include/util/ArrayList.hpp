@@ -1,7 +1,7 @@
 #pragma once
 
+#include <util/DynamicArray.hpp>
 #include <util/List.hpp>
-#include <mem/liballoc.h>
 
 template <typename T>
 class ArrayList : public List<T>
@@ -15,7 +15,7 @@ class ArrayList : public List<T>
      * elements.
      * @param reserve The number of elements to pre-allocate space for.
      */
-    ArrayList(size_t reserve) : _capacity(reserve), _data(new T[_capacity]) {}
+    ArrayList(size_t reserve) : _data(reserve) {}
 
     /**
      * Adds an element to the top of the ArrayList.
@@ -26,7 +26,7 @@ class ArrayList : public List<T>
      */
     bool push(const T &obj) override
     {
-        _shiftRight(1);
+        shiftOrResize(1);
         _data[0] = obj;
         ++_size;
         return true;
@@ -39,8 +39,8 @@ class ArrayList : public List<T>
      */
     bool enqueue(const T &obj) override
     {
-        if (_size == _capacity) {
-            _resize();
+        if (_size == capacity()) {
+            _data.resize();
         }
 
         _data[_size] = obj;
@@ -57,7 +57,7 @@ class ArrayList : public List<T>
     T pop() override
     {
         T ret = peek();
-        _shiftLeft(1);
+        _data.shift(1, true);
         --_size;
         return ret;
     }
@@ -66,7 +66,7 @@ class ArrayList : public List<T>
      * Removes an element from the back of the ArrayList.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    T unqueue() override { --_size; return _data[_size]; }
+    T popBack() override { --_size; return _data[_size]; }
 
     /**
      * Returns the element at the top of the ArrayList without removing it.
@@ -101,13 +101,80 @@ class ArrayList : public List<T>
     bool insert(const T &object) override { return enqueue(object); }
 
     /**
-     * Removes the object from the ArrayList, reducing its size.
-     *
+     * Adds the object to the ArrayList at the given index.
+     * @note This is an O(n) operation.
+     * @param object The object to add.
+     * @param idx The index to add it to. Existing elements from idx onward will
+     *            be shifted one to the right.
+     * @return `true` if the ArrayList changed. `false` otherwise.
+     */
+    bool insert(const T &object, size_t idx)
+    {
+        if (idx == _size) {
+            return enqueue(object);
+        } else if (idx == 0) {
+            return push(object);
+        }
+
+        // TODO: think about an override for hash tables, or if we just allow it
+        if (idx > _size) {
+            return false;
+        }
+
+        // TODO: this is inefficient, as we slide things over twice.
+        if (_size == capacity()) {
+            _data.resize();
+        }
+
+        // move everything at and beyond idx right one.
+        for (size_t i = _size; i > idx; --i) {
+            _data[i] = _data[i-1];
+        }
+
+        _data[idx] = object;
+        ++_size;
+        return true;
+    }
+
+    /**
+     * Removes the first instance of the object from the ArrayList.
+     * @note This is O(n). If you're doing this often, consider using some other
+     *       collection.
      * @param object The object to remove.
      * @return `true` if the ArrayList changed. `false` otherwise.
      */
-    bool remove(const T &) override {
-        return false;
+    bool remove(const T &object) override
+    {
+        size_t removalIdx = SIZE_MAX;
+        for (size_t i = 0; i < _size; ++i) {
+            if (_data[i] == object) {
+                removalIdx = i;
+                break;
+            }
+        }
+
+        return remove(removalIdx);
+    }
+
+    /**
+     * Removes the object at the given index.
+     * @note This is O(n), where n is distance from the end of the ArrayList.
+     * @param idx The index to remove from.
+     * @return
+     */
+    bool remove(size_t idx)
+    {
+        if (idx >= _size) {
+            return false;
+        }
+
+        --_size;
+        // move everything right of idx left one.
+        for (size_t i = idx; i < _size; ++i) {
+            _data[i] = _data[i+1];
+        }
+
+        return true;
     }
 
     /**
@@ -118,82 +185,33 @@ class ArrayList : public List<T>
      */
     T& operator[](size_t idx) const override { return _data[idx]; }
 
-    size_t capacity() const { return _capacity; }
+    /**
+     * The maximum capacity of the currently allocated block.
+     * @return The size of the underlying memory block.
+     */
+    size_t capacity() const { return _data.capacity(); }
 
   private:
     /**
-     * Resizes the data block by allocating a new block, then copying over all
-     * the data from the old block to the new block.
-     * @param newSize The new size. Defaults to (previous capacity * 2).
-     * @param offset The offset from the start of the new block where the old
-     *               data should be moved to. Handy when resizing due to a
-     *               push() operation in order to leave room for the new element
-     *               at the front. The offset should be less than or equal to
-     *               (newSize - capacity), otherwise the behavior is undefined.
-     *               Defaults to 0.
-     */
-    void _resize(size_t newSize = 0, size_t offset = 0)
-    {
-        if (newSize == 0) newSize = nextCapacity();
-        T *oldData = _data;
-        T *newData = new T[newSize];
-        _moveRight(oldData, newData, offset);
-        delete[] _data;
-        _data = newData;
-        _capacity = newSize;
-    }
-
-    /**
-     * Shifts the data back.
+     * Shifts the data back. Resizes if necessary so no data gets lost.
      * @param offset The amount to shift the data right by.
      */
-    void _shiftRight(size_t offset)
+    void shiftOrResize(size_t offset)
     {
         // if there's nothing, don't waste time.
         if (_size == 0) return;
 
-        if (offset + _size > _capacity) {
-            auto minCapacity = _capacity + offset;
-            auto doubleCapacity = nextCapacity();
+        if (offset + _size > capacity()) {
+            auto minCapacity = capacity() + offset;
+            auto doubleCapacity = capacity() * 2;
             auto newSize = minCapacity < doubleCapacity ? doubleCapacity
                                                         : minCapacity;
-            _resize(offset, newSize);
+            _data.resize(offset, newSize);
         } else {
-            _moveRight(_data, _data, offset);
+            _data.shift(offset);
         }
     }
 
-    /**
-     * Shifts the data frontward. Elements from [0, offset) are overwritten.
-     * @param offset The amount to shift left.
-     */
-    void _shiftLeft(size_t offset)
-    {
-        for (size_t i = 0; i < _size; ++i)
-        {
-            _data[i] = _data[i+offset];
-        }
-    }
-
-    /**
-     * Moves `_size` elements from one array to another.
-     * @param from Array to copy from
-     * @param to Array to copy to
-     * @param offset where `from` goes within `to` (i.e. to[offset] = from[0])
-     */
-    void _moveRight(T *from, T *to, size_t offset)
-    {
-        // copy back-to-front to avoid overlap issues
-        // special care needed with reverse for loops and unsigned types
-        for (size_t remaining = _size; remaining > 0; --remaining) {
-            size_t idx = remaining - 1;
-            to[idx+offset] = from[idx];
-        }
-    }
-
-    size_t nextCapacity() const { return _capacity * 2; }
-
-    size_t _capacity = 0;
-    T *_data = nullptr;
+    DynamicArray<T> _data;
     size_t _size = 0;
 };

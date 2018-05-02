@@ -24,7 +24,7 @@ template <typename T> class Deque : public virtual Stack<T>
      * Removes an element from the back of the Deque.
      * @return The object. If the Deque is empty, the return value is undefined.
      */
-    virtual T unqueue() = 0;
+    virtual T popBack() = 0;
 
     /**
      * Returns the element at the back of the Deque without removing it.

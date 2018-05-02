@@ -95,7 +95,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * Removes an element from the back of the List.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    T unqueue() override
+    T popBack() override
     {
         auto oldLast = _last;
 
@@ -179,6 +179,13 @@ template <typename T> class LinkedList : public virtual List<T>
         return it->value;
     }
 
+    bool operator==(const LinkedList &rhs) const
+    {
+        return _first == rhs._first && _last == rhs._last && _size == rhs._size;
+    }
+
+    bool operator!=(const LinkedList &rhs) const { return !operator==(rhs); }
+
     /** An iterator pointing to the first element in the list. */
     Iterator begin() const
     {
@@ -194,7 +201,8 @@ template <typename T> class LinkedList : public virtual List<T>
     Iterator end() const { return Iterator{nullptr, this}; }
 
   private:
-    struct Node : public Object {
+    struct Node : public Object
+    {
         Node(const T &v) : value(v) {}
 
         /**
@@ -208,7 +216,7 @@ template <typename T> class LinkedList : public virtual List<T>
             n->next = this;
             n->prev = prev;
             if (prev) prev->next = n;
-            prev = n;
+            prev = n.get();
             return n;
         }
 
@@ -222,7 +230,7 @@ template <typename T> class LinkedList : public virtual List<T>
             auto n = ArcPtr<Node>::make(obj);
             n->prev = this;
             n->next = next;
-            if (next) next->prev = n;
+            if (next) next->prev = n.get();
             next = n;
             return n;
         }
@@ -241,7 +249,7 @@ template <typename T> class LinkedList : public virtual List<T>
         }
 
         T value;
-        ArcPtr<Node> prev = nullptr;
+        Node *prev = nullptr;
         ArcPtr<Node> next = nullptr;
     };
 
@@ -281,7 +289,7 @@ template <typename T> class LinkedList : public virtual List<T>
          *         isn't pointing to anything (e.g. end of the Collection), the
          *         result is undefined.
          */
-        const T& operator*() const { return _obj->value; }
+        T& operator*() const { return _obj->value; }
 
         /**
          * Equality operator.
@@ -301,11 +309,11 @@ template <typename T> class LinkedList : public virtual List<T>
         bool operator!=(const Iterator &rhs) const { return !operator==(rhs); }
 
       private:
-        Iterator(Node const *node, LinkedList const *parent)
+        Iterator(Node *node, LinkedList const *parent)
                 : _obj(node), _parent(parent)
         {}
 
-        Node const *_obj;
+        Node *_obj;
         LinkedList const *_parent;
     };
 };
