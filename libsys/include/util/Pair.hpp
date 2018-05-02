@@ -7,6 +7,8 @@ template <typename A, typename B> class Pair : public virtual Object
     using FirstType = A;
     using SecondType = B;
 
+    Pair() = default;
+
     Pair(const A &a, const B &b) : first(a), second(b) {}
 
     /** The first element in the pair. */
