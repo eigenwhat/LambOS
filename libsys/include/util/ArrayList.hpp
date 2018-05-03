@@ -84,7 +84,7 @@ class ArrayList : public List<T>
      * Returns whether or not the ArrayList is empty.
      * @return `true` if empty, `false` otherwise.
      */
-    bool isEmpty() const override { return _size == 0;}
+    bool isEmpty() const override { return _size == 0; }
 
     /**
      * The number of elements in the ArrayList.

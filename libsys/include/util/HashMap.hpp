@@ -18,7 +18,7 @@ class HashMap : public virtual Map<K, V>
      * Returns whether or not the HashMap is empty.
     * @return `true` if empty, `false` otherwise.
     */
-    bool isEmpty() const { return _size != 0; }
+    bool isEmpty() const { return _size == 0; }
 
     /**
      * The number of elements in the HashMap.

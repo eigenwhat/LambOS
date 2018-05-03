@@ -1,7 +1,9 @@
 #pragma once
 
 #include <Object.hpp>
+
 #include <stddef.h>
+#include <stdint.h>
 
 template <typename T>
 class DefaultResizer
