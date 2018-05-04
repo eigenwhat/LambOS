@@ -1,6 +1,7 @@
 #pragma once
 
 #include <fs/FileSystem.hpp>
+#include <fs/Volume.hpp>
 
 class Iso9660 : public FileSystem
 {
@@ -9,6 +10,8 @@ class Iso9660 : public FileSystem
     static FileSystem &instance();
 
     bool hasFileSystem(AtaDevice &device) override;
+
+    Volume *createVolume(AtaDevice &device) override;
 
   private:
     Iso9660() : FileSystem("ISO9660") {}

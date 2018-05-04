@@ -1,4 +1,5 @@
 #include <fs/iso9660/Iso9660.hpp>
+#include <fs/iso9660/Volume.hpp>
 #include <util/Array.hpp>
 #include <cstring>
 
@@ -20,4 +21,15 @@ bool Iso9660::hasFileSystem(AtaDevice &device)
     strncpy(cd001, (char*)&buf[1], 5);
 
     return !strcmp(cd001.get(), "CD001");
+}
+
+Volume *Iso9660::createVolume(AtaDevice &device)
+{
+    if (hasFileSystem(device)) {
+        auto vol = new iso9660::Volume(device);
+        vol->init();
+        return vol;
+    }
+
+    return nullptr;
 }

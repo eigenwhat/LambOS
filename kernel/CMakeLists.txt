@@ -33,11 +33,13 @@ set (LIBALLOC_SOURCES
 set (SOURCES
         ${I386_SOURCES}
         ${LIBALLOC_SOURCES}
-        src/fs/iso9660/Iso9660.cpp
         src/device/input/KeyboardInputStream.cpp
         src/device/input/PS2Keyboard.cpp
         src/device/storage/AtaDeviceDescriptor.cpp
         src/device/storage/AtapiCommand.cpp
+        src/fs/iso9660/DirectoryEntry.cpp
+        src/fs/iso9660/Iso9660.cpp
+        src/fs/iso9660/Volume.cpp
         src/Kernel.cpp)
 
 add_executable(${KERNEL_TARGET} ${SOURCES} ${INCLUDE_FILES})
