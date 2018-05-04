@@ -74,6 +74,9 @@ template <typename T> class ArcPtr
 
     ArcPtr(const ArcPtr &other) : ArcPtr(other.get()) {}
 
+    template <typename U>
+    ArcPtr(const ArcPtr<U> &other) : ArcPtr(other.get()) {}
+
     ArcPtr(ArcPtr &&other) = default;
 
     ~ArcPtr() { reset(nullptr); }
@@ -97,7 +100,23 @@ template <typename T> class ArcPtr
         return *this;
     }
 
+    template <typename U>
+    ArcPtr &operator=(ArcPtr<U> const &r) noexcept
+    {
+        reset(r.get());
+        return *this;
+    }
+
     ArcPtr &operator=(ArcPtr &&r) noexcept
+    {
+        if (_ptr) _ptr->release();
+        _ptr = r._ptr;
+        r._ptr = nullptr;
+        return *this;
+    }
+
+    template <typename U>
+    ArcPtr &operator=(ArcPtr<U> &&r) noexcept
     {
         if (_ptr) _ptr->release();
         _ptr = r._ptr;
@@ -112,8 +131,15 @@ template <typename T> class ArcPtr
     explicit operator bool() const { return _ptr != nullptr; }
 
   private:
+    template <typename> friend class ArcPtr;
     T *_ptr;
 };
+
+template <typename T>
+ArcPtr<T> AsArcPtr(T *ptr, bool initialRetain = true)
+{
+    return ArcPtr<T>(ptr, initialRetain);
+}
 
 /** RAII object releaser. */
 template <typename T>
