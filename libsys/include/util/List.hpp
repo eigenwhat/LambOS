@@ -12,6 +12,18 @@ class List : public virtual Deque<T>
 {
   public:
     /**
+     * Removes an element from the front of the List.
+     * @return The object. If the List is empty, the return value is undefined.
+     */
+    virtual T pop() = 0;
+
+    /**
+     * Returns the element at the top of the List without removing it.
+     * @return The object. If the List is empty, the return value is undefined.
+     */
+    virtual const T &peek() const = 0;
+
+    /**
      * Returns the element at the given index.
      * @note Runtime complexity is implementation specific. O(1) not guaranteed!
      * @param idx The index of the object.
