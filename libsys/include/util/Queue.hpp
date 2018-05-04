@@ -16,24 +16,24 @@ public:
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    virtual bool enqueue(T obj) = 0;
+    virtual bool enqueue(const T &obj) = 0;
 
     /**
      * Removes an element from the front of the queue.
      * @return The object. If the queue is empty, the return value is undefined.
      */
-    virtual T dequeue() = 0;
+    virtual T pop() = 0;
 
     /**
      * Returns the element at the front of the queue without removing it.
      * @return The object. If the queue is empty, the return value is undefined.
      */
-    virtual T peek() const = 0;
+    virtual const T &peek() const = 0;
 
     /**
      * Adds an element to the back of the Queue. Equivalent to enqueue(T).
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool insert(T obj) override { return enqueue(obj); }
+    bool insert(const T &obj) override { return enqueue(obj); }
 };

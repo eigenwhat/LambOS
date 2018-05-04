@@ -71,7 +71,7 @@ template <typename T> class Array : public Collection<T>
      * (this[]) to modify the object at that index instead.
      * @return `false`, as the Collection remains unchanged.
      */
-    bool insert(T) override { return false; }
+    bool insert(const T&) override { return false; }
 
     /**
      * Removing an object from a fixed-width container is inconsequential, as
@@ -79,7 +79,7 @@ template <typename T> class Array : public Collection<T>
      * modify the object at that index instead.
      * @return `false`.
      */
-    bool remove(T) override { return false; }
+    bool remove(const T&) override { return false; }
 
   private:
     T *_array;

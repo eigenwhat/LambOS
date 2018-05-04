@@ -1,5 +1,8 @@
 #pragma once
+
 #include <util/Queue.hpp>
+
+#include <stdint.h>
 
 /**
  * A RingBuffer is a Queue of fixed size. If an object is enqueued while the
@@ -23,7 +26,7 @@ public:
      * @param item The item to enqueue.
      * @return `true` if the operation succeeded, `false` otherwise.
      */
-    bool enqueue(T item) override
+    bool enqueue(const T &item) override
     {
         _buffer[_back] = item;
         _back = _next(_back);
@@ -41,7 +44,7 @@ public:
      * @return The frontmost element. If the queue is empty, the return value is
      *         undefined.
      */
-    T dequeue() override
+    T pop() override
     {
         if(isEmpty()) {
             return T{};
@@ -58,7 +61,7 @@ public:
      * @return The frontmost element. If the queue is empty, the return value is
      *         undefined.
      */
-    T peek() const override { return isEmpty() ? T{} : _buffer[_front]; }
+    const T &peek() const override { return isEmpty() ? *(T*)nullptr : _buffer[_front]; }
 
     /**
      * Returns whether or not the collection is empty.
@@ -78,7 +81,7 @@ public:
      * @todo Investigate whether it's worth implementing.
      * @return `true` if the operation succeeded, `false` otherwise.
      */
-    bool remove(T) override { return false; }
+    bool remove(const T&) override { return false; }
 
     /**
      * The maximum capacity of the buffer.

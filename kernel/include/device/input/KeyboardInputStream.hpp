@@ -1,10 +1,11 @@
 #pragma once
 
-#include <stdint.h>
-#include <stddef.h>
 #include <util/RingBuffer.hpp>
 #include <io/InputStream.hpp>
 #include <device/input/Keyboard.hpp>
+
+#include <stdint.h>
+#include <stddef.h>
 
 class KeyboardInputStream : public InputStream
 {
