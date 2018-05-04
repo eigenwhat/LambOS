@@ -18,22 +18,33 @@ template <typename T> class BasicString : public Collection<T>
 
     /**
      * Constructs a BasicString, pre-allocating space for `reserve` number of
-     * elements.
-     * @param reserve The number of elements to pre-allocate space for.
+     * characters.
+     * @param reserve The number of characters to pre-allocate space for.
      */
-    BasicString(size_t reserve) : _data(reserve) {}
+    BasicString(size_t reserve) : _data(reserve + 1) {}
 
     /**
      * Constructs a BasicString, allocating and filling space for the provided
      * null-terminated string.
      * @param str The string to initialize as.
      */
-    BasicString(T const *str)
-            : _data(stringLength(str) + 1), _size(_data.capacity() - 1)
+    BasicString(T const *str) : BasicString(str, stringLength(str)) {}
+
+    /**
+     * Constructs a BasicString, allocating and filling space for the first
+     * X characters in the null-terminated string.
+     * @param str The string to initialize as.
+     * @param strlen The number of characters to read.
+     */
+    BasicString(T const *str, size_t strlen) : _data(strlen + 1), _size(strlen)
     {
-        // _data.capacity() == stringLength(str) + 1 for the null terminator.
-        for (size_t i = 0; i < _data.capacity(); ++i) {
-            _data[i] = str[i];
+        if (strlen == 0) {
+            _data[0] = 0;
+        } else {
+            for (size_t i = 0; i < strlen; ++i) {
+                _data[i] = str[i];
+            }
+            _data[_size] = 0; // null terminate
         }
     }
 
@@ -155,7 +166,18 @@ template <typename T> class BasicString : public Collection<T>
      */
     BasicString &append(ValueType const *str)
     {
-        const size_t strlen = stringLength(str);
+        return append(str, stringLength(str));
+    }
+
+    /**
+     * Appends a number of characters from the provided null-terminated string.
+     *
+     * @param str The null-terminated string to append.
+     * @param strlen The number of characters to read from it.
+     * @return A reference to this.
+     */
+    BasicString &append(ValueType const *str, size_t strlen)
+    {
         const size_t requiredSize = _size + strlen + 1;
         if (requiredSize > capacity())
         {
@@ -236,7 +258,25 @@ template <typename T> class BasicString : public Collection<T>
      */
     BasicString &operator+=(ValueType rhs) { return append(rhs); }
 
+    /**
+     * Equality operator.
+     * @param rhs The BasicString to compare to.
+     * @return
+     */
+    bool operator==(BasicString const &rhs) const
+    {
+        return !stringComparison(cstr(), rhs.cstr());
+    }
+
+    bool operator!=(BasicString const &rhs) const { return !operator==(rhs); }
+
   private:
+    int stringComparison(T const *str1, T const *str2) const
+    {
+        while (*str1 && *str2 && (*str1++ == *str2++));
+        return *(const unsigned char *)str1 - *(const unsigned char *)str2;
+    }
+
     size_t stringLength(T const *str)
     {
         size_t ret = 0;
@@ -245,5 +285,5 @@ template <typename T> class BasicString : public Collection<T>
     }
 
     DynamicArray<T> _data;
-    size_t _size;
+    size_t _size = 0;
 };
