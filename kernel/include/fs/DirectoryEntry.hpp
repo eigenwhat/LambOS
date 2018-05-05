@@ -41,7 +41,7 @@ class DirectoryEntry : public Object
      * Reads the names of the contents of the directory.
      * @return A list of the directory contents.
      */
-    virtual List<String> *readdir() = 0;
+    virtual LinkedList<String> *readdir() = 0;
     virtual int mkfile(char const *name) = 0;
     virtual int mkdir(char const *name) = 0;
     virtual int rmdir(char const *name) = 0;
@@ -50,6 +50,7 @@ class DirectoryEntry : public Object
 
   protected:
     void setType(Type type) { _type = type; }
+    void setName(String &&name) { _name = name; }
 
   private:
     Volume &_volume;

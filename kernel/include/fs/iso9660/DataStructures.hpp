@@ -46,6 +46,19 @@ struct DirectoryInfo
     DualEndian<uint16_t> sequenceNumber;
     uint8_t nameLength;
     char name[];
+
+    // address for start of SUSP attributes.
+    char *suspStart()
+    {
+        return name + nameLength + (nameLength % 2 ? 0 : 1);
+    }
+
+    // length of SUSP attribute set.
+    size_t suspLength()
+    {
+        size_t lengthSoFar = suspStart() - (char*)this;
+        return length - lengthSoFar;
+    }
 } __attribute__((packed));
 
 struct PrimaryVolumeDescriptorInfo
@@ -96,5 +109,96 @@ struct PrimaryVolumeDescriptorInfo
     uint8_t applicationUsed[512];
     uint8_t reserved[];
 } __attribute__((packed));
+
+namespace rockridge {
+
+/** Common header for Rock Ridge Interchange Protocol entries. */
+struct EntryHeader
+{
+    char signature[2];
+    uint8_t length;
+    uint8_t entryVersion;
+} __attribute__((packed));
+
+/** Rock Ridge "PX" entry. */
+struct PosixFileEntryInfo
+{
+    EntryHeader header;
+    char mode[8];
+    char links[8];
+    char uid[8];
+    char gid[8];
+    char serial[8];
+} __attribute__((packed));
+
+/** Rock Ridge "PD" entry. */
+struct PosixDeviceEntryInfo
+{
+    EntryHeader header;
+    DualEndian<uint32_t> devtHigh;
+    DualEndian<uint32_t> devtLow;
+} __attribute__((packed));
+
+/** Rock Ridge "SL" entry. */
+struct SymbolicLinkEntryInfo
+{
+    struct Component
+    {
+        uint8_t flags;
+        uint8_t length;
+        char name[];
+    } __attribute__((packed));
+
+    EntryHeader header;
+    uint8_t flags;
+    Component components[];
+} __attribute__((packed));
+
+/** Rock Ridge "NM" entry. */
+struct AltNameEntryInfo
+{
+    EntryHeader header;
+    uint8_t flags;
+    char name[];
+} __attribute__((packed));
+
+/** Rock Ridge "CL" entry. */
+struct ChildLinkEntryInfo
+{
+    EntryHeader header;
+    DualEndian<uint32_t> childLba;
+} __attribute__((packed));
+
+/** Rock Ridge "PL" entry. */
+struct ParentLinkEntryInfo
+{
+    EntryHeader header;
+    DualEndian<uint32_t> parentLba;
+} __attribute__((packed));
+
+/** Rock Ridge "RE" entry. */
+struct RelocatedDirectoryEntryInfo
+{
+    EntryHeader header;
+} __attribute__((packed));
+
+/** Rock Ridge "TF" entry. */
+struct TimeStampEntryInfo
+{
+    EntryHeader header;
+    uint8_t flags;
+    uint8_t timestamps[]; // depending on flag bit 7, either 7 or 17 bit stamps.
+} __attribute__((packed));
+
+/** Rock Ridge "SF" entry. */
+struct SparseFileEntryInfo
+{
+    EntryHeader header;
+    DualEndian<uint32_t> virtualSizeHigh;
+    DualEndian<uint32_t> virtualSizeLow;
+    uint8_t tableDepth;
+} __attribute__((packed));
+
+} // namespace rockridge
 
 } // namespace iso9660

@@ -14,7 +14,7 @@ class DirectoryEntry : public ::DirectoryEntry
     DirectoryEntry(DirectoryInfo &info, Volume &volume);
 
 
-    List<String> *readdir() override;
+    LinkedList<String> *readdir() override;
 
     /**
      * Does nothing. Read-only file system.
