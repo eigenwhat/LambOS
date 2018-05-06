@@ -26,7 +26,7 @@
 template <typename T> class LinkedList : public virtual List<T>
 {
   public:
-    class Iterator;
+    using Iterator = typename Iterable<T>::Iterator;
 
     /**
      * Adds an element to the front of the List.
@@ -179,17 +179,29 @@ template <typename T> class LinkedList : public virtual List<T>
         return it->value;
     }
 
+    /**
+     * Checks if two LinkedList objects are equal.
+     * @param rhs The LinkedList to compare to.
+     * @return `true` if equal, `false` otherwise.
+     */
     bool operator==(const LinkedList &rhs) const
     {
         return _first == rhs._first && _last == rhs._last && _size == rhs._size;
     }
 
+    /**
+     * Checks if two LinkedList objects are not equal.
+     * @param rhs The LinkedList to compare to.
+     * @return `true` if not equal, `false` otherwise.
+     */
     bool operator!=(const LinkedList &rhs) const { return !operator==(rhs); }
 
     /** An iterator pointing to the first element in the list. */
-    Iterator begin() const
+    Iterator begin() const override
     {
-        return Iterator{_first.get(), this};
+        auto *llit = new LLIterator{_first.get(), this};
+        autorelease(llit);
+        return Iterable<T>::newIterator(llit);
     }
 
     /**
@@ -198,7 +210,12 @@ template <typename T> class LinkedList : public virtual List<T>
      *
      * @return An iterator signifying the end of this LinkedList.
      */
-    Iterator end() const { return Iterator{nullptr, this}; }
+    Iterator end() const override
+    {
+        auto *llit = new LLIterator{nullptr, this};
+        autorelease(llit);
+        return Iterable<T>::newIterator(llit);
+    }
 
   private:
     struct Node : public Object
@@ -253,34 +270,32 @@ template <typename T> class LinkedList : public virtual List<T>
         ArcPtr<Node> next = nullptr;
     };
 
-    ArcPtr<Node> _first = nullptr;
-    ArcPtr<Node> _last = nullptr;
-    size_t _size = 0;
-
-  public:
-    class Iterator : public Object
+    class LLIterator : public Iterable<T>::IteratorImpl
     {
         friend class LinkedList;
+        using Iterable<T>::IteratorImpl::publicInstance;
+        using Iterable<T>::IteratorImpl::implOf;
       public:
         /**
          * (pre-increment) Advances the iterator one element forward.
          * @return A reference to the next Iterator in the Collection.
          */
-        Iterator& operator++()
+        Iterator& operator++() override
         {
             _obj = _obj->next.get();
-            return *this;
+            return *publicInstance();
         }
 
         /**
          * (post-increment) Advances the Iterator one element forward.
          * @return An Iterator equal to this before the increment.
          */
-        Iterator operator++(int)
+        Iterator operator++(int) override
         {
-            Iterator it = *this;
+            LLIterator *it = new LLIterator(*this);
+            autorelease(it);
             this->operator++();
-            return it;
+            return Iterable<T>::newIterator(it);
         }
 
         /**
@@ -289,31 +304,43 @@ template <typename T> class LinkedList : public virtual List<T>
          *         isn't pointing to anything (e.g. end of the Collection), the
          *         result is undefined.
          */
-        T& operator*() const { return _obj->value; }
+        T& operator*() const override { return _obj->value; }
 
         /**
          * Equality operator.
          * @param rhs The iterator to compare to.
          * @return `true` if they are equal, `false` otherwise.
          */
-        bool operator==(const Iterator &rhs) const
+        bool operator==(Iterator const &rhs) const override
         {
-            return _obj == rhs._obj && _parent == rhs._parent;
+            if (classId() != rhs.classId()) {
+                return false;
+            }
+
+            LLIterator *iterator = reinterpret_cast<LLIterator *>(implOf(rhs));
+            if (!iterator) {
+                return false;
+            }
+
+            if (iterator == this) {
+                return true;
+            }
+
+            return _obj == iterator->_obj && _parent == iterator->_parent;
         }
 
-        /**
-         * Inequality operator. Equivalent to !(this == rhs).
-         * @param rhs The Iterator to compare to.
-         * @return `true` if they're not equal, `false` otherwise.
-         */
-        bool operator!=(const Iterator &rhs) const { return !operator==(rhs); }
+        size_t classId() const override { return 0x21ED7157; }
 
       private:
-        Iterator(Node *node, LinkedList const *parent)
+        LLIterator(Node *node, LinkedList const *parent)
                 : _obj(node), _parent(parent)
         {}
 
         Node *_obj;
         LinkedList const *_parent;
     };
+
+    ArcPtr<Node> _first = nullptr;
+    ArcPtr<Node> _last = nullptr;
+    size_t _size = 0;
 };
