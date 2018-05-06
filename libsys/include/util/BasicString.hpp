@@ -11,6 +11,7 @@
 template <typename T> class BasicString : public Collection<T>
 {
   public:
+    static constexpr size_t npos = -1;
     using ValueType = T;
 
     /** Constructs a BasicString with the default pre-allocation. */
@@ -203,6 +204,23 @@ template <typename T> class BasicString : public Collection<T>
     {
         insert(ch);
         return *this;
+    }
+
+    /**
+     * Returns a substring [start, start+length) as a new BasicString.
+     * @param start The start index.
+     * @param length The length of the string.
+     * @return A new BasicString equal to the substring.
+     */
+    BasicString substring(size_t start = 0, size_t length = npos)
+    {
+        if (start > _size) { start = _size; }
+
+        if (length > (_size - start)) { length = _size - start; }
+
+        if (length == 0) { return BasicString(); }
+
+        return BasicString(&_data[start], length);
     }
 
     /**
