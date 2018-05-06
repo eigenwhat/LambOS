@@ -11,6 +11,7 @@
 template <typename T> class BasicString : public Collection<T>
 {
   public:
+    static constexpr size_t npos = -1;
     using ValueType = T;
 
     /** Constructs a BasicString with the default pre-allocation. */
@@ -142,20 +143,7 @@ template <typename T> class BasicString : public Collection<T>
      */
     BasicString &append(BasicString const &str)
     {
-        const size_t requiredSize = _size + str.size() + 1;
-        if (requiredSize > capacity())
-        {
-            const size_t newSize = requiredSize > capacity()*2 ? requiredSize : 0;
-            _data.resize(newSize);
-        }
-
-        for (size_t i = 0; i < str.size(); ++i) {
-            _data[_size+i] = str[i];
-        }
-        _size += str.size();
-        _data[_size] = 0; // null terminate
-
-        return *this;
+        return append(str.cstr(), str.size());
     }
 
     /**
@@ -206,6 +194,23 @@ template <typename T> class BasicString : public Collection<T>
     }
 
     /**
+     * Returns a substring [start, start+length) as a new BasicString.
+     * @param start The start index.
+     * @param length The length of the string.
+     * @return A new BasicString equal to the substring.
+     */
+    BasicString substring(size_t start = 0, size_t length = npos)
+    {
+        if (start > _size) { start = _size; }
+
+        if (length > (_size - start)) { length = _size - start; }
+
+        if (length == 0) { return BasicString(); }
+
+        return BasicString(&_data[start], length);
+    }
+
+    /**
      * Returns the element at the given index.  No bounds checking is performed.
      * @param idx The index of the object.
      * @return The object at that index. If the index is out of bounds, the
@@ -233,6 +238,18 @@ template <typename T> class BasicString : public Collection<T>
         BasicString ret(*this);
         ret.insert(rhs);
         return ret;
+    }
+
+    BasicString &operator=(BasicString const &rhs)
+    {
+        _size = 0;
+        return append(rhs);
+    }
+
+    BasicString &operator=(T const *str)
+    {
+        _size = 0;
+        return append(str);
     }
 
     /**

@@ -26,7 +26,7 @@ char *strncpy(char *dst, char const *src, size_t num)
 
 int strcmp(char const *str1, char const *str2)
 {
-    while (*str1 && *str2 && (*str1++ == *str2++));
+    while (*str1 && *str2 && (*str1 == *str2)) { ++str1; ++str2; }
     return *(const unsigned char *)str1 - *(const unsigned char *)str2;
 }
 
@@ -34,6 +34,50 @@ int strncmp(char const *str1, char const *str2, size_t num)
 {
     while ((num--) && *str1 && *str2 && (*str1++ == *str2++));
     return *(const unsigned char *)str1 - *(const unsigned char *)str2;
+}
+
+char *strtok(char * restrict str, char const * restrict delim)
+{
+    static char *s = NULL;
+    if (str != NULL) {
+        s = str;
+    }
+
+    while (*s) {
+        int isDelim = 0;
+        for (int i = 0; delim[i] != 0; ++i) {
+            if (*s == delim[i]) {
+                isDelim = 1;
+                break;
+            }
+        }
+
+        if (!isDelim) {
+            break;
+        }
+
+        ++s;
+    }
+
+    if (*s == 0) {
+        return NULL;
+    }
+
+    char *tok = s;
+
+    while (*s) {
+        for (int i = 0; delim[i] != 0; ++i) {
+            if (*s == delim[i]) {
+                *s = 0;
+                ++s;
+                return tok;
+            }
+        }
+
+        ++s;
+    }
+
+    return tok;
 }
 
 void *memset(void *ptr, int value, size_t num)
