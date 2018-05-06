@@ -26,7 +26,7 @@ char *strncpy(char *dst, char const *src, size_t num)
 
 int strcmp(char const *str1, char const *str2)
 {
-    while (*str1 && *str2 && (*str1++ == *str2++));
+    while (*str1 && *str2 && (*str1 == *str2)) { ++str1; ++str2; }
     return *(const unsigned char *)str1 - *(const unsigned char *)str2;
 }
 
