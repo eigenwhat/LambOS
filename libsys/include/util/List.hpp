@@ -1,6 +1,7 @@
 #pragma once
 
 #include <util/Deque.hpp>
+#include <util/Iterable.hpp>
 
 /**
  * A List is, well, a list of things. Like Queues and Stacks, List elements are
@@ -8,7 +9,7 @@
  * @tparam T The type of object the List contains.
  */
 template<typename T>
-class List : public virtual Deque<T>
+class List : public virtual Deque<T>, public virtual Iterable<T>
 {
   public:
     /**
