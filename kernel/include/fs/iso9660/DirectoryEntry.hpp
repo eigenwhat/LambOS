@@ -13,8 +13,15 @@ class DirectoryEntry : public ::DirectoryEntry
   public:
     DirectoryEntry(DirectoryInfo &info, Volume &volume);
 
-
     LinkedList<String> *readdir() override;
+
+    /**
+     * Retrieves the directory entry for the given relative path if it exists.
+     * @param path The path to search out.
+     * @return The DirectoryEntry corresponding to that path, or `nullptr` if no
+     *         such thing exists.
+     */
+    ::DirectoryEntry *find(char const *path) override;
 
     /**
      * Does nothing. Read-only file system.

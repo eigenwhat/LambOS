@@ -16,11 +16,9 @@ bool Iso9660::hasFileSystem(AtaDevice &device)
     const auto volumeDescriptor = 0x10;
     Array<uint8_t> buf{device.sectorSize()};
     device.read(volumeDescriptor, (uint16_t *)buf.get());
-    Array<char> cd001{6};
-    memset(cd001.get(), 0, 6);
-    strncpy(cd001, (char*)&buf[1], 5);
-
-    return !strcmp(cd001.get(), "CD001");
+    char *cd001 = reinterpret_cast<char*>(&buf[1]);
+    cd001[5] = 0;
+    return !strcmp(cd001, "CD001");
 }
 
 Volume *Iso9660::createVolume(AtaDevice &device)

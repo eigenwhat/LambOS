@@ -1,7 +1,6 @@
 #include <fs/iso9660/DirectoryEntry.hpp>
 #include <fs/iso9660/Volume.hpp>
 #include <util/Array.hpp>
-#include <cstdio>
 #include <sys/asm.h>
 #include <cstring>
 
@@ -98,6 +97,40 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
     if (rrNameEntry) {
         setName(rockRidgeName(rrNameEntry));
     }
+}
+
+
+::DirectoryEntry *DirectoryEntry::find(char const *path)
+{
+    static constexpr char const *delimiters = "/";
+    // get first element in path
+    Array<char> pathCpy{strlen(path)+1};
+    strcpy(pathCpy, path);
+    char *firstElem = strtok(pathCpy, delimiters);
+
+    // read directory contents
+    const auto sectorSize = volume().parentDevice()->sectorSize();
+    size_t sectorsToRead = _extentLength / sectorSize
+                           + (_extentLength & sectorSize) ? 1 : 0;
+    Array<uint8_t> buf{sectorSize*sectorsToRead};
+    volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorsToRead);
+
+    // go over entries
+    auto bytesLeft = _extentLength;
+    uint8_t *infoBytes = buf.get();
+    DirectoryInfo *info = reinterpret_cast<DirectoryInfo *>(infoBytes);
+    while (bytesLeft > 0 && info->length > 0)
+    {
+        DirectoryEntry entry(*info, (iso9660::Volume&)volume());
+        if (!strcmp(entry.name(), firstElem)) {
+            // found our guy.
+            return new DirectoryEntry(entry);
+        }
+        infoBytes += info->length;
+        info = reinterpret_cast<DirectoryInfo *>(infoBytes);
+    }
+
+    return nullptr;
 }
 
 LinkedList<String> *DirectoryEntry::readdir()

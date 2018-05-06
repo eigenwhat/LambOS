@@ -7,6 +7,7 @@
 class Volume : public virtual Object
 {
   public:
+    Volume() : _parentDevice(nullptr) {}
     Volume(AtaDevice &device) : _parentDevice(&device) {}
 
     char const *label() { return _label.cstr(); }

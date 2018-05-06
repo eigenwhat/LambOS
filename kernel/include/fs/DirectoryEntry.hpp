@@ -17,6 +17,8 @@ class DirectoryEntry : public Object
         Directory
     };
 
+    DirectoryEntry(Volume &volume) : _volume(volume) {}
+
     DirectoryEntry(Volume &volume, Type type, String const &name)
             : _volume(volume), _type(type), _name(name) {}
 
@@ -33,15 +35,21 @@ class DirectoryEntry : public Object
     bool isFile() { return _type == Type::File; }
     bool isDir() { return _type == Type::Directory; }
 
-//    virtual DirectoryEntry *namei(char const *path) = 0;
-//    virtual struct fs_file *file_open(struct fs_dirent *d, uint8_t mode) = 0;
-//    virtual int close(struct fs_dirent *d) = 0;
+    /**
+     * Retrieves the directory entry for the given relative path if it exists.
+     * @param path The path to search out.
+     * @return The DirectoryEntry corresponding to that path, or `nullptr` if no
+     *         such thing exists.
+     */
+    virtual DirectoryEntry *find(char const *path) = 0;
 
     /**
      * Reads the names of the contents of the directory.
-     * @return A list of the directory contents.
+     * If the DirectoryEntry describes a file, `nullptr` is returned.
+     * @return A list of the directory contents, or `nullptr` if this is a file.
      */
     virtual LinkedList<String> *readdir() = 0;
+
     virtual int mkfile(char const *name) = 0;
     virtual int mkdir(char const *name) = 0;
     virtual int rmdir(char const *name) = 0;
@@ -50,7 +58,7 @@ class DirectoryEntry : public Object
 
   protected:
     void setType(Type type) { _type = type; }
-    void setName(String &&name) { _name = name; }
+    void setName(String const &name) { _name = name; }
 
   private:
     Volume &_volume;
