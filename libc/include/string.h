@@ -12,6 +12,7 @@ char *strcpy(char *destination, char const *source);
 char *strncpy(char *dst, char const *src, size_t num);
 int strcmp(char const *str1, char const *str2);
 int strncmp(char const *str1, char const *str2, size_t num);
+char *strtok(char * __restrict str, char const * __restrict delim);
 
 void *memset(void *ptr, int value, size_t num);
 void *memcpy(void *dst, void const *src, size_t num);

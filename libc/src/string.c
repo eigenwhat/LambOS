@@ -36,6 +36,50 @@ int strncmp(char const *str1, char const *str2, size_t num)
     return *(const unsigned char *)str1 - *(const unsigned char *)str2;
 }
 
+char *strtok(char * restrict str, char const * restrict delim)
+{
+    static char *s = NULL;
+    if (str != NULL) {
+        s = str;
+    }
+
+    while (*s) {
+        int isDelim = 0;
+        for (int i = 0; delim[i] != 0; ++i) {
+            if (*s == delim[i]) {
+                isDelim = 1;
+                break;
+            }
+        }
+
+        if (!isDelim) {
+            break;
+        }
+
+        ++s;
+    }
+
+    if (*s == 0) {
+        return NULL;
+    }
+
+    char *tok = s;
+
+    while (*s) {
+        for (int i = 0; delim[i] != 0; ++i) {
+            if (*s == delim[i]) {
+                *s = 0;
+                ++s;
+                return tok;
+            }
+        }
+
+        ++s;
+    }
+
+    return tok;
+}
+
 void *memset(void *ptr, int value, size_t num)
 {
     uint8_t *dst = (uint8_t *)ptr;

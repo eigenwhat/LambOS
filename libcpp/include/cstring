@@ -14,6 +14,7 @@ using ::strcpy;
 using ::strncpy;
 using ::strcmp;
 using ::strncmp;
+using ::strtok;
 
 using ::memset;
 using ::memcpy;
