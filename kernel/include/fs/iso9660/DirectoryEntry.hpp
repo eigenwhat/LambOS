@@ -13,7 +13,7 @@ class DirectoryEntry : public ::DirectoryEntry
   public:
     DirectoryEntry(DirectoryInfo &info, Volume &volume);
 
-    LinkedList<String> *readdir() override;
+    List<String> *readdir() override;
 
     /**
      * Retrieves the directory entry for the given relative path if it exists.

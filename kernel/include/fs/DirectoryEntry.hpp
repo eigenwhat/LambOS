@@ -2,7 +2,7 @@
 
 #include <Object.hpp>
 #include <stdint.h>
-#include <util/LinkedList.hpp>
+#include <util/List.hpp>
 #include <util/String.hpp>
 
 class Volume;
@@ -48,8 +48,13 @@ class DirectoryEntry : public Object
      * If the DirectoryEntry describes a file, `nullptr` is returned.
      * @return A list of the directory contents, or `nullptr` if this is a file.
      */
-    virtual LinkedList<String> *readdir() = 0;
+    virtual List<String> *readdir() = 0;
 
+    /**
+     * Creates a new file in the directory of this DirectoryEntry.
+     * @param name The name of the file.
+     * @return uh...
+     */
     virtual int mkfile(char const *name) = 0;
     virtual int mkdir(char const *name) = 0;
     virtual int rmdir(char const *name) = 0;

@@ -1,6 +1,7 @@
 #include <fs/iso9660/DirectoryEntry.hpp>
 #include <fs/iso9660/Volume.hpp>
 #include <util/Array.hpp>
+#include <util/LinkedList.hpp>
 #include <sys/asm.h>
 #include <cstring>
 
@@ -133,13 +134,13 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
     return nullptr;
 }
 
-LinkedList<String> *DirectoryEntry::readdir()
+List<String> *DirectoryEntry::readdir()
 {
     if (type() != Type::Directory) {
         return nullptr; // not a directory...
     }
 
-    LinkedList<String> *contents = new LinkedList<String>;
+    List<String> *contents = new LinkedList<String>;
 
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();
