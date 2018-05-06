@@ -22,29 +22,17 @@ bool X86AtaDevice::isAttached() const
 
 char const *X86AtaDevice::model()
 {
-    if (!_identified) {
-        identify();
-    }
-
-    return _descriptor.model();
+    return descriptor().model();
 }
 
 char const *X86AtaDevice::serial()
 {
-    if (!_identified) {
-        identify();
-    }
-
-    return _descriptor.serial();
+    return descriptor().serial();
 }
 
 char const *X86AtaDevice::firmware()
 {
-    if (!_identified) {
-        identify();
-    }
-
-    return _descriptor.firmware();
+    return descriptor().firmware();
 }
 
 X86AtaDevice::Type X86AtaDevice::type() const
@@ -131,7 +119,7 @@ void X86AtaDevice::softReset() const
     outb(_controlPort, 0x00);
 }
 
-void X86AtaDevice::identify()
+void X86AtaDevice::identify() const
 {
     // Set features register. 0 = PIO, 1 = DMA.
     outb(_ioPort + 1, 0);
@@ -172,7 +160,7 @@ void X86AtaDevice::identify()
     }
 }
 
-bool X86AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize)
+bool X86AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize) const
 {
     uint8_t status = 0;
 
@@ -219,7 +207,7 @@ bool X86AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *b
     return true;
 }
 
-void X86AtaDevice::pioRead(uint16_t *buf, uint32_t bytesToRead)
+void X86AtaDevice::pioRead(uint16_t *buf, uint32_t bytesToRead) const
 {
     uint32_t wordCount = bytesToRead / 2;
     for (size_t i = 0; i < wordCount; ++i) {
@@ -227,7 +215,7 @@ void X86AtaDevice::pioRead(uint16_t *buf, uint32_t bytesToRead)
     }
 }
 
-void X86AtaDevice::pioWrite(uint16_t *buf, uint32_t bytesToRead)
+void X86AtaDevice::pioWrite(uint16_t *buf, uint32_t bytesToRead) const
 {
     uint32_t wordCount = bytesToRead / 2;
     for (size_t i = 0; i < wordCount; ++i) {

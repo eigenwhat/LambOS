@@ -67,7 +67,7 @@ class X86AtaDevice : public AtaDevice
      * The size of the device's sectors.
      * @return An unsigned 32-bit integer with the sector size in bytes.
      */
-    uint32_t sectorSize() const override { return _descriptor.sectorSize(); }
+    uint32_t sectorSize() const override { return descriptor().sectorSize(); }
 
     /**
      * The type of device. [P-ATA, P-ATAPI, S-ATA, S-ATAPI, unknown]
@@ -86,6 +86,12 @@ class X86AtaDevice : public AtaDevice
     bool read(uint64_t address, uint16_t *buf, size_t sectors = 1) override;
 
   private:
+    AtaDeviceDescriptor &descriptor() const
+    {
+        if (!_identified) identify();
+        return _descriptor;
+    }
+
     // ====================================================
     // ATA base ports and bits
     // ====================================================
@@ -156,7 +162,7 @@ class X86AtaDevice : public AtaDevice
     void ioWait() const;
 
     /** Identifies the device's name, model, firmware. */
-    void identify();
+    void identify() const;
 
     /**
      * Sends an ATA PACKET command plus the corresponding ATAPI command.
@@ -165,7 +171,8 @@ class X86AtaDevice : public AtaDevice
      * @param bufSize The size of the PIO buffer, in BYTES.
      * @return true if success, false if error
      */
-    bool performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf, size_t bufSize);
+    bool performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *buf,
+                                  size_t bufSize) const;
 
     /**
      * Reads in data via PIO from the device.
@@ -173,7 +180,7 @@ class X86AtaDevice : public AtaDevice
      * @param bytesToRead The amount of data to read, in BYTES. Should be
      *                    divisible by 2, as we read in 2-byte words.
      */
-    void pioRead(uint16_t *buf, uint32_t bytesToRead);
+    void pioRead(uint16_t *buf, uint32_t bytesToRead) const;
 
     /**
      * Writes out data via PIO to the device.
@@ -181,12 +188,12 @@ class X86AtaDevice : public AtaDevice
      * @param bytesToRead The amount of data to write, in BYTES. Should be
      *                    divisible by 2, as we write out in 2-byte words.
      */
-    void pioWrite(uint16_t *buf, uint32_t bytesToRead);
+    void pioWrite(uint16_t *buf, uint32_t bytesToRead) const;
 
     bool const _primary;
     uint16_t const _slaveBit;
     uint16_t const _ioPort;
     uint16_t const _controlPort;
-    bool _identified = false;
-    AtaDeviceDescriptor _descriptor{true};
+    mutable bool _identified = false;
+    mutable AtaDeviceDescriptor _descriptor{true};
 };
