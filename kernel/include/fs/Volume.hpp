@@ -10,20 +10,30 @@ class Volume : public virtual Object
     Volume() : _parentDevice(nullptr) {}
     Volume(AtaDevice &device) : _parentDevice(&device) {}
 
-    char const *label() { return _label.cstr(); }
-
     /**
-     * Unmounts the volume.
-     * @return 0 if success, an error code otherwise.
+     * The label of the volume.
+     * @return The String containing the volume's label.
      */
-    virtual int unmount() = 0;
+    String const &label() { return _label; }
 
     /**
      * Returns the DirectoryEntry corresponding to the root of the Volume.
      * @return A pointer to the DirectoryEntry.
      */
-    virtual DirectoryEntry *root() = 0;
+    virtual DirectoryEntry *root() const = 0;
 
+    /**
+     * Retrieves the directory entry for the given absolute path if it exists.
+     * @param path The path to search out.
+     * @return The DirectoryEntry corresponding to that path, or `nullptr` if no
+     *         such thing exists.
+     */
+    virtual DirectoryEntry *find(char const *path) const = 0;
+
+    /**
+     * The physical device the Volume is on.
+     * @return The AtaDevice instance.
+     */
     AtaDevice *parentDevice() const { return _parentDevice.get(); }
 
   protected:

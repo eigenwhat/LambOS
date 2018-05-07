@@ -80,14 +80,14 @@ void Volume::init()
     _label.append(descriptor->volumeId, volumeIdLength);
 }
 
-int Volume::unmount()
-{
-    return -1;
-}
-
-::DirectoryEntry *Volume::root()
+::DirectoryEntry *Volume::root() const
 {
     return _root.get();
+}
+
+::DirectoryEntry *Volume::find(char const *path) const
+{
+    return _root->find(path);
 }
 
 }
