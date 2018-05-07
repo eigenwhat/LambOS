@@ -49,6 +49,12 @@ QEMU (specifically, QEMU for the i386 system target).
 
 ### CMake
 
+In order to build with CMake, you'll need to tell it where to find your
+cross compiler. Included in the cmake/ folder are two simple toolchain
+definitions for i586-elf and i686-elf. To use them, set the 
+`CMAKE_TOOLCHAIN_FILE` variable to the file path of the toolchain file
+as part of the CMake invocation.
+
 The following targets are available:
 
 * `lambos-kernel`: Builds the kernel.
