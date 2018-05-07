@@ -11,7 +11,8 @@ file(GLOB_RECURSE GLOB_INCLUDES include/*.hpp include/*.h)
 
 set (SOURCES
         ${GLOB_INCLUDES} # ok with globbing since they're not translation units
-        src/io/PrintStream.cpp)
+        src/fs/Path.cpp
+        src/io/PrintStream.cpp
         src/util/StringTokenizer.cpp)
 
 add_library(${LIBSYS_TARGET} STATIC ${SOURCES})
