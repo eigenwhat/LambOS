@@ -14,6 +14,13 @@ template <typename T> class BasicString : public Collection<T>
     static constexpr size_t npos = -1;
     using ValueType = T;
 
+    static BasicString const &emptyString()
+    {
+        static BasicString *s_empty = nullptr;
+        if (!s_empty) { s_empty = new BasicString; }
+        return *s_empty;
+    }
+
     /** Constructs a BasicString with the default pre-allocation. */
     BasicString() : BasicString(8) {}
 
@@ -22,7 +29,10 @@ template <typename T> class BasicString : public Collection<T>
      * characters.
      * @param reserve The number of characters to pre-allocate space for.
      */
-    BasicString(size_t reserve) : _data(reserve + 1) {}
+    BasicString(size_t reserve) : _data(reserve + 1)
+    {
+        for (size_t i = 0; i < _data.capacity(); ++i) { _data[i] = 0; }
+    }
 
     /**
      * Constructs a BasicString, allocating and filling space for the provided
