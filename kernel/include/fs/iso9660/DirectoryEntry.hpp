@@ -2,7 +2,7 @@
 
 #include <fs/DirectoryEntry.hpp>
 #include <fs/iso9660/DataStructures.hpp>
-#include <util/String.hpp>
+#include <util/StringTokenizer.hpp>
 
 namespace iso9660 {
 
@@ -13,8 +13,6 @@ class DirectoryEntry : public ::DirectoryEntry
   public:
     DirectoryEntry(DirectoryInfo &info, Volume &volume);
 
-    List<String> *readdir() override;
-
     /**
      * Retrieves the directory entry for the given relative path if it exists.
      * @param path The path to search out.
@@ -22,6 +20,13 @@ class DirectoryEntry : public ::DirectoryEntry
      *         such thing exists.
      */
     ::DirectoryEntry *find(char const *path) override;
+
+    /**
+     * Reads the names of the contents of the directory.
+     * If the DirectoryEntry describes a file, `nullptr` is returned.
+     * @return A list of the directory contents, or `nullptr` if this is a file.
+     */
+    List<String> *readdir() override;
 
     /**
      * Does nothing. Read-only file system.
@@ -54,8 +59,10 @@ class DirectoryEntry : public ::DirectoryEntry
     int unlink(char const *) override;
 
   private:
-    uint32_t _extentLba;
-    uint32_t _extentLength;
+    ::DirectoryEntry *find(StringTokenizer &tokenizer);
+
+    uint32_t _extentLba = 0;
+    uint32_t _extentLength = 0;
 };
 
 }

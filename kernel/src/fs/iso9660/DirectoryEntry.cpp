@@ -22,19 +22,12 @@ void fixEntryName(char *name, int length)
     }
 }
 
-enum class RREntry
+constexpr size_t sectorsToRead(size_t bytesToRead, size_t sectorSize)
 {
-    PX,
-    PN,
-    SL,
-    NM,
-    CL,
-    PL,
-    RE,
-    TF,
-    SF,
-    Unknown
-};
+    return bytesToRead / sectorSize + (bytesToRead % sectorSize) ? 1 : 0;
+}
+
+enum class RREntry { PX, PN, SL, NM, CL, PL, RE, TF, SF, Unknown };
 
 RREntry decodeSignature(char *ptr)
 {
@@ -105,16 +98,19 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
 {
     static constexpr char const *delimiters = "/";
     // get first element in path
-    Array<char> pathCpy{strlen(path)+1};
-    strcpy(pathCpy, path);
-    char *firstElem = strtok(pathCpy, delimiters);
+    StringTokenizer tokenizer(path, delimiters);
+    return find(tokenizer);
+}
+
+::DirectoryEntry *DirectoryEntry::find(StringTokenizer &tokenizer)
+{
+    auto elem = tokenizer.nextToken();
 
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();
-    size_t sectorsToRead = _extentLength / sectorSize
-                           + (_extentLength & sectorSize) ? 1 : 0;
-    Array<uint8_t> buf{sectorSize*sectorsToRead};
-    volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorsToRead);
+    const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
+    Array<uint8_t> buf{sectorSize*sectorCount};
+    volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorCount);
 
     // go over entries
     auto bytesLeft = _extentLength;
@@ -123,8 +119,11 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
     while (bytesLeft > 0 && info->length > 0)
     {
         DirectoryEntry entry(*info, (iso9660::Volume&)volume());
-        if (!strcmp(entry.name(), firstElem)) {
-            // found our guy.
+        if (!strcmp(entry.name(), elem.cstr())) {
+            if (tokenizer.hasNextToken()) {
+                return entry.find(tokenizer);
+            }
+
             return new DirectoryEntry(entry);
         }
         infoBytes += info->length;
@@ -144,10 +143,9 @@ List<String> *DirectoryEntry::readdir()
 
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();
-    size_t sectorsToRead = _extentLength / sectorSize
-                         + (_extentLength & sectorSize) ? 1 : 0;
-    Array<uint8_t> buf{sectorSize*sectorsToRead};
-    volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorsToRead);
+    const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
+    Array<uint8_t> buf{sectorSize*sectorCount};
+    volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorCount);
 
     // go over entries
     auto bytesLeft = _extentLength;
