@@ -4,10 +4,11 @@ Lamb Operating System
 Overview
 --------
 LambOS is a hobby operating system with three intentions:
-* Fulfill a long-standing goal to write an operating system
+* Fulfill a personal long-standing goal to write an operating system.
 * Gain experience in low-level software engineering and learn more about
-  computer architecture
-* Explore ideas about how an operating system could function
+  computer architecture.
+* Make a codebase that is easy for OS dev beginners to read and digest
+  in small chunks (i.e. *NOT* your typical terse, uncommented C code).
 
 Name
 ----
@@ -19,8 +20,10 @@ sort of inside joke, the kind nobody outside that office could ever
 truly understand and only really ever serves to annoy other people. But,
 it worked out neatly enough for the name of an operating system.
 
-I'm probably going to rename it to Guinea Pig OS at some point, because
-have you SEEN THOSE THINGS??
+I think I'm going to rename it after guinea pigs at some point, because
+you know, experimenting with OS development, being a guinea pig...
+
+Also, have you SEEN THOSE THINGS??
 
 <img src="https://i.redd.it/qnbtas3gw1n01.jpg"
      alt="The cutest little thing ever"
@@ -56,32 +59,3 @@ The following targets are available:
 * `run-qemu`: Configures and launches QEMU with the bootable ISO loaded.
     Only available if QEMU (specifically qemu-system-i386) is installed.
 
-### Makefile
-
-The original build system for the project, hand-rolled Makefiles, is
-still available if you don't have CMake or don't feel like dealing with
-it. Once the environment is set up, compilation is simple. Simply run:
-
-```
-$ make
-```
-
-This will compile the project and create an ISO image to boot from. If
-the prerequisites for building the ISO aren't there, the build will
-technically fail, but the kernel.bin will be good to go otherwise.
-
-Additionally, if you have QEMU and/or Bochs, the Makefile comes with
-run targets to quickly launch the emulator of choice with the newly
-built image.
-
-For QEMU:
-
-```
-$ make go-qemu
-```
-
-For Bochs:
-
-```
-$ make go-bochs
-```
