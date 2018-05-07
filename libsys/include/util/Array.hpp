@@ -11,7 +11,21 @@ template <typename T> class Array : public Collection<T>
 {
   public:
     Array(size_t size) : _array(new T[size]), _size(size) {}
-    ~Array() { delete[] _array; }
+
+    ~Array() { if (_array) { delete[] _array; } }
+
+    Array(Array const &other) = delete;
+
+    /**
+     * Moves the contents of one array to the other.
+     * @note This leaves the moved-from array unusable.
+     * @param other The array whose contents to move.
+     */
+    Array(Array &&other) : _size(other.size())
+    {
+        _array = other._array;
+        other._array = nullptr;
+    }
 
     /**
      * Returns the backing C style array.

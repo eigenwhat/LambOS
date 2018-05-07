@@ -15,7 +15,7 @@ public:
      * blocking for more data.
      * @return The estimated number of bytes available to read/skip.
      */
-    virtual size_t available() { return 0; }
+    virtual size_t available() const { return 0; }
 
     /** Closes the stream, releasing any resources associated with it. */
     virtual void close() {}
@@ -36,7 +36,7 @@ public:
      * Returns whether or not marking a reset point for the stream is supported.
      * @return `true` if supported, `false` otherwise.
      */
-    virtual bool markSupported() { return false; }
+    virtual bool markSupported() const { return false; }
 
     /**
      * Reads the next byte of data from the stream.

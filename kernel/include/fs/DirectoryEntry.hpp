@@ -4,6 +4,7 @@
 #include <stdint.h>
 #include <util/List.hpp>
 #include <util/String.hpp>
+#include <io/InputStream.hpp>
 
 class Volume;
 
@@ -28,11 +29,22 @@ class DirectoryEntry : public Object
      */
     Volume &volume() { return _volume; }
 
+    /**
+     * The type of filesystem object the entry describes.
+     * @return The Type.
+     */
     Type type() { return _type; }
 
+    /**
+     * The name of the file or directory.
+     * @return A C string containing the name of the file or directory.
+     */
     char const *name() { return _name.cstr(); }
 
+    /** Returns `true` if the DirectoryEntry points to a file. */
     bool isFile() { return _type == Type::File; }
+
+    /** Returns `true` if the DirectoryEntry points to a directory. */
     bool isDir() { return _type == Type::Directory; }
 
     /**
@@ -49,6 +61,12 @@ class DirectoryEntry : public Object
      * @return A list of the directory contents, or `nullptr` if this is a file.
      */
     virtual List<String> *readdir() = 0;
+
+    /**
+     * Prepares an InputStream for reading the contents of the file.
+     * @return The InputStream, or `nullptr` if this is a directory.
+     */
+    virtual InputStream *fileStream() = 0;
 
     /**
      * Creates a new file in the directory of this DirectoryEntry.

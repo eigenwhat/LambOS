@@ -29,6 +29,12 @@ class DirectoryEntry : public ::DirectoryEntry
     List<String> *readdir() override;
 
     /**
+     * Prepares an InputStream for reading the contents of the file.
+     * @return The InputStream, or `nullptr` if this is a directory.
+     */
+    InputStream *fileStream() override;
+
+    /**
      * Does nothing. Read-only file system.
      * @return -1.
      */

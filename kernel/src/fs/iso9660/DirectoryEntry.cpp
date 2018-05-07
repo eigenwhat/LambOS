@@ -4,6 +4,7 @@
 #include <util/LinkedList.hpp>
 #include <sys/asm.h>
 #include <cstring>
+#include <util/StringTokenizer.hpp>
 
 namespace iso9660 {
 
@@ -75,6 +76,52 @@ rockridge::AltNameEntryInfo *findRockRidgeNameEntry(char *ptr, size_t len)
 
     return nullptr;
 }
+
+class IsoFileStream : public InputStream
+{
+  public:
+    IsoFileStream(size_t fileSize, size_t bufferSize)
+            : _fileSize(fileSize), _buffer(bufferSize) {}
+
+    size_t available() const override { return _fileSize - _pos; }
+
+    int read() override
+    {
+        if (_pos == _fileSize) {
+            return kEndOfStream;
+        }
+
+        if (_readsUntilInvalid) {
+            --_readsUntilInvalid;
+        }
+
+        return _buffer[_pos++];
+    }
+
+    void mark(size_t readsLeft) override
+    {
+        _readsUntilInvalid = readsLeft;
+        _mark = _pos;
+    }
+
+    bool markSupported() const override { return true; }
+
+    void reset() override
+    {
+        if (_readsUntilInvalid) {
+            _pos = _mark;
+        }
+    }
+
+    uint8_t *buffer() { return _buffer.get(); }
+
+  private:
+    size_t _fileSize = 0;
+    Array<uint8_t> _buffer;
+    size_t _pos = 0;
+    size_t _mark = 0;
+    size_t _readsUntilInvalid = 0;
+};
 
 } // anonymous namespace
 
@@ -167,6 +214,20 @@ List<String> *DirectoryEntry::readdir()
     }
 
     return contents;
+}
+
+InputStream *DirectoryEntry::fileStream()
+{
+    if (isDir()) return nullptr;
+
+    // build an input stream and some junk
+    const auto sectorSize = volume().parentDevice()->sectorSize();
+    const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
+    auto *fstream = new IsoFileStream(_extentLength, sectorSize*sectorCount);
+    volume().parentDevice()->read(_extentLba, (uint16_t *)fstream->buffer(),
+                                  sectorCount);
+
+    return fstream;
 }
 
 int DirectoryEntry::rmdir(char const *) { return -1; }
