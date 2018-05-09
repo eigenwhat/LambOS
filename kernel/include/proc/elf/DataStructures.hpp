@@ -5,7 +5,7 @@
 
 namespace elf {
 
-enum class Bitness : uint8_t { k32Bit = 1, k64Bit = 2 };
+enum class Bitness : uint8_t { kNone = 0, k32Bit = 1, k64Bit = 2 };
 enum class Endianness : uint8_t { LittleEndian = 1, BigEndian = 2 };
 enum class Type : uint16_t { Relocatable = 1, Executable = 2, Shared = 3, Core = 4 };
 
@@ -25,7 +25,17 @@ enum class InstructionSet : uint16_t
 
 struct ElfHeader32
 {
-    uint8_t id;
+    static constexpr uint8_t kMagicNumber = 0x7F;
+    static constexpr uint32_t kCurrentVersion = 1;
+
+    bool checkMagic() const
+    {
+        bool const magicMatches = magic == ElfHeader32::kMagicNumber;
+        bool const elfMatches = elf[0] == 'E' && elf[1] == 'L' && elf[2] == 'F';
+        return magicMatches && elfMatches;
+    }
+
+    uint8_t magic;
     char elf[3]; // == "ELF"
     Bitness bitness;
     Endianness endianness;
