@@ -4,7 +4,5 @@ stoof/
 .AppleDouble
 .DS_Store
 none
-
 .idea
-
-cmake-build-debug/
+cmake-build-*/

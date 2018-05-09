@@ -4,8 +4,8 @@
 #include <stdint.h>
 #include <cpu/RealTimeClock.hpp>
 
-class X86RealTimeClock : RealTimeClock
+class X86RealTimeClock : public RealTimeClock
 {
 public:
-    virtual DateTime currentTime();
+    DateTime currentTime() override;
 };
