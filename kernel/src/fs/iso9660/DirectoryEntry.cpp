@@ -180,7 +180,7 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
     return nullptr;
 }
 
-List<String> *DirectoryEntry::readdir()
+List<String> *DirectoryEntry::readdir() const
 {
     if (type() != Type::Directory) {
         return nullptr; // not a directory...
@@ -216,7 +216,7 @@ List<String> *DirectoryEntry::readdir()
     return contents;
 }
 
-InputStream *DirectoryEntry::fileStream()
+InputStream *DirectoryEntry::fileStream() const
 {
     if (isDir()) return nullptr;
 

@@ -27,25 +27,25 @@ class DirectoryEntry : public Object
      * Returns the volume this directory entry belongs to.
      * @return The Volume object.
      */
-    Volume &volume() { return _volume; }
+    Volume &volume() const { return _volume; }
 
     /**
      * The type of filesystem object the entry describes.
      * @return The Type.
      */
-    Type type() { return _type; }
+    Type type() const { return _type; }
 
     /**
      * The name of the file or directory.
      * @return A C string containing the name of the file or directory.
      */
-    char const *name() { return _name.cstr(); }
+    char const *name() const { return _name.cstr(); }
 
     /** Returns `true` if the DirectoryEntry points to a file. */
-    bool isFile() { return _type == Type::File; }
+    bool isFile() const { return _type == Type::File; }
 
     /** Returns `true` if the DirectoryEntry points to a directory. */
-    bool isDir() { return _type == Type::Directory; }
+    bool isDir() const { return _type == Type::Directory; }
 
     /**
      * Retrieves the directory entry for the given relative path if it exists.
@@ -60,13 +60,13 @@ class DirectoryEntry : public Object
      * If the DirectoryEntry describes a file, `nullptr` is returned.
      * @return A list of the directory contents, or `nullptr` if this is a file.
      */
-    virtual List<String> *readdir() = 0;
+    virtual List<String> *readdir() const = 0;
 
     /**
      * Prepares an InputStream for reading the contents of the file.
      * @return The InputStream, or `nullptr` if this is a directory.
      */
-    virtual InputStream *fileStream() = 0;
+    virtual InputStream *fileStream() const = 0;
 
     /**
      * Creates a new file in the directory of this DirectoryEntry.
