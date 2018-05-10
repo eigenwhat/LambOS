@@ -4,6 +4,9 @@
 
 namespace std {
 
-template <class T> constexpr remove_reference_t<T> &&move(T&& a) { return a; }
+template <class T> constexpr remove_reference_t<T> &&move(T&& a)
+{
+    return static_cast<typename std::remove_reference_t<T>&&>(a);
+}
 
 } // namespace std
