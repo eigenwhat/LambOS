@@ -2,6 +2,7 @@
 
 #include <Object.hpp>
 
+#include <utility>
 #include <stddef.h>
 #include <stdint.h>
 
@@ -19,11 +20,11 @@ class DefaultResizer
      * @param offset The offset from the beginning where the old data should go.
      * @return The new memory block.
      */
-    static T *resize(T const *oldData, size_t oldSize, size_t newSize, size_t offset = 0)
+    static T *resize(T *oldData, size_t oldSize, size_t newSize, size_t offset = 0)
     {
         T *newData = new T[newSize];
         for (size_t i = 0; i < oldSize; ++i) {
-            newData[i+offset] = oldData[i];
+            newData[i+offset] = std::move(oldData[i]);
         }
         return newData;
     }

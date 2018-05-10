@@ -48,6 +48,25 @@ template <typename T> class LinkedList : public virtual List<T>
     }
 
     /**
+     * Adds an element to the front of the List.
+     * @param obj The object to add.
+     * @return `true` if an object was added. `false` otherwise.
+     */
+    bool push(T &&obj) override
+    {
+        if (!_first) {
+            _first = ArcPtr<Node>::make(std::move(obj));
+            _last = _first;
+        } else {
+            _first = _first->insertBefore(std::move(obj));
+        }
+
+        ++_size;
+
+        return true;
+    }
+
+    /**
      * Removes an element from the front of the List.
      * @return The object. If the List is empty, the return value is undefined.
      */
@@ -81,6 +100,17 @@ template <typename T> class LinkedList : public virtual List<T>
      * @return `true` if an object was added. `false` otherwise.
      */
     bool enqueue(const T &obj) override
+    {
+        if (!_last) {
+            return push(obj); // list is empty
+        }
+
+        _last = _last->insertAfter(obj);
+        ++_size;
+        return true;
+    }
+
+    bool enqueue(T &&obj) override
     {
         if (!_last) {
             return push(obj); // list is empty
@@ -221,6 +251,7 @@ template <typename T> class LinkedList : public virtual List<T>
     struct Node : public Object
     {
         Node(const T &v) : value(v) {}
+        Node(T &&v) : value(std::move(v)) {}
 
         /**
          * Inserts an object into the List positioned before this node.
@@ -245,6 +276,21 @@ template <typename T> class LinkedList : public virtual List<T>
         ArcPtr<Node> insertAfter(const T &obj)
         {
             auto n = ArcPtr<Node>::make(obj);
+            n->prev = this;
+            n->next = next;
+            if (next) next->prev = n.get();
+            next = n;
+            return n;
+        }
+
+        /**
+         * Inserts an object into the List positioned after this node.
+         * @param obj The object to add.
+         * @return The newly created node.
+         */
+        ArcPtr<Node> insertAfter(T &&obj)
+        {
+            auto n = ArcPtr<Node>::make(std::move(obj));
             n->prev = this;
             n->next = next;
             if (next) next->prev = n.get();
