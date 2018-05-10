@@ -190,6 +190,8 @@ class X86AtaDevice : public AtaDevice
      */
     void pioWrite(uint16_t *buf, uint32_t bytesToRead) const;
 
+    bool readInternal(uint64_t address, uint16_t *buf, size_t sectors);
+
     bool const _primary;
     uint16_t const _slaveBit;
     uint16_t const _ioPort;

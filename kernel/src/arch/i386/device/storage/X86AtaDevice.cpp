@@ -55,6 +55,18 @@ bool X86AtaDevice::read(uint64_t address, uint16_t *buf, size_t sectors)
 {
     if (sectors == 0) return false;
 
+    if (sectors > 10) {
+        size_t const bufIncr = sectorSize() * 10 / sizeof(uint16_t);
+        bool success = read(address + 10, buf + bufIncr, sectors - 10);
+        return success && readInternal(address, buf, 10);
+    } else {
+        return readInternal(address, buf, sectors);
+    }
+
+}
+
+bool X86AtaDevice::readInternal(uint64_t address, uint16_t *buf, size_t sectors)
+{
     const size_t maxByteCount = sectorSize() * sectors;
     outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit << 4);
     ioWait();
