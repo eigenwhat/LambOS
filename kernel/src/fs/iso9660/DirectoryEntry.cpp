@@ -25,7 +25,7 @@ void fixEntryName(char *name, int length)
 
 constexpr size_t sectorsToRead(size_t bytesToRead, size_t sectorSize)
 {
-    return bytesToRead / sectorSize + (bytesToRead % sectorSize) ? 1 : 0;
+    return bytesToRead / sectorSize + ((bytesToRead % sectorSize) ? 1 : 0);
 }
 
 enum class RREntry { PX, PN, SL, NM, CL, PL, RE, TF, SF, Unknown };
