@@ -3,6 +3,7 @@
 #include <util/Queue.hpp>
 
 #include <stdint.h>
+#include <utility>
 
 /**
  * A RingBuffer is a Queue of fixed size. If an object is enqueued while the
@@ -29,6 +30,19 @@ public:
     bool enqueue(const T &item) override
     {
         _buffer[_back] = item;
+        _back = _next(_back);
+        if(_front == _back) {
+            _front = _next(_front);
+        } else {
+            ++_size;
+        }
+
+        return true;
+    }
+
+    bool enqueue(T &&item) override
+    {
+        _buffer[_back] = std::move(item);
         _back = _next(_back);
         if(_front == _back) {
             _front = _next(_front);

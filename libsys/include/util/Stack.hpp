@@ -19,6 +19,13 @@ class Stack : public virtual Collection<T>
     virtual bool push(const T &obj) = 0;
 
     /**
+     * Adds an element to the top of the Stack.
+     * @param obj The object to add.
+     * @return `true` if an object was added. `false` otherwise.
+     */
+    virtual bool push(T &&obj) = 0;
+
+    /**
      * Removes an element from the top of the Stack.
      * @return The object. If the Stack is empty, the return value is undefined.
      */

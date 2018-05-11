@@ -10,7 +10,10 @@
 template <typename T> class Array : public Collection<T>
 {
   public:
-    Array(size_t size) : _array(new T[size]), _size(size) {}
+    Array(size_t size) : _array(nullptr), _size(size)
+    {
+        if (size) { _array = new T[size]; }
+    }
 
     ~Array() { if (_array) { delete[] _array; } }
 
@@ -21,9 +24,8 @@ template <typename T> class Array : public Collection<T>
      * @note This leaves the moved-from array unusable.
      * @param other The array whose contents to move.
      */
-    Array(Array &&other) : _size(other.size())
+    Array(Array &&other) : _array(other._array), _size(other.size())
     {
-        _array = other._array;
         other._array = nullptr;
     }
 
@@ -37,13 +39,13 @@ template <typename T> class Array : public Collection<T>
      * Returns the backing C style array.
      * @return A T * pointing to the front of the array.
      */
-    const T *get() const { return _array; }
+    T const *get() const { return _array; }
 
     /**
      * Allows streamlined conversion to the backing T[].
      * @return A T * pointing to the front of the array.
      */
-    operator const T*() const { return get(); }
+    operator T const *() const { return get(); }
 
     /**
      * Allows streamlined conversion to the backing T[].
@@ -94,6 +96,16 @@ template <typename T> class Array : public Collection<T>
      * @return `false`.
      */
     bool remove(const T&) override { return false; }
+
+    Array &operator=(Array &&rhs)
+    {
+        auto &size = const_cast<size_t&>(_size);
+        size = rhs._size;
+        if (_array) { delete[] _array; }
+        _array = rhs._array;
+        rhs._array = nullptr;
+        return *this;
+    }
 
   private:
     T *_array;

@@ -19,6 +19,13 @@ public:
     virtual bool enqueue(const T &obj) = 0;
 
     /**
+     * Adds an element to the back of the Queue.
+     * @param obj The object to add.
+     * @return `true` if an object was added. `false` otherwise.
+     */
+    virtual bool enqueue(T &&obj) = 0;
+
+    /**
      * Removes an element from the front of the queue.
      * @return The object. If the queue is empty, the return value is undefined.
      */

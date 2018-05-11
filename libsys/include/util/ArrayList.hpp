@@ -46,6 +46,19 @@ class ArrayList : public List<T>
     ArrayList(size_t reserve) : _data(reserve) {}
 
     /**
+     * Reserves enough room to hold the given amount.
+     * This function can only grow the ArrayList. If reserve <= capacity, no
+     * action is performed.
+     * @param reserve The number of elements to make room for.
+     */
+    void reserve(size_t reserve)
+    {
+        if (reserve > capacity()) {
+            _data.resize(reserve);
+        }
+    }
+
+    /**
      * Adds an element to the top of the ArrayList.
      * @note This is an O(n) operation! If you're doing this often, consider
      *       the ordering of your data, or use a different List implementation.
@@ -56,6 +69,21 @@ class ArrayList : public List<T>
     {
         shiftOrResize(1);
         _data[0] = obj;
+        ++_size;
+        return true;
+    }
+
+    /**
+     * Adds an element to the top of the ArrayList.
+     * @note This is an O(n) operation! If you're doing this often, consider
+     *       the ordering of your data, or use a different List implementation.
+     * @param obj The object to add.
+     * @return `true` if an object was added. `false` otherwise.
+     */
+    bool push(T &&obj) override
+    {
+        shiftOrResize(1);
+        _data[0] = std::move(obj);
         ++_size;
         return true;
     }
@@ -75,6 +103,23 @@ class ArrayList : public List<T>
         ++_size;
         return true;
     }
+
+    /**
+     * Adds an element to the back of the ArrayList.
+     * @param obj The object to add.
+     * @return `true` if an object was added. `false` otherwise.
+     */
+    bool enqueue(T &&obj) override
+    {
+        if (_size == capacity()) {
+            _data.resize();
+        }
+
+        _data[_size] = std::move(obj);
+        ++_size;
+        return true;
+    }
+
 
     /**
      * Removes an element from the top of the ArrayList.
