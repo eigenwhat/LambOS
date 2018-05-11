@@ -8,7 +8,7 @@
 /** A stream of bytes that can be read from. */
 class InputStream : public Object
 {
-public:
+  public:
     static constexpr int kEndOfStream = -1;
     /**
      * Returns an estimate of the number of bytes available for reading without
@@ -52,13 +52,30 @@ public:
      * @param bytesToRead The maximum number of bytes to read.
      * @return The number of bytes actually read.
      */
-    virtual int read(uint8_t *bytes, size_t bytesToRead)
+    virtual size_t read(uint8_t *bytes, size_t bytesToRead)
     {
-        int bytesRead = 0;
+        size_t bytesRead = 0;
         for (; bytesToRead > 0; --bytesToRead) {
             int byte = read();
             if (byte == kEndOfStream) break; // reached end of stream.
             *bytes++ = byte;
+            ++bytesRead;
+        }
+
+        return bytesRead;
+    }
+
+    /**
+     * Advances the stream until `bytesToSkip` bytes have been skipped over, or
+     * the end of the stream has been reached.
+     * @param bytesToSkip The maximum number of bytes to skip over.
+     * @return The number of bytes actually skipped.
+     */
+    virtual size_t skip(size_t bytesToSkip)
+    {
+        size_t bytesRead = 0;
+        for (; bytesToSkip > 0; --bytesToSkip) {
+            if (read() == kEndOfStream) break; // reached end of stream.
             ++bytesRead;
         }
 
