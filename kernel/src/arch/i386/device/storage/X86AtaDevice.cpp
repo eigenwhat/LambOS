@@ -1,7 +1,8 @@
 #include <arch/i386/device/storage/X86AtaDevice.hpp>
 #include <sys/asm.h>
-#include <cstdio>
 #include <Kernel.hpp>
+
+#include <cstdio>
 
 X86AtaDevice::Type X86AtaDevice::typeOf(bool primary, bool master)
 {
@@ -56,9 +57,19 @@ bool X86AtaDevice::read(uint64_t address, uint16_t *buf, size_t sectors)
     if (sectors == 0) return false;
 
     if (sectors > 10) {
-        size_t const bufIncr = sectorSize() * 10 / sizeof(uint16_t);
-        bool success = read(address + 10, buf + bufIncr, sectors - 10);
-        return success && readInternal(address, buf, 10);
+        size_t const bufIncr = sectorSize() / sizeof(uint16_t);
+
+        bool success = true;
+        for (size_t offset = 0; offset < sectors; offset += 10) {
+            size_t const bufOffset = bufIncr * offset;
+            size_t sectorsToRead = sectors - offset < 10 ? sectors - offset : 10;
+            success = readInternal(address + offset, buf + bufOffset, sectorsToRead);
+            if (!success) {
+                break;
+            }
+        }
+
+        return success;
     } else {
         return readInternal(address, buf, sectors);
     }
