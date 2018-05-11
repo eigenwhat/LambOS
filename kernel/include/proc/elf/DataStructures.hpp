@@ -96,13 +96,13 @@ struct SectionHeader32
     {
         Null = 0,
         ProgBits = 1,
-        SymbleTable = 2,
+        SymbolTable = 2,
         StringTable = 3,
         RelocAddend = 4,
         HashTable = 5,
         Dynamic = 6,
         Note = 7,
-        Nobits = 8,
+        NoBits = 8,
         Relocation = 9,
         Shlib = 10,
         Dynsym = 11,
@@ -110,6 +110,17 @@ struct SectionHeader32
         HiProc = 0x7fffffff,
         LoUser = 0x80000000,
         HiUser = 0xffffffff
+    };
+
+    enum class SpecialIndex
+    {
+        Undefined = 0,
+        LoReserve = 0xff00,
+        LoProc = 0xff00,
+        HiProc = 0xff1f,
+        Absolute = 0xfff1,
+        Common = 0xfff2,
+        HiReserve = 0xffff
     };
 
     uint32_t nameIndex;
@@ -122,6 +133,38 @@ struct SectionHeader32
     uint32_t info;
     uint32_t alignment;
     uint32_t entrySize;
+} __attribute__((packed));
+
+struct SymbolTableEntry
+{
+    // Binding and Type are not enum classes because we can't bit pack those
+    struct Binding
+    {
+        static constexpr uint8_t Local = 0;
+        static constexpr uint8_t Global = 1;
+        static constexpr uint8_t Weak = 2;
+        static constexpr uint8_t LoProc = 13;
+        static constexpr uint8_t HiProc = 15;
+    };
+
+    struct Type
+    {
+        static constexpr uint8_t NoType = 0;
+        static constexpr uint8_t Object = 1;
+        static constexpr uint8_t Func = 2;
+        static constexpr uint8_t Section = 3;
+        static constexpr uint8_t File = 4;
+        static constexpr uint8_t LoProc = 13;
+        static constexpr uint8_t HiProc = 15;
+    };
+
+    uint32_t nameIndex;
+    uint32_t value;
+    uint32_t size;
+    uint8_t binding:4; // Binding
+    uint8_t type:4; // Type
+    uint8_t other;
+    uint16_t sectionHeaderIndex; // may be a SpecialIndex
 } __attribute__((packed));
 
 } // namespace elf
