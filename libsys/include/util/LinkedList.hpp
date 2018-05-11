@@ -55,7 +55,7 @@ template <typename T> class LinkedList : public virtual List<T>
     bool push(T &&obj) override
     {
         if (!_first) {
-            _first = ArcPtr<Node>::make(std::move(obj));
+            _first = AsArcPtr(new Node(std::move(obj)), false);
             _last = _first;
         } else {
             _first = _first->insertBefore(std::move(obj));
@@ -113,10 +113,10 @@ template <typename T> class LinkedList : public virtual List<T>
     bool enqueue(T &&obj) override
     {
         if (!_last) {
-            return push(obj); // list is empty
+            return push(std::move(obj)); // list is empty
         }
 
-        _last = _last->insertAfter(obj);
+        _last = _last->insertAfter(std::move(obj));
         ++_size;
         return true;
     }
@@ -269,6 +269,22 @@ template <typename T> class LinkedList : public virtual List<T>
         }
 
         /**
+         * Inserts an object into the List positioned before this node.
+         * @param obj The object to add.
+         * @return The newly created node.
+         */
+        ArcPtr<Node> insertBefore(T &&obj)
+        {
+            auto n = AsArcPtr(new Node(std::move(obj)), false);
+            n->next = this;
+            n->prev = prev;
+            if (prev) prev->next = n;
+            prev = n.get();
+            return n;
+        }
+
+
+        /**
          * Inserts an object into the List positioned after this node.
          * @param obj The object to add.
          * @return The newly created node.
@@ -290,7 +306,7 @@ template <typename T> class LinkedList : public virtual List<T>
          */
         ArcPtr<Node> insertAfter(T &&obj)
         {
-            auto n = ArcPtr<Node>::make(std::move(obj));
+            auto n = AsArcPtr(new Node(std::move(obj)), false);
             n->prev = this;
             n->next = next;
             if (next) next->prev = n.get();
