@@ -12,6 +12,7 @@ file(GLOB_RECURSE GLOB_INCLUDES include/*.hpp include/*.h)
 set (SOURCES
         ${GLOB_INCLUDES} # ok with globbing since they're not translation units
         src/fs/Path.cpp
+        src/io/FileReader.cpp
         src/io/PrintStream.cpp
         src/util/StringTokenizer.cpp)
 
