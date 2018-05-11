@@ -74,6 +74,18 @@ class DynamicArray : public Object
     }
 
     /**
+     * Returns the backing C style array.
+     * @return A T * pointing to the front of the array.
+     */
+    T const *get() const { return _data; }
+
+    /**
+     * Allows streamlined conversion to the backing T[].
+     * @return A T * pointing to the front of the array.
+     */
+    operator T const *() const { return get(); }
+
+    /**
      * Returns the element at the given index.  No bounds checking is performed.
      * @param idx The index of the object.
      * @return The object at that index. If the index is out of bounds, the

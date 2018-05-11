@@ -39,13 +39,13 @@ template <typename T> class Array : public Collection<T>
      * Returns the backing C style array.
      * @return A T * pointing to the front of the array.
      */
-    const T *get() const { return _array; }
+    T const *get() const { return _array; }
 
     /**
      * Allows streamlined conversion to the backing T[].
      * @return A T * pointing to the front of the array.
      */
-    operator const T*() const { return get(); }
+    operator T const *() const { return get(); }
 
     /**
      * Allows streamlined conversion to the backing T[].
