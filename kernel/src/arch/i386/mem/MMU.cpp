@@ -101,8 +101,8 @@ void MMU::install()
 void *MMU::palloc(size_t numberOfPages)
 {
     size_t contiguousFoundPages = 0;
-    size_t retpde, retpte;
-    void *retval = NULL;
+    size_t retpde = 0, retpte = 0;
+    void *retval = nullptr;
     for (size_t pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
         PageEntry directoryEntry = _pageDirectory.entryAtIndex(pde);
         PageTable table = PageTableForDirectoryIndex(pde);
@@ -131,6 +131,8 @@ void *MMU::palloc(size_t numberOfPages)
                     break;
                 }
             } else if (retval && contiguousFoundPages) { // current page is used, reset our contiguous page count
+            } else if (contiguousFoundPages) { // current page is used, reset our contiguous page count
+                retval = nullptr;
                 contiguousFoundPages = 0;
             }
         }
