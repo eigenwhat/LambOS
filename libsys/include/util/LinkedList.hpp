@@ -35,16 +35,20 @@ template <typename T> class LinkedList : public virtual List<T>
      */
     bool push(const T &obj) override
     {
-        if (!_first) {
-            _first = ArcPtr<Node>::make(obj);
-            _last = _first;
+        if constexpr (std::is_copy_constructible<T>::value) {
+            if (!_first) {
+                _first = ArcPtr<Node>::make(obj);
+                _last = _first;
+            } else {
+                _first = _first->insertBefore(obj);
+            }
+
+            ++_size;
+
+            return true;
         } else {
-            _first = _first->insertBefore(obj);
+            return false;
         }
-
-        ++_size;
-
-        return true;
     }
 
     /**
@@ -85,7 +89,7 @@ template <typename T> class LinkedList : public virtual List<T>
             --_size;
         }
 
-        return oldFirst->value;
+        return std::move(oldFirst->value);
     }
 
     /**
@@ -101,13 +105,17 @@ template <typename T> class LinkedList : public virtual List<T>
      */
     bool enqueue(const T &obj) override
     {
-        if (!_last) {
-            return push(obj); // list is empty
-        }
+        if constexpr (std::is_copy_constructible<T>::value) {
+            if (!_last) {
+                return push(obj); // list is empty
+            }
 
-        _last = _last->insertAfter(obj);
-        ++_size;
-        return true;
+            _last = _last->insertAfter(obj);
+            ++_size;
+            return true;
+        } else {
+            return false;
+        }
     }
 
     bool enqueue(T &&obj) override
@@ -140,7 +148,7 @@ template <typename T> class LinkedList : public virtual List<T>
             --_size;
         }
 
-        return oldLast->value;
+        return std::move(oldLast->value);
     }
 
     /**

@@ -10,8 +10,35 @@ template <typename> struct _not;
 }
 
 // ====================================================
+// Type transformations
+// ====================================================
+
+// remove_reference
+template <typename T> struct remove_reference      { using type = T; };
+template <typename T> struct remove_reference<T&>  { using type = T; };
+template <typename T> struct remove_reference<T&&> { using type = T; };
+template <typename T>
+using remove_reference_t = typename remove_reference<T>::type;
+
+// add_lvalue_Reference
+template <typename T> struct add_lvalue_reference { using type = T&; };
+template <typename T>
+using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
+
+// add_rvalue_reference
+template <typename T> struct add_rvalue_reference { using type = T&&; };
+template <typename T>
+using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
+
+// add_const
+template <typename T> struct add_const { using type = T const; };
+template <typename T> using add_const_t = typename add_const<T>::type;
+
+// ====================================================
 // Type traits
 // ====================================================
+
+template<typename T> typename add_rvalue_reference<T>::type declval() noexcept;
 
 template<typename T, T _value>
 struct integral_constant
@@ -57,6 +84,26 @@ struct is_object : public internal::_not<internal::_or<is_function<_Tp>,
                                                        is_reference<_Tp>,
                                                        is_void<_Tp>>>::type {};
 
+template <class...>
+using void_t = void;
+
+// is_constructible
+template <class, class T, class... Args>
+struct __is_constructible : std::false_type {};
+
+template <class T, class... Args>
+struct __is_constructible<
+        void_t<decltype(T(std::declval<Args>()...))>,
+        T, Args...> : std::true_type {};
+
+template <class T, class... Args>
+using is_constructible = __is_constructible<void_t<>, T, Args...>;
+
+// is_copy_constructible
+template<class T>
+struct is_copy_constructible : public is_constructible<T,
+        typename add_lvalue_reference<typename add_const<T>::type>::type> {};
+
 // conditional
 template<bool Pred, typename Then, typename Else>
 struct conditional { using type = Then; };
@@ -70,28 +117,6 @@ template <typename T> struct enable_if<true, T> { using type = T; };
 
 template <bool B, typename T = void>
 using enable_if_t = typename enable_if<B, T>::type;
-
-
-// ====================================================
-// Type transformations
-// ====================================================
-
-// remove_reference
-template <typename T> struct remove_reference      { using type = T; };
-template <typename T> struct remove_reference<T&>  { using type = T; };
-template <typename T> struct remove_reference<T&&> { using type = T; };
-template <typename T>
-using remove_reference_t = typename remove_reference<T>::type;
-
-// add_lvalue_Reference
-template <typename T> struct add_lvalue_reference { using type = T&; };
-template <typename T>
-using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
-
-// add_rvalue_reference
-template <typename T> struct add_rvalue_reference { using type = T&&; };
-template <typename T>
-using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 
 namespace internal {
 

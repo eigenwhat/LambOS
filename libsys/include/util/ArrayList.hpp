@@ -67,10 +67,14 @@ class ArrayList : public List<T>
      */
     bool push(const T &obj) override
     {
-        shiftOrResize(1);
-        _data[0] = obj;
-        ++_size;
-        return true;
+        if constexpr (std::is_copy_constructible<T>::value) {
+            shiftOrResize(1);
+            _data[0] = obj;
+            ++_size;
+            return true;
+        }
+
+        return false;
     }
 
     /**
@@ -95,13 +99,17 @@ class ArrayList : public List<T>
      */
     bool enqueue(const T &obj) override
     {
-        if (_size == capacity()) {
-            _data.resize();
+        if constexpr (std::is_copy_constructible<T>::value) {
+            if (_size == capacity()) {
+                _data.resize();
+            }
+
+            _data[_size] = obj;
+            ++_size;
+            return true;
         }
 
-        _data[_size] = obj;
-        ++_size;
-        return true;
+        return false;
     }
 
     /**
@@ -129,7 +137,7 @@ class ArrayList : public List<T>
      */
     T pop() override
     {
-        T ret = peek();
+        T ret = std::move(_data[0]);
         _data.shift(1, true);
         --_size;
         return ret;
@@ -139,7 +147,7 @@ class ArrayList : public List<T>
      * Removes an element from the back of the ArrayList.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    T popBack() override { --_size; return _data[_size]; }
+    T popBack() override { --_size; return std::move(_data[_size]); }
 
     /**
      * Returns the element at the top of the ArrayList without removing it.
@@ -244,7 +252,7 @@ class ArrayList : public List<T>
         --_size;
         // move everything right of idx left one.
         for (size_t i = idx; i < _size; ++i) {
-            _data[i] = _data[i+1];
+            _data[i] = std::move(_data[i+1]);
         }
 
         return true;
