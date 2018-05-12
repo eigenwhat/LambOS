@@ -107,7 +107,7 @@ class DynamicArray : public Object
         // special care needed with reverse for loops and unsigned types
         for (size_t remaining = amount; remaining > 0; --remaining) {
             size_t idx = remaining - 1;
-            to[idx+offset] = from[idx];
+            to[idx+offset] = std::move(from[idx]);
         }
     }
 
@@ -115,7 +115,7 @@ class DynamicArray : public Object
     {
         for (size_t i = offset; i < amount; ++i)
         {
-            to[i-offset] = from[i];
+            to[i-offset] = std::move(from[i]);
         }
     }
 
