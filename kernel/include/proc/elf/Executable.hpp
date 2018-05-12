@@ -28,7 +28,7 @@ class Executable : public Object
     Executable(DirectoryEntry &entry);
 
     /** The sections as listed in the binary's section header table. */
-    ArrayList<Section> const &sections() const { return _sections; }
+    List<Section> const &sections() const { return _sections; }
 
     struct Section
     {
@@ -38,16 +38,10 @@ class Executable : public Object
 
         Section() {}
 
-        // TODO: eliminate once we have proper type traits to SFINAE collections
-        Section(Section const&) { kernel->panic("Attempted copy of Section."); }
+        Section(Section const &) = delete;
         Section(Section &&rhs) = default;
 
-        // TODO: eliminate once we have proper type traits to SFINAE collections
-        Section &operator=(Section const &)
-        {
-            kernel->panic("Attempted copy assignment of Section.");
-            return *this;
-        }
+        Section &operator=(Section const &) = delete;
         Section &operator=(Section &&rhs) = default;
 
         bool operator==(Section const &rhs) const
