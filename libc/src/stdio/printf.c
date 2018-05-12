@@ -67,7 +67,7 @@ incomprehensible_conversion:
             switch (*format) {
                 case 'l':
                     ++format;
-                    length = length == kLength_l ? kLength_ll : kLength_ll;
+                    length = length == kLength_l ? kLength_ll : kLength_l;
                     break;
                 case 'h':
                     ++format;
