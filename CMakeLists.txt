@@ -16,6 +16,8 @@ option(BOCHS_USE_SDL2 "Tell bochs to use the SDL2 display library" OFF)
 option(BOCHS_USE_WIN32 "Tell bochs to use the Win32 display library" OFF)
 option(BOCHS_USE_GUI_DEBUG "Tell bochs to use the GUI debugger if able. Requires specifying a display library." OFF)
 
+option(QEMU_USE_GDB "Run QEMU with the GDB server enabled. Waits for a connection before booting." OFF)
+
 # Define all target names here, as they're somewhat interdependent.
 # kernel target name
 set(KERNEL_TARGET lambos-kernel)
@@ -53,7 +55,12 @@ else ()
     find_program(QEMU qemu-system-i386)
     if (QEMU)
         set (RUN_QEMU_TARGET run-qemu)
-        add_custom_target(${RUN_QEMU_TARGET} COMMAND ${QEMU} -cdrom ${ISO_PATH} -m 32)
+        set (QEMU_ARGS -cdrom ${ISO_PATH} -m 32)
+        if (QEMU_USE_GDB)
+            set(QEMU_ARGS ${QEMU_ARGS} -s -S)
+        endif()
+
+        add_custom_target(${RUN_QEMU_TARGET} COMMAND ${QEMU} ${QEMU_ARGS})
         add_dependencies(${RUN_QEMU_TARGET} ${ISO_TARGET})
     endif ()
 
