@@ -32,6 +32,10 @@ int FileReader::read(size_t offset)
 
 size_t FileReader::read(uint8_t *buf, size_t offset, size_t bytesToRead)
 {
+    if (bytesToRead == 0) {
+        return 0;
+    }
+
     // first, read up to the end of the range if needed
     auto lastIndex = offset + bytesToRead - 1;
     read(offset + bytesToRead - 1);

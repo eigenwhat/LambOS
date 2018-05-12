@@ -39,14 +39,21 @@ class FileReader : public Object
 
     /**
      * Returns the file as read so far.
+     * @see bytesRead() returns the actual extent of the data in the array.
      * @return A pointer to the byte array.
      */
-    uint8_t const *bytesRead() const { return _fileBytes; }
+    uint8_t const *bytes() const { return _fileBytes; }
+
+    /**
+     * Returns the number of bytes read so far.
+     * @return The number of bytes read.
+     */
+    size_t bytesRead() const { return _fileExtent; }
 
     /** Whether or not the end-of-file (EOF) has been reached. */
     bool eofReached() const { return _eofReached; }
 
-    /** Reads the entire file into memory. */
+    /** Reads the entire file into memory up front. */
     void readAll();
 
   private:
