@@ -4,10 +4,52 @@
 #include <Kernel.hpp>
 
 #include <utility>
+#include <cstring>
+#include <util/LinkedList.hpp>
 
 namespace elf {
 
 namespace {
+
+class SegmentRAII
+{
+  public:
+    SegmentRAII() {}
+    SegmentRAII(void *addr, size_t pages) : _addr(addr), _pages(pages) {}
+
+    ~SegmentRAII()
+    {
+        if (_armed && _addr && _pages) {
+            kernel->mmu()->pfree(_addr, _pages);
+        }
+    }
+
+    SegmentRAII(SegmentRAII &&other)
+    {
+        *this = std::move(other);
+    }
+
+    SegmentRAII &operator=(SegmentRAII &&other)
+    {
+        _addr = other._addr;
+        _pages = other._pages;
+        _armed = other._armed;
+        other.disarm();
+        return *this;
+    }
+
+    bool operator==(SegmentRAII const &rhs)
+    {
+        return _addr == rhs._addr && _pages == rhs._pages && _armed == rhs._armed;
+    }
+
+    void disarm() { _armed = false; }
+
+  private:
+    void *_addr = nullptr;
+    size_t _pages = 0;
+    bool _armed = true;
+};
 
 template <typename T>
 T readObject(FileReader &file, size_t offset, size_t *bytesRead = nullptr)
@@ -61,6 +103,12 @@ Executable::Executable(DirectoryEntry &entry)
     _segments.reserve(header.programEntryCount);
     loadSections(header.sectionHeaderOffset, header.sectionEntryCount, header.sectionNameEntryIndex);
     loadProgramSegments(header.programHeaderOffset, header.programEntryCount);
+    _entry = (EntryType)header.entry;
+}
+
+Executable::~Executable()
+{
+    unloadSegments();
 }
 
 size_t Executable::loadSections(size_t offset, size_t entryCount, size_t nameTableIndex)
@@ -165,6 +213,56 @@ size_t Executable::loadProgramSegments(size_t offset, size_t entryCount)
     }
 
     return totalBytesRead;
+}
+
+bool Executable::loadSegments()
+{
+    if (_isLoaded) {
+        return true; // already loaded
+    }
+
+    LinkedList<SegmentRAII> cleanup;
+    for (auto &ps : _segments) {
+        if (ps.alignment == 0x1000) {
+            size_t pages = ps.memorySize / 0x1000 + ((ps.memorySize % 0x1000) ? 1 : 0);
+            auto mem = kernel->mmu()->palloc((void*)ps.vaddress, pages);
+            if (!mem) {
+                return false;
+            }
+
+            cleanup.enqueue(SegmentRAII{mem, pages});
+            memset(mem, 0, ps.memorySize);
+            if (ps.dataSize) {
+                memcpy(mem, ps.data, ps.dataSize);
+            }
+        }
+    }
+
+    // successfully loaded
+    for (auto &c : cleanup) {
+        c.disarm();
+    }
+
+    _isLoaded = true;
+
+    return true;
+}
+
+bool Executable::unloadSegments()
+{
+    if (!_isLoaded) {
+        return true; // already unloaded
+    }
+
+    for (auto &ps : _segments) {
+        size_t pages = ps.memorySize / 0x1000 + ((ps.memorySize % 0x1000) ? 1 : 0);
+        if (kernel->mmu()->pfree((void*)ps.vaddress, pages) != 0) {
+            kernel->panic("Error freeing loaded ELF segment memory.");
+        }
+    }
+
+    _isLoaded = false;
+    return true;
 }
 
 } // namespace elf

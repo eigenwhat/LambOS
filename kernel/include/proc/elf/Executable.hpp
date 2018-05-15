@@ -4,12 +4,16 @@
 #include <io/FileReader.hpp>
 #include <util/ArrayList.hpp>
 #include <Kernel.hpp>
+#include <util/LinkedList.hpp>
 
 namespace elf {
 
 class Executable : public Object
 {
   public:
+    /** The function signature for the program's entry point. */
+    using EntryType = int (*)();
+
     struct Section;
 
     /**
@@ -27,8 +31,32 @@ class Executable : public Object
      */
     Executable(DirectoryEntry &entry);
 
+    ~Executable();
+
     /** The sections as listed in the binary's section header table. */
     List<Section> const &sections() const { return _sections; }
+
+    /**
+     * Loads the program segments into memory.
+     * @return `true` if the segments are loaded, `false` otherwise.
+     */
+    bool loadSegments();
+
+    /**
+     * Executes the program.
+     * @note VERY TEMPORARY AND VERY SUBJECT TO CHANGE.
+     * @return The exit status of the program.
+     */
+    int exec()
+    {
+        return loadSegments() ? _entry() : -1;
+    }
+
+    /**
+     * Unloads the program segments from memory.
+     * @return `true` if the segments are unloaded, `false` otherwise.
+     */
+    bool unloadSegments();
 
     struct Section
     {
@@ -89,6 +117,8 @@ class Executable : public Object
     ArrayList<Section> _sections{1};
     ArrayList<Segment> _segments{1};
     Section const *_nameTable = nullptr;
+    EntryType _entry = nullptr;
+    bool _isLoaded = false;
 };
 
 }
