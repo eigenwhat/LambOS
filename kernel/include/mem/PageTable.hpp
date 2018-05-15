@@ -35,14 +35,42 @@ private:
     uint32_t _entry;
 };
 
-class PageTable {
-public:
+class PageTable
+{
+  public:
+    /**
+     * Creates a representation of a page table.
+     * @param tableAddress The virtual address where the table resides if paging
+     *                     is enabled, physical otherwise.
+     */
     PageTable(uint32_t *tableAddress) : _tableAddress(tableAddress) {}
+
+    /**
+     * Clears all entries in the table.
+     * This method should be called when creating a new page table.
+     */
     void clear();
+
+    /** The addressable location of the page table in memory. */
     uint32_t *address() const { return _tableAddress; }
+
+    /**
+     * Returns the PageEntry at the given index.
+     * @param index The index of the entry.
+     * @return The entry.
+     */
     PageEntry entryAtIndex(uint16_t index) const;
+
+    /**
+     * Sets the PageEntry at the given index.
+     * @param index The index to set/replace.
+     * @param entry The entry to set.
+     */
     void setEntry(uint16_t index, PageEntry entry);
+
+    /** Installs the PageTable as the active page directory. */
     void install();
-private:
+
+  private:
     uint32_t *_tableAddress;
 };

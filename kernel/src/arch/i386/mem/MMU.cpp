@@ -171,8 +171,7 @@ int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
     while (numberOfPages--) {
         uint32_t pdeIndex = virtualAddress >> 22;
         uint32_t pteIndex = virtualAddress >> 12 & 0x03FF;
-        PageEntry pde = _pageDirectory.entryAtIndex(pdeIndex);
-        PageTable table((uint32_t *) pde.address());
+        PageTable table = PageTableForDirectoryIndex(pdeIndex);
         PageEntry pte = table.entryAtIndex(pteIndex);
         _pageFrameAllocator.free(pte.address());
         table.setEntry(pteIndex, PageEntry(0));
@@ -191,8 +190,12 @@ int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
 
 PageTable MMU::getOrCreateTable(uint16_t directoryIndex)
 {
+    if (directoryIndex > 1023) {
+        kernel->panic("MMU::getOrCreateTable: invalid directoryIndex");
+    }
+
     PageEntry pde = _pageDirectory.entryAtIndex(directoryIndex);
-    PageTable table{(uint32_t *) pde.address()};
+    PageTable table{PageTableForDirectoryIndex(directoryIndex)};
     if (!pde.getFlag(kPresentBit)) { // no page table here, create one
         pde = PageEntry(_pageFrameAllocator.alloc());
         pde.setFlags(kPresentBit | kReadWriteBit);
@@ -259,7 +262,8 @@ void MMU::_flush()
 namespace {
 
 // Pulls the page table from the self-mapped page directory.
-// I'm not sure if this is really necessary.
+// Trust me, you need to use this. Don't use the address from the page directory
+// entry. That's the physical page frame!
 PageTable PageTableForDirectoryIndex(int index)
 {
     uint32_t *addr = (uint32_t *) 0xFFC00000 + (0x400 * index);
