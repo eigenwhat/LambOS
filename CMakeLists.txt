@@ -33,6 +33,8 @@ add_subdirectory(libcpp)
 add_subdirectory(libsys)
 add_subdirectory(kernel)
 
+add_subdirectory(kernel/tests/elftest)
+
 # create bootable ISO
 find_program(GRUB_MKRESCUE grub-mkrescue)
 if (NOT GRUB_MKRESCUE)
@@ -48,8 +50,9 @@ else ()
     set (ISO_PATH ${CMAKE_BINARY_DIR}/lambos.iso)
     add_custom_target(${ISO_TARGET}
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${KERNEL_TARGET}> ${CMAKE_BINARY_DIR}/iso/boot/
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:elf-test> ${CMAKE_BINARY_DIR}/iso/
             COMMAND ${GRUB_MKRESCUE} --output=${ISO_PATH} ${CMAKE_BINARY_DIR}/iso)
-    add_dependencies(${ISO_TARGET} ${KERNEL_TARGET})
+    add_dependencies(${ISO_TARGET} ${KERNEL_TARGET} elf-test)
 
     # set up convenience target to boot generated ISO in qemu (if available)
     find_program(QEMU qemu-system-i386)

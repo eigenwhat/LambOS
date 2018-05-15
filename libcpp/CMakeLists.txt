@@ -9,8 +9,7 @@ endif ()
 
 set (INCLUDE_FILES
         include/cstring include/cstdio)
-set (SOURCES
-        src/_lang.cpp)
+set (SOURCES)
 
 add_library(${LIBCPP_TARGET} STATIC ${SOURCES} ${INCLUDE_FILES})
 target_include_directories(${LIBCPP_TARGET} PUBLIC include)
