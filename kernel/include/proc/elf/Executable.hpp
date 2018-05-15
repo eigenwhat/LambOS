@@ -34,7 +34,8 @@ class Executable : public Object
     {
         String name;
         uint8_t const *data = nullptr;
-        uintptr_t vaddress;
+        uintptr_t vaddress = 0;
+        uint32_t size = 0;
 
         Section() {}
 
@@ -54,12 +55,39 @@ class Executable : public Object
         bool operator!=(Section const &rhs) const { return !operator==(rhs); }
     };
 
+    struct Segment
+    {
+        uint8_t const *data = nullptr;
+        uintptr_t vaddress = 0;
+        uint32_t alignment = 0;
+        uint32_t dataSize = 0;
+        uint32_t memorySize = 0;
+
+        Segment() {}
+
+        Segment(Segment const &) = delete;
+        Segment(Segment &&rhs) = default;
+
+        Segment &operator=(Segment const &) = delete;
+        Segment &operator=(Segment &&rhs) = default;
+
+        bool operator==(Segment const &rhs) const
+        {
+            return vaddress == rhs.vaddress
+                   && data == rhs.data;
+        }
+
+        bool operator!=(Segment const &rhs) const { return !operator==(rhs); }
+    };
+
   private:
+    size_t loadProgramSegments(size_t offset, size_t entryCount);
     size_t loadSections(size_t offset, size_t entryCount, size_t nameTableIndex);
     void loadNameTable(size_t offset, size_t entryIndex);
 
     FileReader _file;
     ArrayList<Section> _sections{1};
+    ArrayList<Segment> _segments{1};
     Section const *_nameTable = nullptr;
 };
 

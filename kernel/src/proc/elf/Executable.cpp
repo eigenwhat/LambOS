@@ -58,7 +58,9 @@ Executable::Executable(DirectoryEntry &entry)
     _file.readAll();
     auto header = readObject<ElfHeader32>(_file, 0);
     _sections.reserve(header.sectionEntryCount);
+    _segments.reserve(header.programEntryCount);
     loadSections(header.sectionHeaderOffset, header.sectionEntryCount, header.sectionNameEntryIndex);
+    loadProgramSegments(header.programHeaderOffset, header.programEntryCount);
 }
 
 size_t Executable::loadSections(size_t offset, size_t entryCount, size_t nameTableIndex)
@@ -97,6 +99,7 @@ size_t Executable::loadSections(size_t offset, size_t entryCount, size_t nameTab
 
         Section section;
         section.vaddress = header.address;
+        section.size = header.size;
 
         if (_nameTable) {
             section.name = (char const *)_nameTable->data + header.nameIndex;
@@ -127,6 +130,41 @@ void Executable::loadNameTable(size_t offset, size_t entryIndex)
     section.name = reinterpret_cast<char const *>(section.data) + header.nameIndex;
     _sections.enqueue(std::move(section));
     _nameTable = &_sections.peekBack();
+}
+
+size_t Executable::loadProgramSegments(size_t offset, size_t entryCount)
+{
+    size_t totalBytesRead = 0;
+
+    for (size_t i = 0; i < entryCount; ++i) {
+        size_t bytesRead = 0;
+        auto const header = readObject<ProgramHeader32>(_file, offset, &bytesRead);
+        offset += bytesRead;
+        totalBytesRead += bytesRead;
+
+        switch (header.type) {
+            case ProgramHeader32::Type::Null:break;
+            case ProgramHeader32::Type::Load:break;
+            case ProgramHeader32::Type::Dynamic:break;
+            case ProgramHeader32::Type::Interpreter:break;
+            case ProgramHeader32::Type::Note:break;
+            case ProgramHeader32::Type::Shlib:break;
+            case ProgramHeader32::Type::ProgramHeader:break;
+            case ProgramHeader32::Type::LoProc:break;
+            case ProgramHeader32::Type::HiProc:break;
+            default: kernel->panic("Unexpected section header type while reading ELF");
+        }
+
+        Segment segment;
+        segment.vaddress = header.virtAddress;
+        segment.alignment = header.alignment;
+        segment.data = _file.bytes() + header.offset;
+        segment.dataSize = header.sizeInFile;
+        segment.memorySize = header.sizeInMemory;
+        _segments.enqueue(std::move(segment));
+    }
+
+    return totalBytesRead;
 }
 
 } // namespace elf
