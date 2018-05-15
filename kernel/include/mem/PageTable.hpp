@@ -39,9 +39,9 @@ class PageTable {
 public:
     PageTable(uint32_t *tableAddress) : _tableAddress(tableAddress) {}
     void clear();
-    uint32_t *address() { return _tableAddress; }
-    void setEntry(uint16_t index, PageEntry entry); 
-    PageEntry entryAtIndex(uint16_t index);
+    uint32_t *address() const { return _tableAddress; }
+    PageEntry entryAtIndex(uint16_t index) const;
+    void setEntry(uint16_t index, PageEntry entry);
     void install();
 private:
     uint32_t *_tableAddress;

@@ -18,10 +18,14 @@ extern uint32_t readonly_end;
 extern "C" int log_task(char const *printstr, int success);
 extern "C" int log_test(char const *printstr, int success);
 
+namespace {
+
 //==========================================================
 // Prototypes
 //==========================================================
 PageTable PageTableForDirectoryIndex(int index);
+
+}
 
 //==========================================================
 // Page Frame Allocator init hook
@@ -104,17 +108,7 @@ void *MMU::palloc(size_t numberOfPages)
     size_t retpde = 0, retpte = 0;
     void *retval = nullptr;
     for (size_t pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
-        PageEntry directoryEntry = _pageDirectory.entryAtIndex(pde);
-        PageTable table = PageTableForDirectoryIndex(pde);
-
-        if (!directoryEntry.getFlag(kPresentBit)) { // no page table here, create one
-            directoryEntry = PageEntry(_pageFrameAllocator.alloc());
-            directoryEntry.setFlags(kPresentBit | kReadWriteBit);
-            _pageDirectory.setEntry(pde, directoryEntry);
-            _flush();
-            table.clear();
-            _flush();
-        }
+        PageTable table = getOrCreateTable(pde);
 
         // look through page table
         for (size_t pte = 0; pte < 1024; ++pte) {
@@ -130,7 +124,6 @@ void *MMU::palloc(size_t numberOfPages)
                     retval = (void *) ((retpde << 22) | (retpte << 12));
                     break;
                 }
-            } else if (retval && contiguousFoundPages) { // current page is used, reset our contiguous page count
             } else if (contiguousFoundPages) { // current page is used, reset our contiguous page count
                 retval = nullptr;
                 contiguousFoundPages = 0;
@@ -139,30 +132,34 @@ void *MMU::palloc(size_t numberOfPages)
     }
 
     if (retval) { // if we succeeded in finding space
-        size_t pagesLeft = numberOfPages;
-        size_t currpde = retpde;
-        size_t currpte = retpte;
-
-        while (pagesLeft > 0) { // map the pages
-            PageTable table = PageTableForDirectoryIndex(currpde);
-            PageEntry entry = PageEntry(_pageFrameAllocator.alloc());
-            entry.setFlags(kPresentBit | kReadWriteBit);
-            table.setEntry(currpte, entry);
-
-            ++currpte;
-            --pagesLeft;
-
-            // move to next PDE if needed
-            if (currpte > 1023) {
-                ++currpde;
-                currpte = 0;
-            }
-        }
+        allocatePages(retval, numberOfPages);
     }
 
-    _flush();
-
     return retval;
+}
+
+void *MMU::palloc(void *virtualAddress, size_t numberOfPages)
+{
+    uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
+    if (address & 0xFFF) {
+        return nullptr; // address is not page aligned
+    }
+
+    for (size_t i = 0; i < numberOfPages; ++i) {
+        auto page = pageForAddress(reinterpret_cast<void*>(address));
+        if (page.getFlag(kPresentBit)) {
+            virtualAddress = nullptr; // can't allocate, not enough space
+            break;
+        }
+
+        address += 0x1000; // increment to next page
+    }
+
+    if (virtualAddress) {
+        allocatePages(virtualAddress, numberOfPages);
+    }
+
+    return virtualAddress;
 }
 
 int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
@@ -192,6 +189,62 @@ int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
 // MMU Private methods
 //===========================================================
 
+PageTable MMU::getOrCreateTable(uint16_t directoryIndex)
+{
+    PageEntry pde = _pageDirectory.entryAtIndex(directoryIndex);
+    PageTable table{(uint32_t *) pde.address()};
+    if (!pde.getFlag(kPresentBit)) { // no page table here, create one
+        pde = PageEntry(_pageFrameAllocator.alloc());
+        pde.setFlags(kPresentBit | kReadWriteBit);
+        _pageDirectory.setEntry(directoryIndex, pde);
+        table.clear();
+        _flush();
+    }
+
+    return table;
+}
+
+PageTable MMU::tableForAddress(void *virtualAddress)
+{
+    uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
+    uint32_t pdeIndex = address >> 22;
+    return getOrCreateTable(pdeIndex);
+}
+
+PageEntry MMU::pageForAddress(void *virtualAddress)
+{
+    auto table = tableForAddress(virtualAddress);
+    uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
+    uint32_t pteIndex = address >> 12 & 0x03FF;
+    return table.entryAtIndex(pteIndex);
+}
+
+
+void MMU::allocatePages(void *address, size_t numberOfPages)
+{
+    uintptr_t virtualAddress = reinterpret_cast<uintptr_t>(address);
+    uint32_t currpde = virtualAddress >> 22;
+    uint32_t currpte = virtualAddress >> 12 & 0x03FF;
+    size_t pagesLeft = numberOfPages;
+    while (pagesLeft > 0) { // map the pages
+        PageTable table = PageTableForDirectoryIndex(currpde);
+        PageEntry entry = PageEntry(_pageFrameAllocator.alloc());
+        entry.setFlags(kPresentBit | kReadWriteBit);
+        table.setEntry(currpte, entry);
+
+        ++currpte;
+        --pagesLeft;
+
+        // move to next PDE if needed
+        if (currpte > 1023) {
+            ++currpde;
+            currpte = 0;
+        }
+    }
+
+    _flush();
+}
+
 void MMU::_flush()
 {
     asm volatile(
@@ -203,10 +256,16 @@ void MMU::_flush()
 //===========================================================
 // Utility methods
 //===========================================================
+namespace {
 
+// Pulls the page table from the self-mapped page directory.
+// I'm not sure if this is really necessary.
 PageTable PageTableForDirectoryIndex(int index)
 {
     uint32_t *addr = (uint32_t *) 0xFFC00000 + (0x400 * index);
     return PageTable(addr);
 }
+
+}
+
 
