@@ -12,7 +12,7 @@ void PageTable::clear()
     }
 }
 
-PageEntry PageTable::entryAtIndex(uint16_t index)
+PageEntry PageTable::entryAtIndex(uint16_t index) const
 {
     PageEntry entry(_tableAddress[index]);
     entry.setFlags(_tableAddress[index]);
