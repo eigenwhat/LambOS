@@ -104,6 +104,10 @@ template<class T>
 struct is_copy_constructible : public is_constructible<T,
         typename add_lvalue_reference<typename add_const<T>::type>::type> {};
 
+// is_same
+template <typename, typename> struct is_same : public false_type {};
+template <typename T> struct is_same<T, T> : public true_type {};
+
 // conditional
 template<bool Pred, typename Then, typename Else>
 struct conditional { using type = Then; };
