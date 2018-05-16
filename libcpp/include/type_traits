@@ -99,10 +99,17 @@ struct __is_constructible<
 template <class T, class... Args>
 using is_constructible = __is_constructible<void_t<>, T, Args...>;
 
+// is_default_constructible
+template<class T> struct is_default_constructible
+        : public is_constructible<T> {};
+
 // is_copy_constructible
-template<class T>
-struct is_copy_constructible : public is_constructible<T,
-        typename add_lvalue_reference<typename add_const<T>::type>::type> {};
+template<class T> struct is_copy_constructible
+        : public is_constructible<T, add_lvalue_reference_t<add_const_t<T>>> {};
+
+// is_move_constructible
+template <typename T> struct is_move_constructible
+        : public is_constructible<T,add_rvalue_reference_t<T>> {};
 
 // is_same
 template <typename, typename> struct is_same : public false_type {};
