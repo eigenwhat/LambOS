@@ -59,7 +59,7 @@ template <typename T> class LinkedList : public virtual List<T>
     bool push(T &&obj) override
     {
         if (!_first) {
-            _first = AsArcPtr(new Node(std::move(obj)), false);
+            _first = ArcPtr<Node>::make(std::move(obj));
             _last = _first;
         } else {
             _first = _first->insertBefore(std::move(obj));
@@ -283,7 +283,7 @@ template <typename T> class LinkedList : public virtual List<T>
          */
         ArcPtr<Node> insertBefore(T &&obj)
         {
-            auto n = AsArcPtr(new Node(std::move(obj)), false);
+            auto n = ArcPtr<Node>::make(std::move(obj));
             n->next = this;
             n->prev = prev;
             if (prev) prev->next = n;
@@ -314,7 +314,7 @@ template <typename T> class LinkedList : public virtual List<T>
          */
         ArcPtr<Node> insertAfter(T &&obj)
         {
-            auto n = AsArcPtr(new Node(std::move(obj)), false);
+            auto n = ArcPtr<Node>::make(std::move(obj));
             n->prev = this;
             n->next = next;
             if (next) next->prev = n.get();

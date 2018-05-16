@@ -1,5 +1,7 @@
 #pragma once
 
+#include <utility>
+
 /**
  * Provides the functionality necessary for reference counting on the object
  * level. Needed for use with ArcPtr<T>.
@@ -63,7 +65,7 @@ template <typename T> class ArcPtr
     template <typename ... Args>
     static ArcPtr<T> make(Args && ...args)
     {
-        ArcPtr<T> ptr(new T(args...), false);
+        ArcPtr<T> ptr(new T(std::forward<Args>(args)...), false);
         return ptr;
     }
 
