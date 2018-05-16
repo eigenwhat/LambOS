@@ -1,18 +1,22 @@
-#include <new>
-#include <cstring>
-#include <cstdio>
-
 #include <arch/i386/cpu/multiboot.h>
+#include <arch/i386/cpu/PageFaultPanicISR.hpp>
 #include <arch/i386/cpu/X86CPU.hpp>
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
 #include <arch/i386/device/input/PS2KeyboardISR.hpp>
 #include <arch/i386/device/storage/X86AtaDevice.hpp>
 #include <arch/i386/X86Kernel.hpp>
 #include <device/input/KeyboardInputStream.hpp>
+#include <fs/iso9660/Iso9660.hpp>
+#include <proc/elf/Executable.hpp>
+
 #include <io/BochsDebugOutputStream.hpp>
 #include <io/debug.h>
+
 #include <util/Array.hpp>
-#include <fs/iso9660/Iso9660.hpp>
+
+#include <cstdio>
+#include <cstring>
+#include <new>
 
 // ====================================================
 // Globals
@@ -64,6 +68,7 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
     ((X86Kernel*)kernel)->installMMU(info->mmap_addr, info->mmap_length);
     log_task("Setting up memory management unit...", true);
+    ((X86CPU*)kernel->cpu())->idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
 
     kernel->cpu()->enableInterrupts();
     init_system();
@@ -147,6 +152,19 @@ void read_ata()
                 printf("    Checking for ISO9660... ");
                 bool isIso9660 = Iso9660::instance().hasFileSystem(device);
                 puts(isIso9660 ? "yes!" : "no");
+                if (isIso9660) {
+                    auto vol = Iso9660::instance().createVolume(device);
+//                    auto entry = vol->find("/boot/kernel.bin");
+//                    printf("    Found '/boot/kernel.bin'? %s\n", entry ? "yes!" : "no");
+                    auto entry = vol->find("/elf-test");
+                    printf("    Found '/elf-test'? %s\n", entry ? "yes!" : "no");
+                    if (!entry) break;
+                    bool isElf = elf::Executable::isElf(*entry);
+                    printf("    Recognized ELF? %s\n", isElf ? "yes!" : "no");
+                    auto exec = elf::Executable(*entry);
+                    printf("    Executing entry point... -> %x\n", exec.exec());
+                }
+
                 break;
             }
             default:
