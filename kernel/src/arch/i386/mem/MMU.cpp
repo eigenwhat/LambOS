@@ -1,11 +1,13 @@
-#include <Kernel.hpp>
-#include <stdlib.h>
-#include <cstdio>
-#include <new>
 #include <mem/MMU.hpp>
 #include <mem/PageFrameAllocator.hpp>
 #include <mem/PageTable.hpp>
 #include <sys/asm.h>
+#include <Kernel.hpp>
+
+#include <cstdio>
+#include <new>
+
+#include <stdlib.h>
 
 #define kPDESelfMapIndex 1023
 #define kVGAPage (0xB8000/0x1000)
