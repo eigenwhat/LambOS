@@ -3,6 +3,8 @@
 #include <util/TypeTraits.hpp>
 #include <Object.hpp>
 
+#include <stdint.h>
+
 
 class Nothing{};
 
@@ -14,10 +16,10 @@ class Maybe : public Object
     Maybe(Nothing) : Maybe() {}
 
     template <typename U = T, typename = IsCopyConstructible<U>>
-    Maybe(T const &v) : _value(v), _set(true) {}
+    Maybe(T const &v) : _store(v), _set(true) {}
 
     template <typename U = T, typename = IsMoveConstructible<U>>
-    Maybe(T &&v) : _value(std::move(v)), _set(true) {}
+    Maybe(T &&v) : _store(std::move(v)), _set(true) {}
 
     /** Returns whether this contains a value. */
     constexpr operator bool() const noexcept { return _set; }
@@ -29,37 +31,37 @@ class Maybe : public Object
      * Accesses the contained value.
      * @return A const pointer to the value if set, nullptr otherwise.
      */
-    constexpr T const * operator->() const { return _set ? &_value : nullptr; }
+    constexpr T const * operator->() const { return _set ? &_store.value : nullptr; }
 
     /**
      * Accesses the contained value.
      * @return A pointer to the value if set, nullptr otherwise.
      */
-    constexpr T * operator->() { return _set ? &_value : nullptr; }
+    constexpr T * operator->() { return _set ? &_store.value : nullptr; }
 
     /**
      * Accesses the contained value.
      * @return A const ref to the value. Return value is undefined if not set.
      */
-    constexpr T const & operator*() const { return _value; }
+    constexpr T const & operator*() const { return _store.value; }
 
     /**
      * Accesses the contained value.
      * @return A reference to the value. Return value is undefined if not set.
      */
-    constexpr T & operator*() { return _value; }
+    constexpr T & operator*() { return _store.value; }
 
     /**
      * Returns the contained value.
      * @return A const ref to the value. Return value is undefined if not set.
      */
-    constexpr T const & get() const { return _value; }
+    constexpr T const & get() const { return _store.value; }
 
     /**
      * Returns the contained value.
      * @return A reference to the value. Return value is undefined if not set.
      */
-    constexpr T & get() { return _value; }
+    constexpr T & get() { return _store.value; }
 
     /**
      * Returns a copy of the contained value, or a default value if not set.
@@ -68,7 +70,7 @@ class Maybe : public Object
      */
     constexpr T getOr(T &&other) const &
     {
-        return _set ? _value : std::forward<T>(other);
+        return _set ? _store.value : std::forward<T>(other);
     }
 
     /**
@@ -78,11 +80,18 @@ class Maybe : public Object
      */
     constexpr T getOr(T &&other) &&
     {
-        return _set ? std::move(_value) : std::forward<T>(other);
+        return _set ? std::move(_store.value) : std::forward<T>(other);
     }
 
   private:
-    T _value{};
+    union Storage
+    {
+        Storage() {}
+        Storage(T const &aValue) : value(aValue) {}
+        Storage(T &&aValue) : value(std::move(aValue)) {}
+
+        T value;
+    } _store{};
     bool _set{false};
 };
 
