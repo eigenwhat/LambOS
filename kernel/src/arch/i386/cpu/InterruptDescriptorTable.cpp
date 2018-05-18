@@ -5,7 +5,7 @@
 
 #include <arch/i386/cpu/X86CPU.hpp>
 #include <io/debug.h>
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <Kernel.hpp>
 #include <cstdio>
 

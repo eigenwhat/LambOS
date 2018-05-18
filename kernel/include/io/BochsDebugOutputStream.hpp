@@ -1,6 +1,6 @@
 #pragma once
 
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <io/OutputStream.hpp>
 
 class BochsDebugOutputStream : public OutputStream

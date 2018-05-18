@@ -1,6 +1,6 @@
 #include <device/input/PS2Keyboard.hpp>
 
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <string.h>
 
 PS2Keyboard::PS2Keyboard() : _buffer(128)

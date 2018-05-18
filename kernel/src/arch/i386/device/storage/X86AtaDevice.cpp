@@ -1,5 +1,5 @@
 #include <arch/i386/device/storage/X86AtaDevice.hpp>
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <Kernel.hpp>
 
 #include <cstdio>

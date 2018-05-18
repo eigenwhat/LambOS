@@ -1,5 +1,5 @@
 #include <mem/PageTable.hpp>
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <cstdio>
 
 //======================================================

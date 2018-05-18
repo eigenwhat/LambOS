@@ -1,5 +1,5 @@
 #include <string.h>
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <device/display/VGATextConsole.hpp>
 
 static size_t const VGA_WIDTH = 80;

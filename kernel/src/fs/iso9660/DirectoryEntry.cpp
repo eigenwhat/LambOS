@@ -2,7 +2,7 @@
 #include <fs/iso9660/Volume.hpp>
 #include <util/Array.hpp>
 #include <util/LinkedList.hpp>
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <cstring>
 #include <util/StringTokenizer.hpp>
 

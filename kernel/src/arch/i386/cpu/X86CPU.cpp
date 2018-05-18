@@ -1,5 +1,5 @@
 #include <arch/i386/cpu/X86CPU.hpp>
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <string.h>
 #include <stdlib.h>
 #include <io/debug.h>

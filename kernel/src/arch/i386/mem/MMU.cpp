@@ -1,7 +1,7 @@
 #include <mem/MMU.hpp>
 #include <mem/PageFrameAllocator.hpp>
 #include <mem/PageTable.hpp>
-#include <sys/asm.h>
+#include <arch/i386/sys/asm.h>
 #include <Kernel.hpp>
 
 #include <cstdio>
