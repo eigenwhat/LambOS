@@ -53,13 +53,13 @@ set_property(TARGET ${KERNEL_TARGET} PROPERTY OUTPUT_NAME kernel.bin)
 # set compilation options
 set_property(TARGET ${KERNEL_TARGET} PROPERTY CXX_STANDARD 17)
 target_compile_options(${KERNEL_TARGET} PRIVATE
-        $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}> $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>)
+        $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS} -DKERNEL> $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS} -DKERNEL>)
 
 # check for and link support libs
-if (NOT DEFINED LIBC_TARGET)
-    message (SEND_ERROR "LIBC_TARGET not defined or not visible to ${KERNEL_TARGET}.")
+if (NOT DEFINED LIBK_TARGET)
+    message (SEND_ERROR "LIBK_TARGET not defined or not visible to ${KERNEL_TARGET}.")
 else ()
-    target_link_libraries(${KERNEL_TARGET} ${LIBC_TARGET})
+    target_link_libraries(${KERNEL_TARGET} ${LIBK_TARGET})
 endif ()
 
 if (NOT DEFINED LIBCPP_TARGET)

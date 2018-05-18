@@ -23,6 +23,8 @@ option(QEMU_USE_GDB "Run QEMU with the GDB server enabled. Waits for a connectio
 set(KERNEL_TARGET lambos-kernel)
 # libc target name
 set (LIBC_TARGET lambosc)
+# libk target name
+set (LIBK_TARGET lambosk)
 # libc++ target name
 set (LIBCPP_TARGET lambosc++)
 # lambos system library target name
