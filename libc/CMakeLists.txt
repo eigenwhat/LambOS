@@ -23,7 +23,9 @@ set (SOURCES
     ${STDIO_SOURCES}
     ${STDLIB_SOURCES}
     src/ctype.c
-    src/string.c)
+    src/string.c
+    src/sys/syscall.cpp
+    src/sys/syscall_kernel.cpp)
 
 macro(add_libc TARGET_NAME IS_KERNEL)
     add_library(${TARGET_NAME} STATIC ${SOURCES})

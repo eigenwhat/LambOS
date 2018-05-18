@@ -20,7 +20,7 @@ struct SyscallHandler : public InterruptServiceRoutine
     {
         auto callId = registers.eax;
         if (callId == 0) {
-            Syscall::write(_kernel, registers);
+            registers.eax = Syscall::write(_kernel, registers);
         } else {
             debugOut->print("Received unidentified syscall: ");
             debugOut->println<int>(callId);

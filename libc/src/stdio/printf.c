@@ -5,6 +5,7 @@
 #include <stdlib.h>
 
 #include "xtoa.h"
+#include <sys/syscall.h>
 
 /* Function pointer for the print function passed into `vsprintf_internal()`.
  * @param buf The buffer to write to.
@@ -179,10 +180,7 @@ int sprintf(char *str, char const * restrict format, ...)
 
 static void printf_print(__attribute__((unused))char *buf, int *ptr, char const *data, size_t data_length)
 {
-    for ( size_t i = 0; i < data_length; i++ ) {
-        putchar((int) ((unsigned char const *) data)[i]);
-        *ptr += 1;
-    }
+    *ptr += sys_write(0, (uint8_t const *)data, data_length);
 }
 
 int puts(char const *string)

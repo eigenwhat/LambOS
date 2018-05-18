@@ -1,17 +1,16 @@
 #include <stdio.h>
-
-#ifdef KERNEL
-#include <Kernel.hpp>
-#endif
+#include <sys/syscall.h>
 
 extern "C" {
 
 int putchar(int ic)
 {
-#ifdef KERNEL
     char c = (char) ic;
-    kernel->out()->print(c);
-#endif
+
+    uint8_t const *buf = reinterpret_cast<uint8_t const *>(&c);
+
+    sys_write(0, buf, 1);
+
     return ic;
 }
 
