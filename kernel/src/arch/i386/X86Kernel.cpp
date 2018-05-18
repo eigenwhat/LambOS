@@ -3,12 +3,14 @@
 //
 
 #include <arch/i386/X86Kernel.hpp>
+#include <arch/i386/sys/Syscall.hpp>
 #include <device/display/VGATextConsole.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
 #include <io/debug.h>
-#include <arch/i386/sys/Syscall.hpp>
 
 #include <new>
+
+#include <sys/_syscall_numbers.h>
 
 namespace {
 
@@ -19,17 +21,24 @@ struct SyscallHandler : public InterruptServiceRoutine
     void operator()(RegisterTable &registers) override
     {
         auto callId = registers.eax;
-        if (callId == 0) {
-            registers.eax = Syscall::write(_kernel, registers);
-        } else {
-            debugOut->print("Received unidentified syscall: ");
-            debugOut->println<int>(callId);
-            debugOut->print("registers.ebx = ");
-            debugOut->println<int>(registers.ebx);
-            debugOut->print("registers.ecx = ");
-            debugOut->println<int>(registers.ecx);
-            debugOut->print("registers.edx = ");
-            debugOut->println<int>(registers.edx);
+
+        switch (callId)
+        {
+            case SyscallId::kWrite:
+                registers.eax = Syscall::write(_kernel, registers); break;
+            case SyscallId::kOpen:
+            case SyscallId::kRead:
+            case SyscallId::kClose:
+            case SyscallId::kExit:
+            default:
+                debugOut->print("Received unidentified syscall: ");
+                debugOut->println<int>(callId);
+                debugOut->print("registers.ebx = ");
+                debugOut->println<int>(registers.ebx);
+                debugOut->print("registers.ecx = ");
+                debugOut->println<int>(registers.ecx);
+                debugOut->print("registers.edx = ");
+                debugOut->println<int>(registers.edx);
         }
     }
 

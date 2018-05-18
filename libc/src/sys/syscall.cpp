@@ -1,6 +1,7 @@
 #ifndef KERNEL
 
 #include <sys/syscall.h>
+#include <sys/_syscall_numbers.h>
 
 
 // ====================================================
@@ -9,7 +10,7 @@
 
 extern "C" {
 
-DEFN_SYSCALL3(write, 0, uint32_t, uint8_t const *, size_t);
+DEFN_SYSCALL3(write, SyscallId::kWrite, uint32_t, uint8_t const *, size_t);
 
 } // extern "C"
 
