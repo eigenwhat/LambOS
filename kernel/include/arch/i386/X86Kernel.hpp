@@ -21,6 +21,8 @@ public:
      */
     void installMMU(uint32_t mmap_addr, uint32_t mmap_length);
 
+    void installSyscalls();
+
 private:
     X86CPU _x86cpu;
     VGATextConsole _vgaConsole;

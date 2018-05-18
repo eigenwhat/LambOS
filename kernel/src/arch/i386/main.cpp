@@ -51,7 +51,8 @@ int log_test(char const *printstr, int success);
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
     // Get this party started
-    kernel = new(kern_mem) X86Kernel;
+    X86Kernel *x86Kernel = new(kern_mem) X86Kernel;
+    kernel = x86Kernel;
 
     // Set up output to bochs as a debug output stream
     OutputStream *stream = new(bochsout_mem) BochsDebugOutputStream();
@@ -66,9 +67,11 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     kernel->cpu()->install();
     log_task("Installing CPU descriptor tables...", true);
 
-    ((X86Kernel*)kernel)->installMMU(info->mmap_addr, info->mmap_length);
+    x86Kernel->installMMU(info->mmap_addr, info->mmap_length);
     log_task("Setting up memory management unit...", true);
-    ((X86CPU*)kernel->cpu())->idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
+    x86Kernel->x86CPU()->idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
+
+    x86Kernel->installSyscalls();
 
     kernel->cpu()->enableInterrupts();
     init_system();

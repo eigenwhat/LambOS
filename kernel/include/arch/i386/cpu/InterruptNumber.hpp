@@ -37,5 +37,6 @@ enum class InterruptNumber
     kIRQ12,
     kIRQ13,
     kIRQ14,
-    kIRQ15
+    kIRQ15,
+    kSystemCall = 0x80
 };
