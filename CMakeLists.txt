@@ -5,7 +5,7 @@ set (COMMON_COMPILER_FLAGS -ffreestanding -O2 -Wall -Wextra -Werror -fstack-prot
 set (C_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -std=gnu99)
 set (CXX_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -fno-exceptions -fno-rtti)
 
-set (CMAKE_EXE_LINKER_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
+#set (CMAKE_EXE_LINKER_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
 
 # options
 
@@ -35,7 +35,9 @@ add_subdirectory(libcpp)
 add_subdirectory(libsys)
 add_subdirectory(kernel)
 
-add_subdirectory(kernel/tests/elftest)
+
+set(ALL_PROGRAMS
+        elf-test)
 
 # create bootable ISO
 find_program(GRUB_MKRESCUE grub-mkrescue)
@@ -48,13 +50,14 @@ else ()
     #grub-mkrescue --output=$(OBJDIR)/lambos.iso $(OBJDIR)/iso
     file (REMOVE ${CMAKE_SOURCE_DIR}/iso)
     file (COPY ${CMAKE_SOURCE_DIR}/iso DESTINATION ${CMAKE_BINARY_DIR})
+    file (MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/iso/bin)
     set (ISO_TARGET grub-bootable-iso)
     set (ISO_PATH ${CMAKE_BINARY_DIR}/lambos.iso)
     add_custom_target(${ISO_TARGET}
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${KERNEL_TARGET}> ${CMAKE_BINARY_DIR}/iso/boot/
-            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:elf-test> ${CMAKE_BINARY_DIR}/iso/
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:elf-test> ${CMAKE_BINARY_DIR}/iso/bin
             COMMAND ${GRUB_MKRESCUE} --output=${ISO_PATH} ${CMAKE_BINARY_DIR}/iso)
-    add_dependencies(${ISO_TARGET} ${KERNEL_TARGET} elf-test)
+    add_dependencies(${ISO_TARGET} ${KERNEL_TARGET} ${ALL_PROGRAMS})
 
     # set up convenience target to boot generated ISO in qemu (if available)
     find_program(QEMU qemu-system-i386)

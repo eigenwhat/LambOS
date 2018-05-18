@@ -159,8 +159,8 @@ void read_ata()
                     auto vol = Iso9660::instance().createVolume(device);
 //                    auto entry = vol->find("/boot/kernel.bin");
 //                    printf("    Found '/boot/kernel.bin'? %s\n", entry ? "yes!" : "no");
-                    auto entry = vol->find("/elf-test");
-                    printf("    Found '/elf-test'? %s\n", entry ? "yes!" : "no");
+                    auto entry = vol->find("/bin/elf-test");
+                    printf("    Found '/bin/elf-test'? %s\n", entry ? "yes!" : "no");
                     if (!entry) break;
                     bool isElf = elf::Executable::isElf(*entry);
                     printf("    Recognized ELF? %s\n", isElf ? "yes!" : "no");

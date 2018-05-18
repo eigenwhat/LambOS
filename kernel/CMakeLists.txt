@@ -49,6 +49,7 @@ target_include_directories(${KERNEL_TARGET} PUBLIC include)
 target_include_directories(${KERNEL_TARGET} INTERFACE $<TARGET_PROPERTY:${LIBSYS_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
 #target_link_libraries(${KERNEL_TARGET} ${KERNEL_HEADERS_TARGET})
 set_property(TARGET ${KERNEL_TARGET} PROPERTY OUTPUT_NAME kernel.bin)
+set_property(TARGET ${KERNEL_TARGET} PROPERTY LINK_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
 
 # set compilation options
 set_property(TARGET ${KERNEL_TARGET} PROPERTY CXX_STANDARD 17)
@@ -73,3 +74,6 @@ if (NOT DEFINED LIBSYS_TARGET)
 else ()
     target_link_libraries(${KERNEL_TARGET} ${LIBSYS_TARGET})
 endif()
+
+# add elftest
+add_subdirectory(tests/elftest)
