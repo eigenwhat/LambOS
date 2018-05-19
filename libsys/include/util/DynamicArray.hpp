@@ -34,7 +34,9 @@ template <typename T, typename Resizer = DefaultResizer<T>>
 class DynamicArray : public Object
 {
   public:
-    DynamicArray() : DynamicArray(8) {}
+    static constexpr size_t kDefaultSize = 8;
+
+    DynamicArray() : DynamicArray(kDefaultSize) {}
     DynamicArray(size_t reserve) : _capacity(reserve), _data(new T[_capacity]) {}
 
     ~DynamicArray() { delete[] _data; }
@@ -71,6 +73,17 @@ class DynamicArray : public Object
     {
         if (shiftLeft) _moveLeft(_data, _data, _capacity, offset);
         else _moveRight(_data, _data, _capacity, offset);
+    }
+
+    /**
+     * Clears the array, destroying all contents.
+     * @param newSize The new size. Defaults to kDefaultSize.
+     */
+    void clear(size_t newSize = kDefaultSize)
+    {
+        delete[] _data;
+        _data = new T[newSize];
+        _capacity = newSize;
     }
 
     /**

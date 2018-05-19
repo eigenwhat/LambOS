@@ -134,6 +134,19 @@ template <typename T> class BasicString : public Collection<T>
     }
 
     /**
+     * Empties the BasicString.
+     * @note This is O(1). The size value and the first element are set to 0,
+     * in effect making the string empty, but the data is otherwise left as-is.
+     * @return `true`.
+     */
+    bool clear() override
+    {
+        _size = 0;
+        _data[_size] = 0; // null terminate
+        return true;
+    }
+
+    /**
      * Returns an immutable null-terminated C string.
      * @return A C string.
      */

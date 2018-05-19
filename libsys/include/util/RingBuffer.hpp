@@ -104,7 +104,11 @@ public:
     size_t capacity() const { return _capacity; }
 
     /** Empties the buffer. */
-    void clear() { _front = _back; }
+    bool clear() override
+    {
+        _front = _back;
+        return true;
+    }
 
 private:
     size_t _next(size_t current) { return (current + 1) % _capacity; }

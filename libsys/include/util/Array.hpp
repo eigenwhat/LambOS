@@ -97,6 +97,17 @@ template <typename T> class Array : public Collection<T>
      */
     bool remove(const T&) override { return false; }
 
+    /**
+     * Destroys the array, then reallocates a fresh one of the same size.
+     * @return `true`.
+     */
+    bool clear() override
+    {
+        if (_array) { delete[] _array; }
+        if (_size) { _array = new T[_size]; }
+        return true;
+    }
+
     Array &operator=(Array &&rhs)
     {
         auto &size = const_cast<size_t&>(_size);

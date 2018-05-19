@@ -68,5 +68,17 @@ public:
      */
     virtual bool remove(ValueType const &object) = 0;
 
+    /**
+     * Removes all objects from the Collection.
+     *
+     * Some Collections may not allow removal. If no object is removed from the
+     * Collection as a result of this operation (because the container won't
+     * allow it), this method will return false, signifying that no modification
+     * to the contents has occurred.
+     *
+     * @return `true` if the Collection changed, `false` otherwise.
+     */
+    virtual bool clear() = 0;
+
     /** @} */
 };

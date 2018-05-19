@@ -293,6 +293,18 @@ class ArrayList : public List<T>
      */
     size_t capacity() const { return _data.capacity(); }
 
+    /**
+     * Destroys all elements and resets the reserved block to the default
+     * pre-allocation.
+     * @return `true`.
+     */
+    bool clear() override
+    {
+        _data.clear();
+        _size = 0;
+        return true;
+    }
+
   private:
     static constexpr size_t npos = -1;
     /**

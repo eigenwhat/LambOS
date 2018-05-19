@@ -200,6 +200,18 @@ template <typename T> class LinkedList : public virtual List<T>
     }
 
     /**
+     * Removes all elements from the LinkedList.
+     * @return `true`.
+     */
+    bool clear() override
+    {
+        _first = nullptr;
+        _last = nullptr;
+        _size = 0;
+        return true;
+    }
+
+    /**
      * Returns the element at the given index. No bounds checking is performed.
      *
      * @note This is a linked list, so this operation is O(n)!
