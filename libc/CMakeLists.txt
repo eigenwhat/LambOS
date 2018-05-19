@@ -14,8 +14,7 @@ endif ()
 
 set (STDIO_SOURCES
     src/stdio/gets.c
-    src/stdio/printf.c
-    src/stdio/putchar.cpp)
+    src/stdio/printf.c)
 
 set (STDLIB_SOURCES
     src/stdlib/itoa.c)

@@ -203,3 +203,9 @@ int printf(char const * restrict format, ...)
     return result;
 }
 
+int putchar(int ic)
+{
+    uint8_t c = (uint8_t)ic;
+    sys_write(0, &c, 1);
+    return ic;
+}
