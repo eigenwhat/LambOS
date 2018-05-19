@@ -82,7 +82,7 @@ bool Executable::isElf(DirectoryEntry const &entry)
         return false;
     }
 
-    auto file = FileReader{Autorelease(entry.fileStream()).get()};
+    auto file = FileReader{Autorelease(entry.fileStream())};
 
     size_t bytesRead = 0;
     auto const header32 = readObject<ElfHeader32>(file, 0, &bytesRead);
@@ -95,7 +95,7 @@ bool Executable::isElf(DirectoryEntry const &entry)
 }
 
 Executable::Executable(DirectoryEntry &entry)
-        : _file(Autorelease(entry.fileStream()).get())
+        : _file(Autorelease(entry.fileStream()))
 {
     _file.readAll();
     auto header = readObject<ElfHeader32>(_file, 0);

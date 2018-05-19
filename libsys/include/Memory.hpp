@@ -145,7 +145,12 @@ ArcPtr<T> AsArcPtr(T *ptr, bool initialRetain = true)
 
 /** RAII object releaser. */
 template <typename T>
-ArcPtr<T> Autorelease(T *ptr) { return ArcPtr<T>(ptr, false); }
+class Autorelease : public ArcPtr<T>
+{
+  public:
+    Autorelease(T *ptr) : ArcPtr<T>(ptr, false) {}
+    operator T*() const { return ArcPtr<T>::get(); }
+};
 
 /** Handy autorelease macro that almost looks like a language construct. */
 #define autorelease(object) auto autorel__COUNTER__ = Autorelease((object))
