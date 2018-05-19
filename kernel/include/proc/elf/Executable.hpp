@@ -12,7 +12,7 @@ class Executable : public Object
 {
   public:
     /** The function signature for the program's entry point. */
-    using EntryType = int (*)();
+    using EntryType = int (*)(int, char **);
 
     struct Section;
 
@@ -49,7 +49,7 @@ class Executable : public Object
      */
     int exec()
     {
-        return loadSegments() ? _entry() : -1;
+        return loadSegments() ? _entry(0, nullptr) : -1;
     }
 
     /**
