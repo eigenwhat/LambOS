@@ -79,6 +79,13 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
 void init_system()
 {
+    // prepare stdin
+    auto *kb = new PS2Keyboard();
+    PS2KeyboardISR::install(*(X86CPU*)kernel->cpu(), kb);
+    auto *in = new KeyboardInputStream(kb);
+    kernel->setIn(in);
+    kb->release();
+
     read_ata();
 
     kernel->console()->setForegroundColor(COLOR_WHITE);
@@ -100,11 +107,6 @@ void init_system()
     kernel->console()->setForegroundColor(defaultTextColor);
     putchar('\n');
     kernel->console()->setCursorVisible(true);
-
-    auto *kb = new PS2Keyboard();
-    PS2KeyboardISR::install(*(X86CPU*)kernel->cpu(), kb);
-    auto *in = new KeyboardInputStream(kb);
-    kb->release();
 
     while (true) {
         kernel->out()->write(in->read());
