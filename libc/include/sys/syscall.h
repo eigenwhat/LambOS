@@ -10,6 +10,7 @@
 __BEGIN_DECLS
 
 DECL_SYSCALL3(write, uint32_t, uint8_t const *, size_t);
+DECL_SYSCALL3(read, uint32_t, uint8_t *, size_t);
 
 __END_DECLS
 

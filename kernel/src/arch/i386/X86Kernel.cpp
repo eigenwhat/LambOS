@@ -21,13 +21,19 @@ struct SyscallHandler : public InterruptServiceRoutine
     void operator()(RegisterTable &registers) override
     {
         auto callId = registers.eax;
-
         switch (callId)
         {
+            case SyscallId::kRead: {
+                // ISR clears IF, but keyboard input is interrupt driven so we
+                // need to set IF again.
+                asm volatile ("sti");
+                registers.eax = Syscall::read(_kernel, registers);
+                asm volatile ("cli");
+                break;
+            }
             case SyscallId::kWrite:
                 registers.eax = Syscall::write(_kernel, registers); break;
             case SyscallId::kOpen:
-            case SyscallId::kRead:
             case SyscallId::kClose:
             case SyscallId::kExit:
             default:

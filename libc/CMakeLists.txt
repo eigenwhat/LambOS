@@ -13,6 +13,7 @@ if (NOT DEFINED LIBK_TARGET)
 endif ()
 
 set (STDIO_SOURCES
+    src/stdio/gets.c
     src/stdio/printf.c
     src/stdio/putchar.cpp)
 

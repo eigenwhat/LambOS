@@ -27,6 +27,12 @@ int sys_write(uint32_t fd, uint8_t const *buf, size_t bytes)
     return (int)Syscall::write((X86Kernel&)*kernel, registers);
 }
 
+int sys_read(uint32_t fd, uint8_t *buf, size_t bytes)
+{
+    auto registers = fake_syscall(fd, (uint32_t)buf, bytes);
+    return (int)Syscall::read((X86Kernel&)*kernel, registers);
+}
+
 } // extern "C"
 
 #endif

@@ -21,4 +21,16 @@ class Syscall
 
         return static_cast<uint32_t>(-1);
     }
+
+    static uint32_t read(X86Kernel &k, RegisterTable const &registers)
+    {
+        auto fd = registers.ebx;
+        if (fd == kStdIn) {
+            uint8_t *buf = reinterpret_cast<uint8_t *>(registers.ecx);
+            auto len = registers.edx;
+            return k.in()->read(buf, len);
+        }
+
+        return static_cast<uint32_t>(-1);
+    }
 };

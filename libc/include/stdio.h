@@ -4,7 +4,12 @@
 #include <decl.h>
 #include <stdarg.h>
 
+#define EOF -1
+
 __BEGIN_DECLS
+
+int getchar();
+char *gets(char *str);
 
 int putchar(int);
 int puts(char const*);
