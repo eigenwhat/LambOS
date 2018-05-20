@@ -35,6 +35,7 @@ add_subdirectory(libcpp)
 add_subdirectory(libsys)
 add_subdirectory(kernel)
 
+add_subdirectory(programs/kvshell)
 
 set(ALL_PROGRAMS
         elf-test)
@@ -55,6 +56,7 @@ else ()
     set (ISO_PATH ${CMAKE_BINARY_DIR}/lambos.iso)
     add_custom_target(${ISO_TARGET}
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${KERNEL_TARGET}> ${CMAKE_BINARY_DIR}/iso/boot/
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kvshell> ${CMAKE_BINARY_DIR}/iso/bin
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:elf-test> ${CMAKE_BINARY_DIR}/iso/bin
             COMMAND ${GRUB_MKRESCUE} --output=${ISO_PATH} ${CMAKE_BINARY_DIR}/iso)
     add_dependencies(${ISO_TARGET} ${KERNEL_TARGET} ${ALL_PROGRAMS})
