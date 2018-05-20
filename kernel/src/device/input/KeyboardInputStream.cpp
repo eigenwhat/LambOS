@@ -1,4 +1,5 @@
 #include <device/input/KeyboardInputStream.hpp>
+#include <Kernel.hpp>
 
 namespace {
 #define NUL 0
@@ -50,5 +51,8 @@ int KeyboardInputStream::read()
     do {
         event = _keyboard->read();
     } while (event.type != kKeyEventPressed || kKeyToChar[event.keyCode] == 0);
-    return charWithModKeys(*_keyboard, event.keyCode);
+
+    auto c = charWithModKeys(*_keyboard, event.keyCode);
+    kernel->out()->print(c);
+    return c;
 }

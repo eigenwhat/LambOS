@@ -106,20 +106,24 @@ void init_system()
     puts("");
 
     auto cvshEntry = cd->find("/bin/kvshell");
-    auto kvshell = elf::Executable(*cvshEntry);
-    printf("Running kvshell...\n");
-    kvshell.exec();
+    if (cvshEntry) {
+        auto kvshell = elf::Executable(*cvshEntry);
+        printf("Running kvshell...\n");
+        kernel->console()->setCursorVisible(true);
+        kvshell.exec();
+    } else {
+        puts("Unable to find kvshell! You might want to look into that.");
+    }
 
     // mock developer
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
     printf("Kernel exited. Maybe you should write the rest of the operating system?");
     kernel->console()->setForegroundColor(defaultTextColor);
     putchar('\n');
-    kernel->console()->setCursorVisible(true);
 
     // show keyboard input indefinitely
     while (true) {
-        kernel->out()->write(in->read());
+        kernel->in()->read();
     }
 }
 
