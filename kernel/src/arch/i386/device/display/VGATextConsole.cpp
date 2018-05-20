@@ -32,6 +32,7 @@ void move_cursor_to(size_t row, size_t col)
 VGATextConsole::VGATextConsole()
 {
     clear();
+    setCursorVisible(_cursorIsVisible);
 }
 
 void VGATextConsole::clear()
