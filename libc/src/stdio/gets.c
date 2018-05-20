@@ -15,7 +15,17 @@ int getchar()
 
 char *gets(char *str)
 {
-    for (; (*str = (char)getchar()) != '\n';  ++str);
+    char const *startstr = str;
+    while ((*str = (char)getchar()) != '\n') {
+        if (*str == '\b') {
+            if (str != startstr) {
+                --str;
+            }
+        } else {
+            ++str;
+        }
+    }
+
     *str = 0;
 
     return str;
