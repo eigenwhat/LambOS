@@ -37,7 +37,7 @@ extern "C" {
 // Function prototypes
 // ====================================================
 void init_system();
-void read_ata();
+Volume *read_ata();
 void read_multiboot(multiboot_info_t *info);
 
 int log_result(char const *printstr, int success, char const *ackstr, char const *nakstr);
@@ -82,11 +82,10 @@ void init_system()
     // prepare stdin
     auto *kb = new PS2Keyboard();
     PS2KeyboardISR::install(*(X86CPU*)kernel->cpu(), kb);
-    auto *in = new KeyboardInputStream(kb);
-    kernel->setIn(in);
+    kernel->setIn(Autorelease(new KeyboardInputStream(kb)));
     kb->release();
 
-    read_ata();
+    auto cd = read_ata();
 
     kernel->console()->setForegroundColor(COLOR_WHITE);
     puts("\n* * *");
@@ -102,19 +101,31 @@ void init_system()
     }
     puts("\n* * *");
 
+    // run shell
+    kernel->console()->setForegroundColor(defaultTextColor);
+    puts("");
+
+    auto cvshEntry = cd->find("/bin/kvshell");
+    auto kvshell = elf::Executable(*cvshEntry);
+    printf("Running kvshell...\n");
+    kvshell.exec();
+
+    // mock developer
     kernel->console()->setForegroundColor(COLOR_LIGHT_RED);
     printf("Kernel exited. Maybe you should write the rest of the operating system?");
     kernel->console()->setForegroundColor(defaultTextColor);
     putchar('\n');
     kernel->console()->setCursorVisible(true);
 
+    // show keyboard input indefinitely
     while (true) {
         kernel->out()->write(in->read());
     }
 }
 
-void read_ata()
+Volume *read_ata()
 {
+    Volume *cdVolume = nullptr;
     kernel->console()->setForegroundColor(COLOR_WHITE);
     kernel->console()->writeString("\nPATA Device Information\n");
     kernel->console()->setForegroundColor(defaultTextColor);
@@ -158,10 +169,9 @@ void read_ata()
                 bool isIso9660 = Iso9660::instance().hasFileSystem(device);
                 puts(isIso9660 ? "yes!" : "no");
                 if (isIso9660) {
-                    auto vol = Iso9660::instance().createVolume(device);
-//                    auto entry = vol->find("/boot/kernel.bin");
-//                    printf("    Found '/boot/kernel.bin'? %s\n", entry ? "yes!" : "no");
-                    auto entry = vol->find("/bin/elf-test");
+                    auto heapDevice = Autorelease(new X86AtaDevice(device));
+                    cdVolume = Iso9660::instance().createVolume(*heapDevice.get());
+                    auto entry = cdVolume->find("/bin/elf-test");
                     printf("    Found '/bin/elf-test'? %s\n", entry ? "yes!" : "no");
                     if (!entry) break;
                     bool isElf = elf::Executable::isElf(*entry);
@@ -176,6 +186,8 @@ void read_ata()
                 break;
         }
     }
+
+    return cdVolume;
 }
 
 void read_multiboot(multiboot_info_t *info)
