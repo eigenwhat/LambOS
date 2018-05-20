@@ -34,6 +34,7 @@ set (SOURCES
         src/runtime/cpplang.cpp
         ${I386_SOURCES}
         ${LIBALLOC_SOURCES}
+        src/device/display/ConsoleOutputStream.cpp
         src/device/input/KeyboardInputStream.cpp
         src/device/input/PS2Keyboard.cpp
         src/device/storage/AtaDeviceDescriptor.cpp

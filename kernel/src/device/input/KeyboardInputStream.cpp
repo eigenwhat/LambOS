@@ -5,7 +5,7 @@ namespace {
 constexpr char kKeyToChar[128] = {
         NUL,
         NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL,
-        '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', NUL,
+        '`', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '=', '\b',
         '\t', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', '[', ']', '\\',
         NUL, 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l', ';', '\'', '\n',
         NUL, 'z', 'x', 'c', 'v', 'b', 'n', 'm', ',', '.', '/', NUL,
@@ -21,7 +21,7 @@ constexpr char kKeyToChar[128] = {
 constexpr char kKeyToCharShift[128] = {
         NUL,
         NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL, NUL,
-        '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', NUL,
+        '~', '!', '@', '#', '$', '%', '^', '&', '*', '(', ')', '_', '+', '\b',
         '\t', 'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}', '|',
         NUL, 'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '\"', '\n',
         NUL, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '\?', NUL,

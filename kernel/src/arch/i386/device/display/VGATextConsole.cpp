@@ -29,18 +29,13 @@ void move_cursor_to(size_t row, size_t col)
 //======================================================
 // VGATextConsole
 //======================================================
-VGATextConsole::VGATextConsole() : _consoleRow(0), _consoleColumn(0)
+VGATextConsole::VGATextConsole()
 {
-    _consoleColor = COLOR_LIGHT_GREY | COLOR_BLACK << 4;
-    _consoleBuffer = (uint16_t *) 0xB8000;
-    setCursorVisible(false);
     clear();
 }
 
 void VGATextConsole::clear()
 {
-    _consoleRow = 0;
-    _consoleColumn = 0;
     for (size_t y = 0; y < VGA_HEIGHT; y++) {
         for (size_t x = 0; x < VGA_WIDTH; x++) {
             size_t const index = y * VGA_WIDTH + x;
@@ -49,11 +44,6 @@ void VGATextConsole::clear()
     }
 
     moveTo(0, 0);
-}
-
-void VGATextConsole::setColor(uint8_t color)
-{
-    this->_consoleColor = color;
 }
 
 void VGATextConsole::setForegroundColor(uint32_t fg)
@@ -66,11 +56,10 @@ void VGATextConsole::setBackgroundColor(uint32_t bg)
     this->_consoleColor = (this->_consoleColor & 0x0F) | (bg << 4);
 }
 
-void VGATextConsole::putCharAt(char c, uint8_t color, size_t x, size_t y)
+void VGATextConsole::putCharAt(char c, size_t row, size_t col)
 {
-
-    size_t const index = y * VGA_WIDTH + x;
-    _consoleBuffer[index] = make_vgaentry(c, color);
+    size_t const index = row * VGA_WIDTH + col;
+    _consoleBuffer[index] = make_vgaentry(c, _consoleColor);
 }
 
 void VGATextConsole::putChar(char c)
@@ -82,7 +71,7 @@ void VGATextConsole::putChar(char c)
             moveTo(VGA_HEIGHT - 1, 0);
         }
     } else {
-        putCharAt(c, _consoleColor, _consoleColumn, _consoleRow);
+        putCharAt(c, _consoleRow, _consoleColumn);
         if (++_consoleColumn == VGA_WIDTH) {
             _consoleColumn = 0;
             if (++_consoleRow == VGA_HEIGHT) {
@@ -103,7 +92,7 @@ void VGATextConsole::scroll(size_t lines)
         _consoleRow = VGA_HEIGHT - lines;
         for (uint8_t j = _consoleRow; j < VGA_HEIGHT; ++j) {
             for (uint8_t i = 0; i < VGA_WIDTH; ++i) {
-                putCharAt(' ', _consoleColor, i, j);
+                putCharAt(' ', j, i);
             }
         }
         _consoleRow = old_row;
