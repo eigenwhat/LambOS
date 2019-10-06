@@ -68,7 +68,7 @@ void Volume::init()
 
     // set root directory entry
     auto *rootEntry = reinterpret_cast<DirectoryInfo *>(&(descriptor->root));
-    _root = ArcPtr<iso9660::DirectoryEntry>::make(*rootEntry, *this);
+    _root = make_arc<iso9660::DirectoryEntry>(*rootEntry, *this);
 
     // get volume label
     size_t volumeIdLength = 0;

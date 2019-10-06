@@ -23,21 +23,19 @@
  *
  * @tparam T The type of object the LinkedList holds.
  */
-template <typename T> class LinkedList : public virtual List<T>
+template <typename T> class LinkedList
 {
   public:
-    using Iterator = typename Iterable<T>::Iterator;
-
     /**
      * Adds an element to the front of the List.
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool push(const T &obj) override
+    bool push(const T &obj)
     {
         if constexpr (std::is_copy_constructible<T>::value) {
             if (!_first) {
-                _first = ArcPtr<Node>::make(obj);
+                _first = make_arc<Node>(obj);
                 _last = _first;
             } else {
                 _first = _first->insertBefore(obj);
@@ -56,10 +54,10 @@ template <typename T> class LinkedList : public virtual List<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool push(T &&obj) override
+    bool push(T &&obj)
     {
         if (!_first) {
-            _first = ArcPtr<Node>::make(std::move(obj));
+            _first = make_arc<Node>(std::move(obj));
             _last = _first;
         } else {
             _first = _first->insertBefore(std::move(obj));
@@ -70,11 +68,14 @@ template <typename T> class LinkedList : public virtual List<T>
         return true;
     }
 
+    bool insert(T const &obj) { return push(obj); }
+    bool insert(T &&obj) { return push(std::move(obj)); }
+
     /**
      * Removes an element from the front of the List.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    T pop() override
+    T pop()
     {
         auto oldFirst = _first;
 
@@ -96,14 +97,14 @@ template <typename T> class LinkedList : public virtual List<T>
      * Returns the element at the front of the List without removing it.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    const T &peek() const override { return _first->value; }
+    const T &peek() const { return _first->value; }
 
     /**
      * Adds an element to the back of the List.
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool enqueue(const T &obj) override
+    bool enqueue(const T &obj)
     {
         if constexpr (std::is_copy_constructible<T>::value) {
             if (!_last) {
@@ -118,7 +119,7 @@ template <typename T> class LinkedList : public virtual List<T>
         }
     }
 
-    bool enqueue(T &&obj) override
+    bool enqueue(T &&obj)
     {
         if (!_last) {
             return push(std::move(obj)); // list is empty
@@ -133,7 +134,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * Removes an element from the back of the List.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    T popBack() override
+    T popBack()
     {
         auto oldLast = _last;
 
@@ -155,7 +156,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * Returns the element at the back of the List without removing it.
      * @return The object. If the List is empty, the return value is undefined.
      */
-    const T &peekBack() const override { return _last->value; }
+    const T &peekBack() const { return _last->value; }
 
     /**
      * Returns whether or not the List is empty.
@@ -167,10 +168,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * The number of elements in the List.
      * @return A size_t equal to the number of elements.
      */
-    virtual size_t size() const
-    {
-        return _size;
-    }
+    size_t size() const { return _size; }
 
     /**
      * Removes the first element equal to `object`.
@@ -203,7 +201,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * Removes all elements from the LinkedList.
      * @return `true`.
      */
-    bool clear() override
+    bool clear()
     {
         _first = nullptr;
         _last = nullptr;
@@ -219,7 +217,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    T& operator[](size_t idx) const override
+    T& operator[](size_t idx) const
     {
         Node *it = _first.get();
         for (; idx > 0; --idx) {
@@ -247,11 +245,11 @@ template <typename T> class LinkedList : public virtual List<T>
     bool operator!=(const LinkedList &rhs) const { return !operator==(rhs); }
 
     /** An iterator pointing to the first element in the list. */
-    Iterator begin() const override
+    Iterator<T> begin() const
     {
         auto *llit = new LLIterator{_first.get(), this};
         autorelease(llit);
-        return Iterable<T>::newIterator(llit);
+        return Iterator<T>::newIterator(llit);
     }
 
     /**
@@ -260,11 +258,11 @@ template <typename T> class LinkedList : public virtual List<T>
      *
      * @return An iterator signifying the end of this LinkedList.
      */
-    Iterator end() const override
+    Iterator<T> end() const
     {
         auto *llit = new LLIterator{nullptr, this};
         autorelease(llit);
-        return Iterable<T>::newIterator(llit);
+        return Iterator<T>::newIterator(llit);
     }
 
   private:
@@ -280,7 +278,7 @@ template <typename T> class LinkedList : public virtual List<T>
          */
         ArcPtr<Node> insertBefore(const T &obj)
         {
-            auto n = ArcPtr<Node>::make(obj);
+            auto n = make_arc<Node>(obj);
             n->next = this;
             n->prev = prev;
             if (prev) prev->next = n;
@@ -295,7 +293,7 @@ template <typename T> class LinkedList : public virtual List<T>
          */
         ArcPtr<Node> insertBefore(T &&obj)
         {
-            auto n = ArcPtr<Node>::make(std::move(obj));
+            auto n = make_arc<Node>(std::move(obj));
             n->next = this;
             n->prev = prev;
             if (prev) prev->next = n;
@@ -311,7 +309,7 @@ template <typename T> class LinkedList : public virtual List<T>
          */
         ArcPtr<Node> insertAfter(const T &obj)
         {
-            auto n = ArcPtr<Node>::make(obj);
+            auto n = make_arc<Node>(obj);
             n->prev = this;
             n->next = next;
             if (next) next->prev = n.get();
@@ -326,7 +324,7 @@ template <typename T> class LinkedList : public virtual List<T>
          */
         ArcPtr<Node> insertAfter(T &&obj)
         {
-            auto n = ArcPtr<Node>::make(std::move(obj));
+            auto n = make_arc<Node>(std::move(obj));
             n->prev = this;
             n->next = next;
             if (next) next->prev = n.get();
@@ -352,17 +350,17 @@ template <typename T> class LinkedList : public virtual List<T>
         ArcPtr<Node> next = nullptr;
     };
 
-    class LLIterator : public Iterable<T>::IteratorImpl
+    class LLIterator : public IteratorImpl<T>
     {
         friend class LinkedList;
-        using Iterable<T>::IteratorImpl::publicInstance;
-        using Iterable<T>::IteratorImpl::implOf;
+        using IteratorImpl<T>::publicInstance;
+        using IteratorImpl<T>::implOf;
       public:
         /**
          * (pre-increment) Advances the iterator one element forward.
          * @return A reference to the next Iterator in the Collection.
          */
-        Iterator& operator++() override
+        Iterator<T>& operator++()
         {
             _obj = _obj->next.get();
             return *publicInstance();
@@ -372,12 +370,12 @@ template <typename T> class LinkedList : public virtual List<T>
          * (post-increment) Advances the Iterator one element forward.
          * @return An Iterator equal to this before the increment.
          */
-        Iterator operator++(int) override
+        Iterator<T> operator++(int)
         {
             LLIterator *it = new LLIterator(*this);
             autorelease(it);
             this->operator++();
-            return Iterable<T>::newIterator(it);
+            return Iterator<T>::newIterator(it);
         }
 
         /**
@@ -386,14 +384,14 @@ template <typename T> class LinkedList : public virtual List<T>
          *         isn't pointing to anything (e.g. end of the Collection), the
          *         result is undefined.
          */
-        T& operator*() const override { return _obj->value; }
+        T& operator*() const { return _obj->value; }
 
         /**
          * Equality operator.
          * @param rhs The iterator to compare to.
          * @return `true` if they are equal, `false` otherwise.
          */
-        bool operator==(Iterator const &rhs) const override
+        bool operator==(Iterator<T> const &rhs) const
         {
             if (classId() != rhs.classId()) {
                 return false;
@@ -411,7 +409,7 @@ template <typename T> class LinkedList : public virtual List<T>
             return _obj == iterator->_obj && _parent == iterator->_parent;
         }
 
-        size_t classId() const override { return 0x21ED7157; }
+        size_t classId() const { return 0x21ED7157; }
 
       private:
         LLIterator(Node *node, LinkedList const *parent)

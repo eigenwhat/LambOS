@@ -24,7 +24,7 @@
 extern uint32_t kernel_end;
 VGA4BitColor defaultTextColor = COLOR_LIGHT_GREY;
 
-Kernel *kernel = NULL;
+Kernel *kernel = nullptr;
 uint8_t kern_mem[sizeof(X86Kernel)];
 
 uint8_t dbgout_mem[sizeof(PrintStream)];

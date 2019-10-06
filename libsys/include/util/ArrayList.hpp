@@ -30,11 +30,9 @@
  * @tparam T The type of object the ArrayList holds.
  */
 template <typename T>
-class ArrayList : public List<T>
+class ArrayList
 {
   public:
-    using Iterator = typename Iterable<T>::Iterator;
-
     /** Constructs an ArrayList with the default pre-allocation. */
     ArrayList() : ArrayList(8) {}
 
@@ -65,7 +63,7 @@ class ArrayList : public List<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool push(const T &obj) override
+    bool push(const T &obj)
     {
         if constexpr (std::is_copy_constructible<T>::value) {
             shiftOrResize(1);
@@ -84,7 +82,7 @@ class ArrayList : public List<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool push(T &&obj) override
+    bool push(T &&obj)
     {
         shiftOrResize(1);
         _data[0] = std::move(obj);
@@ -97,7 +95,7 @@ class ArrayList : public List<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool enqueue(const T &obj) override
+    bool enqueue(const T &obj)
     {
         if constexpr (std::is_copy_constructible<T>::value) {
             if (_size == capacity()) {
@@ -117,7 +115,7 @@ class ArrayList : public List<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool enqueue(T &&obj) override
+    bool enqueue(T &&obj)
     {
         if (_size == capacity()) {
             _data.resize();
@@ -135,7 +133,7 @@ class ArrayList : public List<T>
      *       the ordering of your data, or use a different List implementation.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    T pop() override
+    T pop()
     {
         T ret = std::move(_data[0]);
         _data.shift(1, true);
@@ -147,31 +145,31 @@ class ArrayList : public List<T>
      * Removes an element from the back of the ArrayList.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    T popBack() override { --_size; return std::move(_data[_size]); }
+    T popBack() { --_size; return std::move(_data[_size]); }
 
     /**
      * Returns the element at the top of the ArrayList without removing it.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    const T &peek() const override { return _data[0]; }
+    const T &peek() const { return _data[0]; }
 
     /**
      * Returns the element at the back of the ArrayList without removing it.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    const T &peekBack() const override { return _data[_size-1]; }
+    const T &peekBack() const { return _data[_size-1]; }
 
     /**
      * Returns whether or not the ArrayList is empty.
      * @return `true` if empty, `false` otherwise.
      */
-    bool isEmpty() const override { return _size == 0; }
+    bool isEmpty() const { return _size == 0; }
 
     /**
      * The number of elements in the ArrayList.
      * @return A size_t equal to the number of elements.
      */
-    size_t size() const override { return _size; }
+    size_t size() const { return _size; }
 
     /**
      * Adds the object to the ArrayList, growing its size.
@@ -179,7 +177,7 @@ class ArrayList : public List<T>
      * @param object The object to add.
      * @return `true` if the ArrayList changed. `false` otherwise.
      */
-    bool insert(const T &object) override { return enqueue(object); }
+    bool insert(const T &object) { return enqueue(object); }
 
     /**
      * Adds the object to the ArrayList at the given index.
@@ -197,7 +195,7 @@ class ArrayList : public List<T>
             return push(object);
         }
 
-        // TODO: think about an override for hash tables, or if we just allow it
+        // TODO: think about an for hash tables, or if we just allow it
         if (idx > _size) {
             return false;
         }
@@ -264,14 +262,14 @@ class ArrayList : public List<T>
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    T& operator[](size_t idx) const override { return _data[idx]; }
+    T& operator[](size_t idx) const { return _data[idx]; }
 
     /** An iterator pointing to the first element in the list. */
-    Iterator begin() const override
+    Iterator<T> begin() const
     {
         auto *llit = new ALIterator{0, this};
         autorelease(llit);
-        return Iterable<T>::newIterator(llit);
+        return Iterator<T>::newIterator(llit);
     }
 
     /**
@@ -280,11 +278,11 @@ class ArrayList : public List<T>
      *
      * @return An iterator signifying the end of this ArrayList.
      */
-    Iterator end() const override
+    Iterator<T> end() const
     {
         auto *llit = new ALIterator{npos, this};
         autorelease(llit);
-        return Iterable<T>::newIterator(llit);
+        return Iterator<T>::newIterator(llit);
     }
 
     /**
@@ -298,7 +296,7 @@ class ArrayList : public List<T>
      * pre-allocation.
      * @return `true`.
      */
-    bool clear() override
+    bool clear()
     {
         _data.clear();
         _size = 0;
@@ -327,17 +325,17 @@ class ArrayList : public List<T>
         }
     }
 
-    class ALIterator : public Iterable<T>::IteratorImpl
+    class ALIterator : public IteratorImpl<T>
     {
         friend class ArrayList;
-        using Iterable<T>::IteratorImpl::publicInstance;
-        using Iterable<T>::IteratorImpl::implOf;
+        using IteratorImpl<T>::publicInstance;
+        using IteratorImpl<T>::implOf;
       public:
         /**
          * (pre-increment) Advances the iterator one element forward.
          * @return A reference to the next Iterator in the Collection.
          */
-        Iterator& operator++() override
+        Iterator<T>& operator++()
         {
             ++_index;
             if (_index == _parent->size()) {
@@ -351,12 +349,12 @@ class ArrayList : public List<T>
          * (post-increment) Advances the Iterator one element forward.
          * @return An Iterator equal to this before the increment.
          */
-        Iterator operator++(int) override
+        Iterator<T> operator++(int)
         {
             ALIterator *it = new ALIterator(*this);
             autorelease(it);
             this->operator++();
-            return Iterable<T>::newIterator(it);
+            return Iterator<T>::newIterator(it);
         }
 
         /**
@@ -365,14 +363,14 @@ class ArrayList : public List<T>
          *         isn't pointing to anything (e.g. end of the Collection), the
          *         result is undefined.
          */
-        T& operator*() const override { return (*_parent)[_index]; }
+        T& operator*() const { return (*_parent)[_index]; }
 
         /**
          * Equality operator.
          * @param rhs The iterator to compare to.
          * @return `true` if they are equal, `false` otherwise.
          */
-        bool operator==(Iterator const &rhs) const override
+        bool operator==(Iterator<T> const &rhs) const
         {
             if (classId() != rhs.classId()) {
                 return false;
@@ -390,7 +388,7 @@ class ArrayList : public List<T>
             return _index == iterator->_index && _parent == iterator->_parent;
         }
 
-        size_t classId() const override { return 0xA88A1757; }
+        size_t classId() const { return 0xA88A1757; }
 
       private:
         ALIterator(size_t index, ArrayList const *parent)

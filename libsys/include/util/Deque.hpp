@@ -9,25 +9,18 @@
  * Java Collections Framework's name for the structure (pronounced like "deck").
  * @tparam T The type of object the Deque contains.
  */
-template <typename T> class Deque : public virtual Stack<T>, public virtual Queue<T>
+template <typename T>
+concept Deque = Stack<T> && Queue<T> && requires(T a)
 {
-  public:
-    /**
-     * Adds an element to the back of the Deque. Equivalent to enqueue(T).
-     * @param obj The object to add.
-     * @return `true` if an object was added. `false` otherwise.
-     */
-    bool insert(const T &obj) { return this->enqueue(obj); }
-
     /**
      * Removes an element from the back of the Deque.
      * @return The object. If the Deque is empty, the return value is undefined.
      */
-    virtual T popBack() = 0;
+    { a.popBack() } -> Same<typename T::ValueType>;
 
     /**
      * Returns the element at the back of the Deque without removing it.
      * @return The object. If the Deque is empty, the return value is undefined.
      */
-    virtual const T &peekBack() const = 0;
+    { a.peekBack() } -> Same<typename T::ValueType const &>;
 };

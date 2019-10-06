@@ -4,6 +4,8 @@
 
 namespace std {
 
+using nullptr_t = decltype(nullptr);
+
 template <class T>
 constexpr remove_reference_t<T> &&move(T&& a) { return static_cast<typename std::remove_reference_t<T>&&>(a); }
 

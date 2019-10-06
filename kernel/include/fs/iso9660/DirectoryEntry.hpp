@@ -26,7 +26,7 @@ class DirectoryEntry : public ::DirectoryEntry
      * If the DirectoryEntry describes a file, `nullptr` is returned.
      * @return A list of the directory contents, or `nullptr` if this is a file.
      */
-    List<String> *readdir() const override;
+    Maybe<LinkedList<String>> readdir() const override;
 
     /**
      * Prepares an InputStream for reading the contents of the file.

@@ -9,21 +9,8 @@
  * @tparam T The type of object the List contains.
  */
 template<typename T>
-class List : public virtual Deque<T>, public virtual Iterable<T>
+concept List = Deque<T> && Iterable<T> && requires(T const &a, size_t idx)
 {
-  public:
-    /**
-     * Removes an element from the front of the List.
-     * @return The object. If the List is empty, the return value is undefined.
-     */
-    virtual T pop() = 0;
-
-    /**
-     * Returns the element at the top of the List without removing it.
-     * @return The object. If the List is empty, the return value is undefined.
-     */
-    virtual const T &peek() const = 0;
-
     /**
      * Returns the element at the given index.
      * @note Runtime complexity is implementation specific. O(1) not guaranteed!
@@ -31,5 +18,5 @@ class List : public virtual Deque<T>, public virtual Iterable<T>
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    virtual T& operator[](size_t idx) const = 0;
+    { a[idx] } -> Same<typename T::ValueType &>;
 };

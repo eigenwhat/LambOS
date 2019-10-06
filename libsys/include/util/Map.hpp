@@ -4,12 +4,63 @@
 #include <util/Pair.hpp>
 
 template <typename K, typename V>
-class Map : public virtual Collection<Pair<K const, V>>
+class Map : public virtual Object
 {
   public:
     using KeyType = K;
     using MappedType = V;
     using ValueType = Pair<K const, V>;
+
+    /**
+     * Returns whether or not the Map is empty.
+     * @return `true` if empty, `false` otherwise.
+     */
+    virtual bool isEmpty() const = 0;
+
+    /**
+     * The number of elements in the Map.
+     * @return A size_t equal to the number of elements.
+     */
+    virtual size_t size() const = 0;
+
+    /**
+     * Adds the object to the Map, growing its size.
+     *
+     * Some Maps may not allow duplicates to be added, and some may not
+     * allow modification through this interface at all. In any case where the
+     * object is *NOT* inserted, the method will return false, signifying that
+     * no modification to the contents has occurred.
+     *
+     * @param object The object to add.
+     * @return `true` if the Map changed. `false` otherwise.
+     */
+    virtual bool insert(ValueType const &object) = 0;
+
+    /**
+     * Removes the object from the Map, reducing its size.
+     *
+     * Some Maps may not allow removal. If no object is removed from the
+     * Map as a result of this operation (either because the object was
+     * not in the Map in the first place or because the container won't
+     * allow it), this method will return false, signifying that no modification
+     * to the contents has occurred.
+     *
+     * @param object The object to remove.
+     * @return `true` if the Map changed. `false` otherwise.
+     */
+    virtual bool remove(ValueType const &object) = 0;
+
+    /**
+     * Removes all objects from the Map.
+     *
+     * Some Maps may not allow removal. If no object is removed from the
+     * Map as a result of this operation (because the container won't
+     * allow it), this method will return false, signifying that no modification
+     * to the contents has occurred.
+     *
+     * @return `true` if the Map changed, `false` otherwise.
+     */
+    virtual bool clear() = 0;
 
     /**
      * Adds the value for the given key.

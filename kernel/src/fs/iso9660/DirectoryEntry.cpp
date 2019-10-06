@@ -180,13 +180,13 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
     return nullptr;
 }
 
-List<String> *DirectoryEntry::readdir() const
+Maybe<LinkedList<String>> DirectoryEntry::readdir() const
 {
     if (type() != Type::Directory) {
-        return nullptr; // not a directory...
+        return Nothing; // not a directory...
     }
 
-    List<String> *contents = new LinkedList<String>;
+    Maybe contents{LinkedList<String>{}};
 
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();

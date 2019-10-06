@@ -2,14 +2,20 @@
 
 #include <utility>
 
+template <typename T>
+concept ReferenceCountable = requires(T a) {
+    { a.retain() };
+    { a.release() };
+};
+
 /**
  * Provides the functionality necessary for reference counting on the object
  * level. Needed for use with ArcPtr<T>.
  */
-class ReferenceCountable
+class IntrusiveRefCount
 {
   public:
-    virtual ~ReferenceCountable() {}
+    virtual ~IntrusiveRefCount() {}
     void retain() { ++_referenceCount; }
     void release()
     {
@@ -26,7 +32,7 @@ class ReferenceCountable
  * Marshals a non-ReferenceCountable type into the reference counting system.
  * @tparam T The type to store.
  */
-template <typename T> class ArcWrapper : public ReferenceCountable
+template <typename T> class ArcWrapper : public IntrusiveRefCount
 {
   public:
     /**
@@ -44,6 +50,12 @@ template <typename T> class ArcWrapper : public ReferenceCountable
 
     ArcWrapper(T *obj) : _obj(obj) {}
     ~ArcWrapper() { delete _obj; }
+
+    T& operator*() { return *_obj; }
+    T const & operator*() const { return *_obj; }
+    T* operator->() { return _obj; }
+    T const * operator->() const { return _obj; }
+
   private:
     T *_obj;
 };
@@ -55,46 +67,34 @@ template <typename T> class ArcWrapper : public ReferenceCountable
 template <typename T> class ArcPtr
 {
   public:
-    /**
-     * Creates a new T on the heap, then constructs an ArcPtr<T> with it, then
-     * finally releases, making the ArcPtr the sole retainer.
-     * @tparam Args The types for one of T's constructors. (deducible)
-     * @param args The arguments for one of T's constructors.
-     * @return The ArcPtr.
-     */
-    template <typename ... Args>
-    static ArcPtr<T> make(Args && ...args)
-    {
-        ArcPtr<T> ptr(new T(std::forward<Args>(args)...), false);
-        return ptr;
-    }
+    ArcPtr(std::nullptr_t) noexcept : _ptr{nullptr} {}
 
-    ArcPtr(T *ptr = nullptr, bool initialRetain = true) : _ptr(ptr)
+    explicit ArcPtr(T *ptr = nullptr, bool initialRetain = true) noexcept : _ptr(ptr)
     {
         if (ptr && initialRetain) ptr->retain();
     }
 
-    ArcPtr(const ArcPtr &other) : ArcPtr(other.get()) {}
+    ArcPtr(const ArcPtr &other) noexcept : ArcPtr(other.get()) {}
 
     template <typename U>
-    ArcPtr(const ArcPtr<U> &other) : ArcPtr(other.get()) {}
+    explicit ArcPtr(const ArcPtr<U> &other) noexcept : ArcPtr(other.get()) {}
 
-    ArcPtr(ArcPtr &&other) = default;
+    ArcPtr(ArcPtr &&other) noexcept = default;
 
     ~ArcPtr() { reset(nullptr); }
 
-    T *get() const { return _ptr; }
+    T *get() const noexcept { return _ptr; }
 
-    void reset(T *newPtr)
+    void reset(T *newPtr) noexcept
     {
         if (_ptr) _ptr->release();
         _ptr = newPtr;
         if (_ptr) _ptr->retain();
     }
 
-    T *operator->() const { return _ptr; }
+    T *operator->() const noexcept { return _ptr; }
 
-    T& operator*() const { return *_ptr; }
+    T& operator*() const noexcept { return *_ptr; }
 
     ArcPtr &operator=(ArcPtr const &r) noexcept
     {
@@ -126,19 +126,39 @@ template <typename T> class ArcPtr
         return *this;
     }
 
-    bool operator==(const ArcPtr &r) const { return _ptr == r._ptr; }
+    ArcPtr &operator=(T *rhs) noexcept
+    {
+        reset(rhs);
+        return *this;
+    }
 
-    bool operator!=(const ArcPtr &r) const { return !operator==(r); }
+    bool operator==(const ArcPtr &r) const noexcept { return _ptr == r._ptr; }
 
-    explicit operator bool() const { return _ptr != nullptr; }
+    bool operator!=(const ArcPtr &r) const noexcept { return !operator==(r); }
+
+    explicit operator bool() const noexcept { return _ptr != nullptr; }
 
   private:
     template <typename> friend class ArcPtr;
     T *_ptr;
 };
 
+/**
+ * Creates a new T on the heap, then constructs an ArcPtr<T> with it, then
+ * finally releases, making the ArcPtr the sole retainer.
+ * @tparam Args The types for one of T's constructors. (deducible)
+ * @param args The arguments for one of T's constructors.
+ * @return The ArcPtr.
+ */
+template <typename T, typename ... Args>
+static ArcPtr<T> make_arc(Args && ...args)
+{
+    ArcPtr<T> ptr(new T(std::forward<Args>(args)...), false);
+    return ptr;
+}
+
 template <typename T>
-ArcPtr<T> AsArcPtr(T *ptr, bool initialRetain = true)
+ArcPtr<T> as_arc(T *ptr, bool initialRetain = true)
 {
     return ArcPtr<T>(ptr, initialRetain);
 }
@@ -148,9 +168,20 @@ template <typename T>
 class Autorelease : public ArcPtr<T>
 {
   public:
-    Autorelease(T *ptr) : ArcPtr<T>(ptr, false) {}
+    Autorelease(T *ptr, bool retain = false) : ArcPtr<T>(ptr, retain) {}
     operator T*() const { return ArcPtr<T>::get(); }
 };
 
-/** Handy autorelease macro that almost looks like a language construct. */
+/**
+ * Handy autorelease macro that almost looks like a language construct.
+ * Releases the object when exiting the enclosing scope.
+ */
 #define autorelease(object) auto autorel__COUNTER__ = Autorelease((object))
+
+/**
+ * Macro which creates a scope where the object is first retained at the
+ * beginning of the scope and then gets released at the end of scope.
+ *
+ * Like autorelease but with an initial retain.
+ */
+#define autoretain(object) if (auto autorel__COUNTER__ = Autorelease((object), true); true)

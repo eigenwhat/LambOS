@@ -6,7 +6,7 @@
 class Context : public Object
 {
 public:
-    Context() : _console(NULL), _out(NULL) { }
+    Context() : _console(nullptr), _out(nullptr) { }
 
     /**
      * Gets the Console for this Context.

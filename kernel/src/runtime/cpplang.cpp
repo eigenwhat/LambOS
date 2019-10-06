@@ -7,7 +7,7 @@ void __cxa_pure_virtual()
     // Do nothing or print an error message.
 }
 
-void * __stack_chk_guard = NULL;
+void * __stack_chk_guard = nullptr;
  
 void __stack_chk_guard_setup()
 {

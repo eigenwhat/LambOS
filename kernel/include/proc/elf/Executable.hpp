@@ -34,7 +34,7 @@ class Executable : public Object
     ~Executable();
 
     /** The sections as listed in the binary's section header table. */
-    List<Section> const &sections() const { return _sections; }
+    ArrayList<Section> const &sections() const { return _sections; }
 
     /**
      * Loads the program segments into memory.

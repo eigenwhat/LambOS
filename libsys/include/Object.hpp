@@ -2,4 +2,4 @@
 
 #include <Memory.hpp>
 
-class Object : public ReferenceCountable {};
+class Object : public IntrusiveRefCount {};

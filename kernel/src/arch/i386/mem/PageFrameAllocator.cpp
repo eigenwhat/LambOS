@@ -26,7 +26,7 @@ PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length,
         }
     }
 
-    if (hook != NULL) {
+    if (hook != nullptr) {
         (*hook)(this);
     }
 }

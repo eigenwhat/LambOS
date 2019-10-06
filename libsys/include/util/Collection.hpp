@@ -22,10 +22,7 @@ template <typename T>
 concept InsertableCollection = Collection<T> && Insertable<T, T::ValueType>;
 
 template <typename T>
-concept ClearableCollection = Clearable<T> && Collection<T>;
-
-template <typename T>
-concept RemovableCollection = Collection<T> && requires(T a)
+concept DynamicCollection = InsertableCollection<T> && Clearable<T> && requires(T a)
 {
     /**
     * Removes the object from the Collection, reducing its size.

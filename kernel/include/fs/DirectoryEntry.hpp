@@ -2,7 +2,8 @@
 
 #include <Object.hpp>
 #include <stdint.h>
-#include <util/List.hpp>
+#include <monad/Maybe.hpp>
+#include <util/LinkedList.hpp>
 #include <util/String.hpp>
 #include <io/InputStream.hpp>
 
@@ -60,7 +61,7 @@ class DirectoryEntry : public Object
      * If the DirectoryEntry describes a file, `nullptr` is returned.
      * @return A list of the directory contents, or `nullptr` if this is a file.
      */
-    virtual List<String> *readdir() const = 0;
+    virtual Maybe<LinkedList<String>> readdir() const = 0;
 
     /**
      * Prepares an InputStream for reading the contents of the file.

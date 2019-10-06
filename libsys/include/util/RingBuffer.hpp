@@ -12,7 +12,7 @@
  *           is reserved up front, T must be default-constructible.
  */
 template <typename T>
-class RingBuffer : public virtual Queue<T>
+class RingBuffer
 {
 public:
     explicit RingBuffer(size_t capacity)
@@ -27,7 +27,7 @@ public:
      * @param item The item to enqueue.
      * @return `true` if the operation succeeded, `false` otherwise.
      */
-    bool enqueue(const T &item) override
+    bool enqueue(const T &item)
     {
         _buffer[_back] = item;
         _back = _next(_back);
@@ -40,7 +40,7 @@ public:
         return true;
     }
 
-    bool enqueue(T &&item) override
+    bool enqueue(T &&item)
     {
         _buffer[_back] = std::move(item);
         _back = _next(_back);
@@ -58,7 +58,7 @@ public:
      * @return The frontmost element. If the queue is empty, the return value is
      *         undefined.
      */
-    T pop() override
+    T pop()
     {
         if(isEmpty()) {
             return T{};
@@ -75,19 +75,19 @@ public:
      * @return The frontmost element. If the queue is empty, the return value is
      *         undefined.
      */
-    const T &peek() const override { return isEmpty() ? *(T*)nullptr : _buffer[_front]; }
+    const T &peek() const { return isEmpty() ? *(T*)nullptr : _buffer[_front]; }
 
     /**
      * Returns whether or not the collection is empty.
      * @return `true` if empty, `false` otherwise.
      */
-    bool isEmpty() const override { return size() == 0; }
+    bool isEmpty() const { return size() == 0; }
 
     /**
      * Returns the number of elements in the buffer.
      * @return The number of elements in the buffer.
      */
-    size_t size() const override { return _size; }
+    size_t size() const { return _size; }
 
     /**
      * The maximum capacity of the buffer.
@@ -96,7 +96,7 @@ public:
     size_t capacity() const { return _capacity; }
 
     /** Empties the buffer. */
-    bool clear() override
+    bool clear()
     {
         _front = _back;
         return true;
