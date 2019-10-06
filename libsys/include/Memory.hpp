@@ -26,7 +26,7 @@ class ReferenceCountable
  * Marshals a non-ReferenceCountable type into the reference counting system.
  * @tparam T The type to store.
  */
-template <typename T> class ArcWrapper : public virtual ReferenceCountable
+template <typename T> class ArcWrapper : public ReferenceCountable
 {
   public:
     /**

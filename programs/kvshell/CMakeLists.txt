@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.8)
-project(lambos)
-
 include(${CMAKE_SOURCE_DIR}/programs/AddLambosExecutable.cmake)
 
 set(SOURCES

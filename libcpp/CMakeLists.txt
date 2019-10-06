@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.8)
-project(lambos)
-
 if (NOT DEFINED LIBCPP_TARGET)
     set(LIBCPP_TARGET lambos-libcpp)
     message (WARNING "LIBCPP_TARGET was not set by project root. Defaulting to '${LIBCPP_TARGET}'.")
@@ -14,8 +11,8 @@ set (SOURCES)
 add_library(${LIBCPP_TARGET} STATIC ${SOURCES} ${INCLUDE_FILES})
 target_include_directories(${LIBCPP_TARGET} PUBLIC include)
 target_include_directories(${LIBCPP_TARGET} PRIVATE $<TARGET_PROPERTY:${KERNEL_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
-set_property(TARGET ${LIBCPP_TARGET} PROPERTY CXX_STANDARD 17)
-set(LIBCPP_CCXX_FLAGS -Wall -Wextra -Werror)
+set_property(TARGET ${LIBCPP_TARGET} PROPERTY CXX_STANDARD ${LAMBOS_CXX_STANDARD})
+set(LIBCPP_CCXX_FLAGS)
 target_compile_options(${LIBCPP_TARGET} PRIVATE
         $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS} ${LIBCPP_CCXX_FLAGS}>
         $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS} ${LIBCPP_CCXX_FLAGS}>)

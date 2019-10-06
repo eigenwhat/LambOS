@@ -2,4 +2,4 @@
 
 #include <Memory.hpp>
 
-class Object : public virtual ReferenceCountable {};
+class Object : public ReferenceCountable {};

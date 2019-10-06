@@ -1,6 +1,3 @@
-cmake_minimum_required(VERSION 3.8)
-project(lambos)
-
 if (NOT DEFINED KERNEL_TARGET)
     set(KERNEL_TARGET lambos-kernel)
     message (WARNING "KERNEL_TARGET was not set by project root. Defaulting to '${KERNEL_TARGET}'.")
@@ -53,8 +50,8 @@ set_property(TARGET ${KERNEL_TARGET} PROPERTY OUTPUT_NAME kernel.bin)
 set_property(TARGET ${KERNEL_TARGET} PROPERTY LINK_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
 
 # set compilation options
-set_property(TARGET ${KERNEL_TARGET} PROPERTY CXX_STANDARD 17)
-set(KERNEL_CCXX_FLAGS -Wall -Wextra -Werror -DKERNEL)
+set_property(TARGET ${KERNEL_TARGET} PROPERTY CXX_STANDARD ${LAMBOS_CXX_STANDARD})
+set(KERNEL_CCXX_FLAGS -DKERNEL)
 target_compile_options(${KERNEL_TARGET} PRIVATE
         $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS} ${KERNEL_CCXX_FLAGS}>
         $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS} ${KERNEL_CCXX_FLAGS}>)

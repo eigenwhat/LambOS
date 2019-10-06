@@ -61,7 +61,7 @@ Command readCommand()
     return cmd;
 }
 
-int main(int argc, char *argv[])
+int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
 {
     Command c;
     do {
