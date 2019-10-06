@@ -8,9 +8,23 @@
  * @tparam T The type of object the Stack contains.
  */
 template<typename T>
-class Stack : public virtual Collection<T>
+class Stack : public virtual Object
 {
   public:
+    using ValueType = T;
+
+    /**
+     * Returns whether or not the Stack is empty.
+     * @return `true` if empty, `false` otherwise.
+     */
+    virtual bool isEmpty() const = 0;
+
+    /**
+     * The number of elements in the Stack.
+     * @return A size_t equal to the number of elements.
+     */
+    virtual size_t size() const = 0;
+
     /**
      * Adds an element to the top of the Stack.
      * @param obj The object to add.
@@ -42,5 +56,5 @@ class Stack : public virtual Collection<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool insert(const T &obj) override { return push(obj); }
+    virtual bool insert(const T &obj) { return push(obj); }
 };

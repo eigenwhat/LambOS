@@ -4,6 +4,8 @@
 
 #include <stddef.h>
 
+#include <util/Concepts.hpp>
+
 /**
  * The root template interface in the collections class hierarchy. Collections,
  * simply put, are groups of objects. Collections may vary by their internal
@@ -13,72 +15,27 @@
  * positions?)
  * @tparam T The type of object the Collection contains.
  */
-template<typename T>
-class Collection : public virtual Object
+template <typename T>
+concept Collection = Sized<T> && requires(T a) { typename T::ValueType; };
+
+template <typename T>
+concept InsertableCollection = Collection<T> && Insertable<T, T::ValueType>;
+
+template <typename T>
+concept ClearableCollection = Clearable<T> && Collection<T>;
+
+template <typename T>
+concept RemovableCollection = Collection<T> && requires(T a)
 {
-public:
-    using ValueType = T;
-
     /**
-     * Returns whether or not the Collection is empty.
-     * @return `true` if empty, `false` otherwise.
-     */
-    virtual bool isEmpty() const = 0;
-
-    /**
-     * The number of elements in the Collection.
-     * @return A size_t equal to the number of elements.
-     */
-    virtual size_t size() const = 0;
-
-    /** @name Optional Methods
-     * These methods, though they must be implemented in all subclasses due to
-     * language constraints, are not necessarily supported functionally. When
-     * a Collection does not support the said functionality, the method (or
-     * methods), should function as no-ops and, if possible, report that no
-     * action has been taken.
-     */
-
-    /** @{ */
-
-    /**
-     * Adds the object to the Collection, growing its size.
-     *
-     * Some Collections may not allow duplicates to be added, and some may not
-     * allow modification through this interface at all. In any case where the
-     * object is *NOT* inserted, the method will return false, signifying that
-     * no modification to the contents has occurred.
-     *
-     * @param object The object to add.
-     * @return `true` if the Collection changed. `false` otherwise.
-     */
-    virtual bool insert(ValueType const &object) = 0;
-
-    /**
-     * Removes the object from the Collection, reducing its size.
-     *
-     * Some Collections may not allow removal. If no object is removed from the
-     * Collection as a result of this operation (either because the object was
-     * not in the Collection in the first place or because the container won't
-     * allow it), this method will return false, signifying that no modification
-     * to the contents has occurred.
-     *
-     * @param object The object to remove.
-     * @return `true` if the Collection changed. `false` otherwise.
-     */
-    virtual bool remove(ValueType const &object) = 0;
-
-    /**
-     * Removes all objects from the Collection.
-     *
-     * Some Collections may not allow removal. If no object is removed from the
-     * Collection as a result of this operation (because the container won't
-     * allow it), this method will return false, signifying that no modification
-     * to the contents has occurred.
-     *
-     * @return `true` if the Collection changed, `false` otherwise.
-     */
-    virtual bool clear() = 0;
-
-    /** @} */
+    * Removes the object from the Collection, reducing its size.
+    *
+    * @param object The object to remove.
+    * @return `true` if the Collection changed. `false` otherwise.
+    */
+    { a.remove(std::declval<typename T::ValueType>()) } -> Same<bool>;
 };
+
+#define STR(x) #x
+#define ASSERT_IS_2(TYPE, MSG) static_assert(Collection<TYPE<Object>>, MSG)
+#define ASSERT_IS_COLLECTION(TYPE) ASSERT_IS_2(TYPE, "'" #TYPE "' is not a Collection.");

@@ -224,7 +224,7 @@ class ArrayList : public List<T>
      * @param object The object to remove.
      * @return `true` if the ArrayList changed. `false` otherwise.
      */
-    bool remove(const T &object) override
+    bool remove(const T &object)
     {
         size_t removalIdx = SIZE_MAX;
         for (size_t i = 0; i < _size; ++i) {

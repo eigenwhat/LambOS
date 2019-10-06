@@ -8,7 +8,7 @@
  * pointer objects called {@ref Iterator}s.
  * @tparam T
  */
-template <typename T> class Iterable : public virtual Collection<T>
+template <typename T> class Iterable
 {
   public:
     class Iterator;

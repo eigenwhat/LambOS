@@ -7,9 +7,11 @@
  * @tparam T The type of object the Array contains.
  * @todo Decide if it's really sound designwise subclassing from Collection<T>.
  */
-template <typename T> class Array : public Collection<T>
+template <typename T> class Array
 {
   public:
+    using ValueType = T;
+
     Array(size_t size) : _array(nullptr), _size(size)
     {
         if (size) { _array = new T[size]; }
@@ -71,14 +73,14 @@ template <typename T> class Array : public Collection<T>
      * A fixed width container is never empty.
      * @return `false`, because it's not empty.
      */
-    bool isEmpty() const override { return false; }
+    bool isEmpty() const { return false; }
 
     /**
      * The number of elements in the Array. As a fixed-width container, this is
      * always equal to its initial capacity.
      * @return A size_t equal to the number of elements.
      */
-    size_t size() const override { return _size; }
+    size_t size() const { return _size; }
 
     /**
      * A fixed-width Array cannot grow by definition, so insertion would require
@@ -87,7 +89,7 @@ template <typename T> class Array : public Collection<T>
      * (this[]) to modify the object at that index instead.
      * @return `false`, as the Collection remains unchanged.
      */
-    bool insert(const T&) override { return false; }
+    bool insert(const T&) { return false; }
 
     /**
      * Removing an object from a fixed-width container is inconsequential, as
@@ -95,13 +97,13 @@ template <typename T> class Array : public Collection<T>
      * modify the object at that index instead.
      * @return `false`.
      */
-    bool remove(const T&) override { return false; }
+    bool remove(const T&) { return false; }
 
     /**
      * Destroys the array, then reallocates a fresh one of the same size.
      * @return `true`.
      */
-    bool clear() override
+    bool clear()
     {
         if (_array) { delete[] _array; }
         if (_size) { _array = new T[_size]; }
@@ -122,3 +124,5 @@ template <typename T> class Array : public Collection<T>
     T *_array;
     const size_t _size;
 };
+
+ASSERT_IS_COLLECTION(Array)

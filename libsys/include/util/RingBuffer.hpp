@@ -90,14 +90,6 @@ public:
     size_t size() const override { return _size; }
 
     /**
-     * Removes an item from the buffer.
-     * @note This is presently a no-op.
-     * @todo Investigate whether it's worth implementing.
-     * @return `true` if the operation succeeded, `false` otherwise.
-     */
-    bool remove(const T&) override { return false; }
-
-    /**
      * The maximum capacity of the buffer.
      * @return The maximum capacity of the buffer.
      */

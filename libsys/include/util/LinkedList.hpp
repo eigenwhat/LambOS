@@ -177,7 +177,7 @@ template <typename T> class LinkedList : public virtual List<T>
      * @param object The object to remove.
      * @return `true` if something was removed, false otherwise.
      */
-    bool remove(const T &object) override
+    bool remove(const T &object)
     {
         if (!_first) {
             return false; // no objects

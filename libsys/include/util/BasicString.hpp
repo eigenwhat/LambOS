@@ -8,7 +8,7 @@
  * A string of character-like objects.
  * @tparam T The character-like type.
  */
-template <typename T> class BasicString : public Collection<T>
+template <typename T> class BasicString
 {
   public:
     static constexpr size_t npos = -1;
@@ -65,13 +65,13 @@ template <typename T> class BasicString : public Collection<T>
      * Returns whether or not the Collection is empty.
      * @return `true` if empty, `false` otherwise.
      */
-    bool isEmpty() const override { return _size == 0; }
+    bool isEmpty() const { return _size == 0; }
 
     /**
      * The number of characters in the BasicString.
      * @return A size_t equal to the number of characters.
      */
-    size_t size() const override { return _size; }
+    size_t size() const { return _size; }
 
     /**
      * Appends a character to the end of the BasicString.
@@ -79,7 +79,7 @@ template <typename T> class BasicString : public Collection<T>
      * @param object The object to add.
      * @return `true` if the BasicString changed. `false` otherwise.
      */
-    virtual bool insert(ValueType const &object) override
+    virtual bool insert(ValueType const &object)
     {
         if (_size == capacity()) {
             _data.resize();
@@ -98,7 +98,7 @@ template <typename T> class BasicString : public Collection<T>
      * @return `true` if the Collection changed. `false` otherwise.
      */
 
-    bool remove(const T &object) override
+    bool remove(const T &object)
     {
         size_t removalIdx = SIZE_MAX;
         for (size_t i = 0; i < _size; ++i) {
@@ -139,7 +139,7 @@ template <typename T> class BasicString : public Collection<T>
      * in effect making the string empty, but the data is otherwise left as-is.
      * @return `true`.
      */
-    bool clear() override
+    bool clear()
     {
         _size = 0;
         _data[_size] = 0; // null terminate

@@ -8,9 +8,37 @@
  * @tparam T The type of object the Queue contains.
  */
 template<typename T>
-class Queue : public virtual Collection<T>
+class Queue : public virtual Object
 {
-public:
+  public:
+    using ValueType = T;
+
+    /**
+     * Returns whether or not the Queue is empty.
+     * @return `true` if empty, `false` otherwise.
+     */
+    virtual bool isEmpty() const = 0;
+
+    /**
+     * The number of elements in the Queue.
+     * @return A size_t equal to the number of elements.
+     */
+    virtual size_t size() const = 0;
+
+    /**
+     * Adds an element to the back of the Queue. Equivalent to enqueue(T).
+     * @param obj The object to add.
+     * @return `true` if an object was added. `false` otherwise.
+     */
+    virtual bool insert(T obj) { return enqueue(std::move(obj)); }
+
+    /**
+     * Removes all objects from the Queue.
+     *
+     * @return `true` if the Queue changed, `false` otherwise.
+     */
+    virtual bool clear() = 0;
+
     /**
      * Adds an element to the back of the Queue.
      * @param obj The object to add.
@@ -36,11 +64,4 @@ public:
      * @return The object. If the queue is empty, the return value is undefined.
      */
     virtual const T &peek() const = 0;
-
-    /**
-     * Adds an element to the back of the Queue. Equivalent to enqueue(T).
-     * @param obj The object to add.
-     * @return `true` if an object was added. `false` otherwise.
-     */
-    bool insert(const T &obj) override { return enqueue(obj); }
 };

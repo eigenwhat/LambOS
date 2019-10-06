@@ -9,8 +9,7 @@
  * Java Collections Framework's name for the structure (pronounced like "deck").
  * @tparam T The type of object the Deque contains.
  */
-template <typename T> class Deque : public virtual Stack<T>
-                                  , public virtual Queue<T>
+template <typename T> class Deque : public virtual Stack<T>, public virtual Queue<T>
 {
   public:
     /**
@@ -18,7 +17,7 @@ template <typename T> class Deque : public virtual Stack<T>
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool insert(const T &obj) override { return this->enqueue(obj); }
+    bool insert(const T &obj) { return this->enqueue(obj); }
 
     /**
      * Removes an element from the back of the Deque.
