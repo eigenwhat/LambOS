@@ -1,7 +1,7 @@
 #include <fs/iso9660/Volume.hpp>
 
 #include <fs/iso9660/DataStructures.hpp>
-#include <util/Array.hpp>
+#include <util/StaticList.hpp>
 #include <cstdio>
 #include <fs/iso9660/DirectoryEntry.hpp>
 #include <Kernel.hpp>
@@ -44,7 +44,7 @@ void Volume::init()
 {
     uint64_t lba = 0x10;
     bool reachedEnd = false;
-    Array<uint8_t> buf{_parentDevice->sectorSize()};
+    StaticList<uint8_t> buf{_parentDevice->sectorSize()};
     do {
         _parentDevice->read(lba, (uint16_t *)buf.get());
         auto type = getDescriptorType(buf);

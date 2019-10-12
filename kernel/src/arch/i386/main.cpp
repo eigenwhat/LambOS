@@ -12,7 +12,7 @@
 #include <io/BochsDebugOutputStream.hpp>
 #include <io/debug.h>
 
-#include <util/Array.hpp>
+#include <util/StaticList.hpp>
 
 #include <cstdio>
 #include <cstring>

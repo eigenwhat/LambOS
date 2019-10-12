@@ -1,128 +1,74 @@
+//
+// Created by Martin Miralles-Cordal on 10/6/19.
+//
+
 #pragma once
 
-#include <util/Collection.hpp>
+#include <util/Concepts.hpp>
 
-/**
- * C++ container for a simple fixed-width array.
- * @tparam T The type of object the Array contains.
- * @todo Decide if it's really sound designwise subclassing from Collection<T>.
- */
-template <typename T> class Array
+#include <algorithm>
+#include <utility>
+
+/** Fixed-length array object where the size is known at compile time. Basically std::array. */
+template<typename T, std::size_t Size>
+struct Array
 {
-  public:
-    using ValueType = T;
+    static_assert(Size > 0, "Array must be nonzero size!");
+    using value_type = T;
+    using pointer = value_type*;
+    using const_pointer = const value_type*;
+    using reference = value_type&;
+    using const_reference = const value_type&;
+    using iterator = value_type*;
+    using const_iterator = const value_type*;
+    using size_type = std::size_t;
+    using difference_type = std::ptrdiff_t;
 
-    Array(size_t size) : _array(nullptr), _size(size)
-    {
-        if (size) { _array = new T[size]; }
-    }
+    constexpr void fill(const value_type& u) { std::fill_n(begin(), size(), u); }
+    constexpr void swap(Array& other) noexcept(std::is_nothrow_swappable<T>::value) { std::swap_ranges(begin(), end(), other.begin()); }
 
-    ~Array() { if (_array) { delete[] _array; } }
+    [[nodiscard]] constexpr size_type size() const noexcept { return Size; }
+    [[nodiscard]] constexpr size_type max_size() const noexcept { return Size; }
+    [[nodiscard]] constexpr bool empty() const noexcept { return size() == 0; }
 
-    Array(Array const &other) = delete;
+    [[nodiscard]] constexpr reference operator[](size_type n) noexcept { return _elems[n]; }
+    [[nodiscard]] constexpr const_reference operator[](size_type n) const noexcept { return _elems[n]; }
 
-    /**
-     * Moves the contents of one array to the other.
-     * @note This leaves the moved-from array unusable.
-     * @param other The array whose contents to move.
-     */
-    Array(Array &&other) : _array(other._array), _size(other.size())
-    {
-        other._array = nullptr;
-    }
+    [[nodiscard]] constexpr reference front() noexcept { return *begin(); }
+    [[nodiscard]] constexpr const_reference front() const noexcept { return _elems[0]; }
+    [[nodiscard]] constexpr reference back() noexcept { return *(end() - 1); }
+    [[nodiscard]] constexpr const_reference back() const noexcept { return _elems[Size - 1]; }
 
-    /**
-     * Returns the backing C style array.
-     * @return A T * pointing to the front of the array.
-     */
-    T *get() { return _array; }
+    [[nodiscard]] constexpr pointer data() noexcept { return _elems; }
+    [[nodiscard]] constexpr const_pointer data() const noexcept { return _elems; }
 
-    /**
-     * Returns the backing C style array.
-     * @return A T * pointing to the front of the array.
-     */
-    T const *get() const { return _array; }
+    [[nodiscard]] constexpr iterator begin() noexcept { return iterator(data()); }
+    [[nodiscard]] constexpr const_iterator begin() const noexcept { return const_iterator(data()); }
+    [[nodiscard]] constexpr iterator end() noexcept { return iterator(data() + Size); }
+    [[nodiscard]] constexpr const_iterator end() const noexcept { return const_iterator(data() + Size); }
+    [[nodiscard]] constexpr const_iterator cbegin() const noexcept { return const_iterator(data()); }
+    [[nodiscard]] constexpr const_iterator cend() const noexcept { return const_iterator(data() + Size); }
 
-    /**
-     * Allows streamlined conversion to the backing T[].
-     * @return A T * pointing to the front of the array.
-     */
-    operator T const *() const { return get(); }
+    [[nodiscard]] constexpr friend bool operator==(Array const &lhs, Array const &rhs) { return std::equal(lhs.begin(), lhs.end(), rhs.begin()); }
+    [[nodiscard]] constexpr friend bool operator!=(Array const &lhs, Array const &rhs) { return !(lhs == rhs); }
+    [[nodiscard]] constexpr friend bool operator<(Array const &lhs, Array const &rhs) { return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
+    [[nodiscard]] constexpr friend bool operator>(Array const &lhs, Array const &rhs) { return rhs < lhs; }
+    [[nodiscard]] constexpr friend bool operator<=(Array const &lhs, Array const &rhs) { return !(lhs > rhs); }
+    [[nodiscard]] constexpr friend bool operator>=(Array const &lhs, Array const &rhs) { return !(lhs < rhs); }
 
-    /**
-     * Allows streamlined conversion to the backing T[].
-     * @return A T * pointing to the front of the array.
-     */
-    operator T*() { return get(); }
-
-    /**
-     * Provides direct access to the objects in the backing array using the
-     * natural array subscript syntax.
-     * @return The object in the backing array at the given index.
-     */
-    T & operator[](size_t idx) { return _array[idx]; }
-
-    /**
-     * Provides direct access to the objects in the backing array using the
-     * natural array subscript syntax.
-     * @return The object in the backing array at the given index.
-     */
-    T const & operator[](size_t idx) const { return _array[idx]; }
-
-    /**
-     * A fixed width container is never empty.
-     * @return `false`, because it's not empty.
-     */
-    bool isEmpty() const { return false; }
-
-    /**
-     * The number of elements in the Array. As a fixed-width container, this is
-     * always equal to its initial capacity.
-     * @return A size_t equal to the number of elements.
-     */
-    size_t size() const { return _size; }
-
-    /**
-     * A fixed-width Array cannot grow by definition, so insertion would require
-     * overwriting a pre-existing slot, and selection of an element to replace
-     * is well outside the scope of this class. Use the subscript operator
-     * (this[]) to modify the object at that index instead.
-     * @return `false`, as the Collection remains unchanged.
-     */
-    bool insert(const T&) { return false; }
-
-    /**
-     * Removing an object from a fixed-width container is inconsequential, as
-     * the space will still be occupied. Use the subscript operator (this[]) to
-     * modify the object at that index instead.
-     * @return `false`.
-     */
-    bool remove(const T&) { return false; }
-
-    /**
-     * Destroys the array, then reallocates a fresh one of the same size.
-     * @return `true`.
-     */
-    bool clear()
-    {
-        if (_array) { delete[] _array; }
-        if (_size) { _array = new T[_size]; }
-        return true;
-    }
-
-    Array &operator=(Array &&rhs)
-    {
-        auto &size = const_cast<size_t&>(_size);
-        size = rhs._size;
-        if (_array) { delete[] _array; }
-        _array = rhs._array;
-        rhs._array = nullptr;
-        return *this;
-    }
-
-  private:
-    T *_array;
-    const size_t _size;
+    T _elems[Size];
 };
 
-ASSERT_IS_COLLECTION(Array)
+template<typename T, typename... Ts>
+Array(T, Ts...) -> Array<std::enable_if_t<(Same<T, Ts> && ...), T>, 1 + sizeof...(Ts)>;
+
+namespace std {
+
+template<typename T, std::size_t Size>
+constexpr inline std::enable_if_t<std::is_swappable<T>::value>
+swap(Array<T, Size> &one, Array<T, Size> &two) noexcept(noexcept(one.swap(two))) { one.swap(two); }
+
+template<typename T, std::size_t Size>
+constexpr std::enable_if_t<!std::is_swappable<T>::value> swap(Array<T, Size> &, Array<T, Size> &) = delete;
+
+} // namespace std

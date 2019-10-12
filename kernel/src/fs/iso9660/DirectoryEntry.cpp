@@ -1,6 +1,6 @@
 #include <fs/iso9660/DirectoryEntry.hpp>
 #include <fs/iso9660/Volume.hpp>
-#include <util/Array.hpp>
+#include <util/StaticList.hpp>
 #include <util/LinkedList.hpp>
 #include <arch/i386/sys/asm.h>
 #include <cstring>
@@ -117,7 +117,7 @@ class IsoFileStream : public InputStream
 
   private:
     size_t _fileSize = 0;
-    Array<uint8_t> _buffer;
+    StaticList<uint8_t> _buffer;
     size_t _pos = 0;
     size_t _mark = 0;
     size_t _readsUntilInvalid = 0;
@@ -156,7 +156,7 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();
     const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
-    Array<uint8_t> buf{sectorSize*sectorCount};
+    StaticList<uint8_t> buf{sectorSize * sectorCount};
     volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorCount);
 
     // go over entries
@@ -191,7 +191,7 @@ Maybe<LinkedList<String>> DirectoryEntry::readdir() const
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();
     const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
-    Array<uint8_t> buf{sectorSize*sectorCount};
+    StaticList<uint8_t> buf{sectorSize * sectorCount};
     volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorCount);
 
     // go over entries
