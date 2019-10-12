@@ -1,0 +1,79 @@
+//
+// Created by Martin Miralles-Cordal on 10/6/19.
+//
+
+#pragma once
+
+#include <type_traits>
+
+namespace std {
+
+template<typename T>
+constexpr void swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                                         std::is_nothrow_move_assignable<T>::value);
+template<typename T2, std::size_t N>
+constexpr void swap(T2 (&a)[N], T2 (&b)[N]) noexcept(std::is_nothrow_swappable<T2>::value);
+
+template<typename InputIt1, typename InputIt2>
+constexpr bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2)
+{
+    for (; first1 != last1; ++first1, ++first2) { if (!(*first1 == *first2)) { return false; } }
+    return true;
+}
+
+template<typename InputIt1, typename InputIt2, typename BinaryPredicate>
+constexpr bool equal(InputIt1 first1, InputIt1 last1, InputIt2 first2, BinaryPredicate p)
+{
+    for (; first1 != last1; ++first1, ++first2) { if (!p(*first1, *first2)) { return false; } }
+    return true;
+}
+
+template<typename ForwardIt, typename T>
+constexpr void fill(ForwardIt first, ForwardIt last, const T& value)
+{
+    for (; first != last; ++first) { *first = value; }
+}
+
+template<typename OutputIt, typename Size, typename T>
+constexpr OutputIt fill_n(OutputIt first, Size count, const T& value)
+{
+    for (Size i = 0; i < count; i++) { *first++ = value; }
+    return first;
+}
+
+template<typename ForwardIt1, typename ForwardIt2>
+constexpr void iter_swap(ForwardIt1 a, ForwardIt2 b) // constexpr since C++20
+{
+    using std::swap;
+    swap(*a, *b);
+}
+
+template<typename InputIt1, typename InputIt2>
+constexpr bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)
+{
+    for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 ) {
+        if (*first1 < *first2) return true;
+        if (*first2 < *first1) return false;
+    }
+
+    return (first1 == last1) && (first2 != last2);
+}
+
+template<typename InputIt1, typename InputIt2, typename Compare>
+constexpr bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2, Compare comp)
+{
+    for ( ; (first1 != last1) && (first2 != last2); ++first1, (void) ++first2 ) {
+        if (comp(*first1, *first2)) return true;
+        if (comp(*first2, *first1)) return false;
+    }
+    return (first1 == last1) && (first2 != last2);
+}
+
+template<typename ForwardIt1, typename ForwardIt2>
+constexpr ForwardIt2 swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2)
+{
+    while (first1 != last1) { std::iter_swap(first1++, first2++); }
+    return first2;
+}
+
+} // namespace std

@@ -9,6 +9,7 @@
 
 namespace std {
 
+using ::size_t;
 using ::strlen;
 using ::strcpy;
 using ::strncpy;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <stdint.h>
 #include "RegisterTable.h"
 #include "InterruptNumber.hpp"

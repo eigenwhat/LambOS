@@ -2,7 +2,7 @@
 
 #include <Object.hpp>
 
-#include <stddef.h>
+#include <cstddef>
 
 #include <util/Concepts.hpp>
 

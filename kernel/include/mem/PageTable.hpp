@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <stdint.h>
 
 #define k4KPageAddressMask 0xFFFFF000

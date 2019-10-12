@@ -3,7 +3,7 @@
 #include <Object.hpp>
 
 #include <stdint.h>
-#include <stddef.h>
+#include <cstddef>
 
 /** A stream of bytes that can be read from. */
 class InputStream : public Object

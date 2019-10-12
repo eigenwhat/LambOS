@@ -2,7 +2,7 @@
 
 #include <device/Device.hpp>
 
-#include <stddef.h>
+#include <cstddef>
 #include <stdint.h>
 
 /** Representation of an ATA or ATAPI device. */

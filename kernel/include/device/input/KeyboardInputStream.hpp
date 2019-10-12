@@ -5,7 +5,7 @@
 #include <device/input/Keyboard.hpp>
 
 #include <stdint.h>
-#include <stddef.h>
+#include <cstddef>
 
 class KeyboardInputStream : public InputStream
 {

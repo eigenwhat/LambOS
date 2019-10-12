@@ -3,7 +3,7 @@
 #include <Object.hpp>
 
 #include <utility>
-#include <stddef.h>
+#include <cstddef>
 #include <stdint.h>
 
 template <typename T>

@@ -6,9 +6,11 @@
 #define LAMBOS_CSTDIO
 
 #include <stdio.h>
+#include <stddef.h>
 
 namespace std {
 
+using ::size_t;
 using ::putchar;
 using ::puts;
 

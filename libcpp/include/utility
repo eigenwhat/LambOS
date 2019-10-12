@@ -4,8 +4,6 @@
 
 namespace std {
 
-using nullptr_t = decltype(nullptr);
-
 template <class T>
 constexpr remove_reference_t<T> &&move(T&& a) { return static_cast<typename std::remove_reference_t<T>&&>(a); }
 
@@ -14,5 +12,11 @@ constexpr T && forward(typename std::remove_reference<T>::type & t) noexcept { r
 
 template<typename T>
 constexpr T && forward(typename std::remove_reference<T>::type && t) noexcept { return static_cast<T &&>(t); }
+
+template<typename T>
+constexpr void swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value &&
+                                         std::is_nothrow_move_assignable<T>::value);
+template<class T2, std::size_t N>
+constexpr void swap(T2 (&a)[N], T2 (&b)[N]) noexcept(std::is_nothrow_swappable<T2>::value);
 
 } // namespace std

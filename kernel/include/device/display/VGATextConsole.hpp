@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stddef.h>
+#include <cstddef>
 #include <stdint.h>
 #include "Console.hpp"
 #include "VGA4BitColor.h"
