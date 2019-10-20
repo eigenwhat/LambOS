@@ -3,5 +3,5 @@
 int main()
 {
     puts("Hello, system call!");
-    return 0xCAFEBABE;
+    return (int)0xCAFEBABE;
 }

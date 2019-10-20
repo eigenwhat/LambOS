@@ -8,6 +8,7 @@ set (INCLUDE_FILES
         include/cstring include/cstdio)
 set (SOURCES)
 
+add_library(lambos-cxxabi OBJECT cxxabi/cpplang.cpp cxxabi/icxxabi.cpp)
 add_library(${LIBCPP_TARGET} STATIC ${SOURCES} ${INCLUDE_FILES})
 target_include_directories(${LIBCPP_TARGET} PUBLIC include)
 target_include_directories(${LIBCPP_TARGET} PRIVATE $<TARGET_PROPERTY:${KERNEL_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
@@ -16,4 +17,4 @@ set(LIBCPP_CCXX_FLAGS)
 target_compile_options(${LIBCPP_TARGET} PRIVATE
         $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS} ${LIBCPP_CCXX_FLAGS}>
         $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS} ${LIBCPP_CCXX_FLAGS}>)
-target_link_libraries(${LIBCPP_TARGET} PUBLIC ${LIBC_TARGET})
+target_link_libraries(${LIBCPP_TARGET} PUBLIC ${LIBC_TARGET} lambos-cxxabi)

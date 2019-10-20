@@ -9,22 +9,17 @@
 
 class X86CPU : public CPU
 {
-public:
+  public:
     X86CPU();
 
     virtual void install();
-
     InterruptDescriptorTable *idt() { return &_idt; }
-
     virtual void enableInterrupts();
-
     virtual void disableInterrupts() { asm volatile ("cli"); }
+    virtual void maskIRQ(unsigned int IRQ);
+    virtual void unmaskIRQ(unsigned int IRQ);
 
-    virtual void maskIRQ(unsigned char IRQ);
-
-    virtual void unmaskIRQ(unsigned char IRQ);
-
-private:
+  private:
     GlobalDescriptorTable _gdt;
     InterruptDescriptorTable _idt;
     TaskStateSegment _tss;

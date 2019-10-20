@@ -1,6 +1,6 @@
 #pragma once
 
-enum class InterruptNumber
+enum class InterruptNumber : uint8_t
 {
     kDivideByZero = 0,
     kDebugger,

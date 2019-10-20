@@ -1,7 +1,7 @@
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 #include "Console.hpp"
 #include "VGA4BitColor.h"
 
@@ -23,7 +23,7 @@ class VGATextConsole : public Console
      * Sets the background color for future writes.
      * @param bg The VGA color code to use.
      */
-    void setBackgroundColor(uint32_t bg);
+    void setBackgroundColor(uint32_t bg) override;
 
     /**
      * Writes a single character to the console at the cursor's position,
@@ -37,7 +37,7 @@ class VGATextConsole : public Console
      * @param row The row to move to.
      * @param col The column to move to.
      */
-    void moveTo(size_t row, size_t col);
+    void moveTo(std::size_t row, std::size_t col);
 
     /**
      * Writes a string at the cursor's position, advancing the cursor that many
@@ -80,8 +80,8 @@ class VGATextConsole : public Console
     void scroll(size_t lines);
 
     bool _cursorIsVisible = false;
-    size_t _consoleRow = 0;
-    size_t _consoleColumn = 0;
-    uint8_t _consoleColor = kDefaultTextColor | kDefaultBackgroundColor << 4;
-    uint16_t *_consoleBuffer = (uint16_t *)0xB8000;
+    std::size_t _consoleRow = 0;
+    std::size_t _consoleColumn = 0;
+    std::uint8_t _consoleColor = kDefaultTextColor | kDefaultBackgroundColor << 4u;
+    std::uint16_t *_consoleBuffer = (uint16_t *)0xB8000;
 };

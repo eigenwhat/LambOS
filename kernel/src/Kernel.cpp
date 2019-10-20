@@ -13,7 +13,7 @@ void Kernel::panic(char const *string)
     char const *banner[3] = {"* * * * * * * * * * * * * * * * * * * *",
                              "* LAMBOS FOUND OUT ABOUT WHAT YOU DID *",
                              "* * * * * * * * * * * * * * * * * * * *"};
-    for (int i = 0; i < 3; ++i) {
+    for (size_t i = 0; i < 3; ++i) {
         size_t bannerlength = strlen(banner[i]);
         size_t columnToCenter = console()->width() > bannerlength ? (console()->width() - bannerlength) / 2 : 0;
         console()->moveTo(i + 1, columnToCenter);

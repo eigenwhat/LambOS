@@ -8,7 +8,7 @@
 class FileReader : public Object
 {
   public:
-    static constexpr int kEOF = -1;
+    static inline const auto kEOF = InputStream::kEndOfStream;
 
     /**
      * Constructs a FileReader with the provided InputStream.
@@ -26,7 +26,7 @@ class FileReader : public Object
      * @param offset The offset of the byte to read.
      * @return The byte, or kEOF if the offset is past EOF.
      */
-    int read(size_t offset);
+    InputStream::Byte read(size_t offset);
 
     /**
      * Reads a number of bytes starting from a given offset.
@@ -35,23 +35,23 @@ class FileReader : public Object
      * @param bytesToRead The number of bytes to read.
      * @return The number of bytes actually read.
      */
-    size_t read(uint8_t *buf, size_t offset, size_t bytesToRead);
+    size_t read(std::byte *buf, size_t offset, size_t bytesToRead);
 
     /**
      * Returns the file as read so far.
      * @see bytesRead() returns the actual extent of the data in the array.
      * @return A pointer to the byte array.
      */
-    uint8_t const *bytes() const { return _fileBytes; }
+    [[nodiscard]] std::byte const *bytes() const { return _fileBytes; }
 
     /**
      * Returns the number of bytes read so far.
      * @return The number of bytes read.
      */
-    size_t bytesRead() const { return _fileExtent; }
+    [[nodiscard]] size_t bytesRead() const { return _fileExtent; }
 
     /** Whether or not the end-of-file (EOF) has been reached. */
-    bool eofReached() const { return _eofReached; }
+    [[nodiscard]] bool eofReached() const { return _eofReached; }
 
     /** Reads the entire file into memory up front. */
     void readAll();
@@ -64,7 +64,7 @@ class FileReader : public Object
     }
 
     ArcPtr<InputStream> _fileStream;
-    DynamicArray<uint8_t> _fileBytes{512};
+    DynamicArray<std::byte> _fileBytes{512};
     size_t _fileExtent = 0;
     bool _eofReached = false;
 };

@@ -1,13 +1,34 @@
 #pragma once
+
 #include <io/FilterOutputStream.hpp>
+#include <util/Concepts.hpp>
+#include <cstdlib>
 
 class PrintStream : public FilterOutputStream
 {
-public:
+    template <typename T>
+    static void xtoa(T num, char *intstr, int base);
+  public:
     PrintStream(OutputStream &out) : FilterOutputStream(out) {}
-    virtual void print(char character) { _out.write((uint8_t)character); }
-    virtual void print(char const *str);
-    virtual void print(int num);
-    virtual void println() { print('\n'); flush(); }
+
+    void print(char character) { _out.write((uint8_t)character); }
+    void print(char const *str);
+
+    template <typename T> requires concepts::Integral<T>
+    void print(T item)
+    {
+        char intstr[33];
+        xtoa(item, intstr, 10);
+        print(intstr);
+    }
+
+    void println() { print('\n'); flush(); }
     template<typename T> void println(T item) { print(item); println(); }
 };
+
+template <> inline void PrintStream::xtoa(int num, char *intstr, int base)                { itoa(num, intstr, base); }
+template <> inline void PrintStream::xtoa(long int num, char *intstr, int base)           { ltoa(num, intstr, base); }
+template <> inline void PrintStream::xtoa(long long int num, char *intstr, int base)      { lltoa(num, intstr, base); }
+template <> inline void PrintStream::xtoa(unsigned int num, char *intstr, int base)       { uitoa(num, intstr, base); }
+template <> inline void PrintStream::xtoa(unsigned long num, char *intstr, int base)      { ultoa(num, intstr, base); }
+template <> inline void PrintStream::xtoa(unsigned long long num, char *intstr, int base) { ulltoa(num, intstr, base); }

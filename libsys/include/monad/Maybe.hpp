@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-template <typename T, typename = IfValue<T>>
+template <typename T>
 class Maybe : public Object
 {
   public:
@@ -36,27 +36,27 @@ class Maybe : public Object
     using difference_type = int64_t;
     using size_type = size_t;
 
-    Maybe() = default;
-    Maybe(Void) : Maybe() {}
+    constexpr Maybe() = default;
+    constexpr Maybe(Void) : Maybe() {}
 
     template <typename U = T, typename = IfCopyConstructible<U>>
-    Maybe(T const &v) : _store(v), _set(true) {}
+    constexpr Maybe(T const &v) : _store(v), _set(true) {}
 
     template <typename U = T, typename = IfMoveConstructible<U>>
-    Maybe(T &&v) : _store(std::move(v)), _set(true) {}
+    constexpr Maybe(T &&v) : _store(std::move(v)), _set(true) {}
 
-    Maybe(Maybe const &other) : _store{}, _set(other._set) { if (_set) { _store.init(other.GetRef_()); } }
-    Maybe& operator=(Maybe const &other) = delete;
+    constexpr Maybe(Maybe const &other) : _store{}, _set(other._set) { if (_set) { _store.init(other.ref_()); } }
+    constexpr Maybe& operator=(Maybe const &other) = delete;
 
     /** Move constructor. */
-    Maybe(Maybe&& other) : _store{}, _set(other._set)
+    constexpr Maybe(Maybe&& other) : _store{}, _set(other._set)
     {
         if (_set) { _store.init(std::move(other.takeValue_())); other.clear(); }
     }
-    Maybe& operator=(Maybe &&other) = delete;
+    constexpr Maybe& operator=(Maybe &&other) = delete;
 
     /** Clears the stored value. */
-    void clear() { _store.destroy(_set); _set = false; }
+    constexpr void clear() { _store.destroy(_set); _set = false; }
 
     /** Returns whether this contains a value. */
     constexpr operator bool() const noexcept { return _set; }
@@ -123,21 +123,21 @@ class Maybe : public Object
     /** @name STL container interface */
     /** @{ */
 
-    bool empty() const { return empty(); }
-    size_type size() const { return isPresent() ? 1 : 0; }
-    size_type max_size() const { return 1; }
+    constexpr bool empty() const { return empty(); }
+    constexpr size_type size() const { return isPresent() ? 1 : 0; }
+    constexpr size_type max_size() const { return 1; }
 
-    const_iterator cbegin() const { return isPresent() ? const_iterator{this} : cend(); }
-    const_iterator cend() const { return const_iterator{this, const_iterator::kEndIterator}; }
-    const_iterator begin() const { return cbegin(); }
-    const_iterator end() const { return cend(); }
-    iterator begin() { return isPresent() ? iterator{this} : end(); }
-    iterator end() { return iterator{this, iterator::kEndIterator}; }
+    constexpr const_iterator cbegin() const { return isPresent() ? const_iterator{this} : cend(); }
+    constexpr const_iterator cend() const { return const_iterator{this, const_iterator::kEndIterator}; }
+    constexpr const_iterator begin() const { return cbegin(); }
+    constexpr const_iterator end() const { return cend(); }
+    constexpr iterator begin() { return isPresent() ? iterator{this} : end(); }
+    constexpr iterator end() { return iterator{this, iterator::kEndIterator}; }
 
-    reference front() { return get(); }
-    const_reference front() const { return get(); }
-    reference back() { return get(); }
-    const_reference back() const { return get(); }
+    constexpr reference front() { return get(); }
+    constexpr const_reference front() const { return get(); }
+    constexpr reference back() { return get(); }
+    constexpr const_reference back() const { return get(); }
 
     /** @} */
 
@@ -149,19 +149,19 @@ class Maybe : public Object
     template<typename Ts>
     union Storage
     {
-        Storage() : _nothing() {}
-        Storage(Ts const &aValue) : _value(aValue) {}
-        Storage(Ts &&aValue) : _value(std::move(aValue)) {}
+        constexpr Storage() : _nothing() {}
+        constexpr Storage(Ts const &aValue) : _value(aValue) {}
+        constexpr Storage(Ts &&aValue) : _value(std::move(aValue)) {}
         ~Storage() {}
 
-        void destroy(bool isSet) { if (isSet) { _value.~Ts(); } }
-        void init(const Ts &val) { new (&_value) Ts{val}; }
-        void init(Ts &&val) { new (&_value) Ts{std::move(val)}; }
+        constexpr void destroy(bool isSet) { if (isSet) { _value.~Ts(); } }
+        constexpr void init(const Ts &val) { new (&_value) Ts{val}; }
+        constexpr void init(Ts &&val) { new (&_value) Ts{std::move(val)}; }
 
-        value_type&& rvRef() noexcept { return std::move(_value); }
+        constexpr value_type&& rvRef() noexcept { return std::move(_value); }
 
-        value_type& ref() noexcept { return _value; }
-        value_type const & ref() const noexcept { return _value; }
+        constexpr value_type& ref() noexcept { return _value; }
+        constexpr value_type const & ref() const noexcept { return _value; }
 
       private:
         Void _nothing;
@@ -171,13 +171,13 @@ class Maybe : public Object
     template<typename Ts>
     union Storage<Ts &>
     {
-        Storage()  noexcept : _nothing() {}
-        Storage(Reference aValue) noexcept : _value(&aValue) {}
+        constexpr Storage()  noexcept : _nothing() {}
+        constexpr Storage(Reference aValue) noexcept : _value(&aValue) {}
 
-        void destroy(bool) noexcept {}
-        void init(Reference val) noexcept { _value = &val; }
-        auto rvRef() noexcept { return *_value; }
-        value_type& ref() const noexcept { return *_value; }
+        constexpr void destroy(bool) noexcept {}
+        constexpr void init(Reference val) noexcept { _value = &val; }
+        constexpr auto rvRef() noexcept { return *_value; }
+        constexpr value_type& ref() const noexcept { return *_value; }
 
       private:
         Void _nothing;
@@ -234,7 +234,7 @@ template <typename T> Maybe(T &&) -> Maybe<T>;
  * @return The Maybe.
  */
 template <typename T, typename... Args>
-static Maybe<T> AsMaybe(Args && ...args)
+constexpr static Maybe<T> AsMaybe(Args && ...args)
 {
     return Maybe<T>(T(std::forward<Args>(args)...));
 }

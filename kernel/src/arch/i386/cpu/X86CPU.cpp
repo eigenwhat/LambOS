@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <io/debug.h>
 
-void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2);
+void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2);
 
 /* reinitialize the PIC controllers, giving them specified vector offsets
    rather than 8h and 70h, as configured by default */
@@ -63,30 +63,30 @@ void X86CPU::enableInterrupts()
 {
     static bool pic_initialized = false;
     if (!pic_initialized) {
-        init_pics(_idt, static_cast<int>(InterruptNumber::kIRQ0),
-                        static_cast<int>(InterruptNumber::kIRQ8));
+        init_pics(_idt, uint8_t(InterruptNumber::kIRQ0), uint8_t(InterruptNumber::kIRQ8));
         pic_initialized = true;
     }
 
     asm volatile ("sti");
 }
 
-void X86CPU::maskIRQ(unsigned char IRQ)
+void X86CPU::maskIRQ(unsigned int IRQ)
 {
     uint16_t port;
     uint8_t value;
 
-    if (IRQ < 8) {
+    if (IRQ < 8u) {
         port = PIC1_DATA;
     } else {
         port = PIC2_DATA;
-        IRQ -= 8;
+        IRQ -= 8u;
     }
-    value = inb(port) | (1 << IRQ);
+
+    value = static_cast<uint8_t>(inb(port) | (1u << IRQ));
     outb(port, value);
 }
 
-void X86CPU::unmaskIRQ(unsigned char IRQ)
+void X86CPU::unmaskIRQ(unsigned int IRQ)
 {
     uint16_t port;
     uint8_t value;
@@ -95,9 +95,9 @@ void X86CPU::unmaskIRQ(unsigned char IRQ)
         port = PIC1_DATA;
     } else {
         port = PIC2_DATA;
-        IRQ -= 8;
+        IRQ = 8u;
     }
-    value = inb(port) & ~(1 << IRQ);
+    value = static_cast<uint8_t>(inb(port) & ~(1u << IRQ));
     outb(port, value);
 }
 
@@ -111,10 +111,10 @@ public:
     {
         char hexval[33];
         _out.write((uint8_t *) "(IRQ) int 0x", 12);
-        itoa(registers.int_no, hexval, 16);
+        uitoa(registers.int_no, hexval, 16);
         _out.write((uint8_t *) hexval, 2);
         _out.write((uint8_t *) ", err 0x", 8);
-        itoa(registers.err_code, hexval, 16);
+        uitoa(registers.err_code, hexval, 16);
         _out.write((uint8_t *) hexval, 2);
         _out.write('\n');
         outb(0x20, 0x20);
@@ -130,7 +130,7 @@ offset1 - vector offset for master PIC
 vectors on the master become offset1..offset1+7
 offset2 - same for slave PIC: offset2..offset2+7
 */
-void init_pics(InterruptDescriptorTable &idt, int pic1, int pic2)
+void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2)
 {
     for (int i = pic1; i < pic1 + 8; ++i) {
         idt.setISR(static_cast<InterruptNumber>(i), new IRQHandler(*debugOut));

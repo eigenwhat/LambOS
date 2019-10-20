@@ -13,11 +13,11 @@ X86AtaDevice::Type X86AtaDevice::typeOf(bool primary, bool master)
 bool X86AtaDevice::isAttached() const
 {
     softReset(); /* waits until master drive is ready again */
-    outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit << 4);
-    outb(_ioPort + kAtaRegisterLbaLow, 0x0);
-    outb(_ioPort + kAtaRegisterLbaMid, 0x0);
-    outb(_ioPort + kAtaRegisterLbaHigh, 0x0);
-    outb(_ioPort + kAtaRegisterCommand, 0xEC);
+    outb(static_cast<std::uint16_t>(_ioPort + kAtaRegisterDriveSelect), static_cast<std::uint8_t>(0xA0 | _slaveBit << 4u));
+    outb(static_cast<std::uint16_t>(_ioPort + kAtaRegisterLbaLow), 0x0);
+    outb(static_cast<std::uint16_t>(_ioPort + kAtaRegisterLbaMid), 0x0);
+    outb(static_cast<std::uint16_t>(_ioPort + kAtaRegisterLbaHigh), 0x0);
+    outb(static_cast<std::uint16_t>(_ioPort + kAtaRegisterCommand), 0xEC);
     return waitForStatus(-1) != 0;
 }
 
@@ -39,10 +39,10 @@ char const *X86AtaDevice::firmware()
 X86AtaDevice::Type X86AtaDevice::type() const
 {
     softReset(); /* waits until master drive is ready again */
-    outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit<<4);
+    outb(std::uint16_t(_ioPort + kAtaRegisterDriveSelect), std::uint8_t(0xA0 | _slaveBit << 4));
     ioWait(); /* wait 400ns for drive select to work */
-    uint8_t cl = inb(_ioPort + kAtaRegisterCylinderLow);	/* get the "signature bytes" */
-    uint8_t ch = inb(_ioPort + kAtaRegisterCylinderHigh);
+    uint8_t cl = inb(std::uint16_t(_ioPort + kAtaRegisterCylinderLow));	/* get the "signature bytes" */
+    uint8_t ch = inb(std::uint16_t(_ioPort + kAtaRegisterCylinderHigh));
 
     /* differentiate ATA, ATAPI, SATA and SATAPI */
     if (cl==0x14 && ch==0xEB) return Type::PATAPI;
@@ -79,14 +79,14 @@ bool X86AtaDevice::read(uint64_t address, uint16_t *buf, size_t sectors)
 bool X86AtaDevice::readInternal(uint64_t address, uint16_t *buf, size_t sectors)
 {
     const size_t maxByteCount = sectorSize() * sectors;
-    outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit << 4);
+    outb(_ioPort + kAtaRegisterDriveSelect, std::uint8_t(0xA0 | _slaveBit << 4));
     ioWait();
 
     switch (type()) {
         case Type::PATAPI:
         case Type::SATAPI:
             // send READ(12)
-            return performPioAtapiOperation(AtapiCommand::read12Command(address, sectors), buf, maxByteCount);
+            return performPioAtapiOperation(AtapiCommand::read12Command(uint32_t(address), sectors), buf, maxByteCount);
         case Type::PATA:
         case Type::SATA:
             // should send something, but for now...
@@ -149,7 +149,7 @@ void X86AtaDevice::identify() const
     outb(_controlPort, 0);
 
     // select device
-    outb(_ioPort + kAtaRegisterDriveSelect, 0xA0 | _slaveBit << 4);
+    outb(_ioPort + kAtaRegisterDriveSelect, std::uint8_t(0xA0 | _slaveBit << 4u));
     ioWait();
 
     switch (type()) {
@@ -220,8 +220,8 @@ bool X86AtaDevice::performPioAtapiOperation(const AtapiCommand &cmd, uint16_t *b
     // check if there's data to read
     if ((status & kAtaStatusBitDRQ)) {
         // get actual size of data. We could optimize our buffer size a bit here, but whatever.
-        uint16_t readSizeBytes = inb(_ioPort + kAtaRegisterLbaHigh) << 8;
-        readSizeBytes = readSizeBytes | inb(_ioPort + kAtaRegisterLbaMid);
+        auto readSizeBytes = uint16_t(inb(_ioPort + kAtaRegisterLbaHigh) << 8);
+        readSizeBytes = uint16_t(readSizeBytes | inb(_ioPort + kAtaRegisterLbaMid));
         pioRead(buf, readSizeBytes);
     } else if (bufSize) {
         puts("No data to read but we made a buffer. Really makes you think...");

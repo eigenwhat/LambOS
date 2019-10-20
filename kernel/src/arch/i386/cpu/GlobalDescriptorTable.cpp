@@ -16,15 +16,15 @@ void GlobalDescriptorTable::encodeEntry(uint8_t entryNumber, GDTEntry source)
     }
 
     // Encode the limit
-    target[0] = source._limit & 0xFF;
-    target[1] = (source._limit >> 8) & 0xFF;
-    target[6] |= (source._limit >> 16) & 0xF;
+    target[0] = static_cast<uint8_t>(source._limit & 0xFFu);
+    target[1] = static_cast<uint8_t>((source._limit >> 8u) & 0xFFu);
+    target[6] |= static_cast<uint8_t>((source._limit >> 16u) & 0xFu);
 
     // Encode the base 
-    target[2] = source._base & 0xFF;
-    target[3] = (source._base >> 8) & 0xFF;
-    target[4] = (source._base >> 16) & 0xFF;
-    target[7] = (source._base >> 24) & 0xFF;
+    target[2] = static_cast<uint8_t>(source._base & 0xFFu);
+    target[3] = static_cast<uint8_t>((source._base >> 8u) & 0xFFu);
+    target[4] = static_cast<uint8_t>((source._base >> 16u) & 0xFFu);
+    target[7] = static_cast<uint8_t>((source._base >> 24u) & 0xFFu);
 
     // And... Type
     target[5] = source._type;
@@ -32,7 +32,7 @@ void GlobalDescriptorTable::encodeEntry(uint8_t entryNumber, GDTEntry source)
 
 void GlobalDescriptorTable::installTSS(uint8_t entryIndex)
 {
-    uint32_t descriptor = entryIndex * 8;
+    uint32_t descriptor = static_cast<uint32_t>(entryIndex) * 8u;
     asm volatile ("movl %0, %%eax;"
                   "ltr %%ax;" : : "r"(descriptor) : "%eax");
 }

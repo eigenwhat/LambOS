@@ -1,13 +1,13 @@
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 
 #define k4KPageAddressMask 0xFFFFF000
 #define k4MPageAddressMask 0xFFC00000
 #define kPageFlagsMask 0x00000FFF
 
-typedef enum page_flag {
+enum PageEntryFlag : std::uint32_t {
     kPresentBit = 0x00000001,
     kReadWriteBit = 0x00000002,
     kSupervisorBit = 0x00000004,
@@ -17,22 +17,22 @@ typedef enum page_flag {
     kDirtyBit = 0x00000040,
     kPageSizeBit = 0x00000080,
     kGlobalBit = 0x00000100,
-} PageEntryFlag;
+};
 
 class PageTable;
 
 class PageEntry {
 public:
-    PageEntry(uint32_t address) : _entry(address & k4KPageAddressMask) {}
+    PageEntry(std::uint32_t address) : _entry(address & k4KPageAddressMask) {}
     void unsetFlag(PageEntryFlag flag) { _entry &= ~flag; }
     void setFlag(PageEntryFlag flag) { _entry |= flag; }
     bool getFlag(PageEntryFlag flag) { return (bool)(_entry & flag); }
-    void setFlags(uint32_t flags) { _entry = (_entry & k4KPageAddressMask) | (flags & kPageFlagsMask); }
-    uint32_t address() { return _entry & k4KPageAddressMask; }
-    uint32_t flags() { return _entry & kPageFlagsMask; }
+    void setFlags(std::uint32_t flags) { _entry = (_entry & k4KPageAddressMask) | (flags & kPageFlagsMask); }
+    std::uint32_t address() { return _entry & k4KPageAddressMask; }
+    std::uint32_t flags() { return _entry & kPageFlagsMask; }
     friend class PageTable;
 private:
-    uint32_t _entry;
+    std::uint32_t _entry;
 };
 
 class PageTable
@@ -43,7 +43,7 @@ class PageTable
      * @param tableAddress The virtual address where the table resides if paging
      *                     is enabled, physical otherwise.
      */
-    PageTable(uint32_t *tableAddress) : _tableAddress(tableAddress) {}
+    PageTable(std::uint32_t *tableAddress) : _tableAddress(tableAddress) {}
 
     /**
      * Clears all entries in the table.
@@ -52,7 +52,7 @@ class PageTable
     void clear();
 
     /** The addressable location of the page table in memory. */
-    uint32_t *address() const { return _tableAddress; }
+    std::uint32_t *address() const { return _tableAddress; }
 
     /**
      * Returns the PageEntry at the given index.
@@ -72,5 +72,5 @@ class PageTable
     void install();
 
   private:
-    uint32_t *_tableAddress;
+    std::uint32_t *_tableAddress;
 };

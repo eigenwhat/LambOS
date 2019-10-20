@@ -38,13 +38,13 @@ struct SyscallHandler : public InterruptServiceRoutine
             case SyscallId::kExit:
             default:
                 debugOut->print("Received unidentified syscall: ");
-                debugOut->println<int>(callId);
+                debugOut->println(callId);
                 debugOut->print("registers.ebx = ");
-                debugOut->println<int>(registers.ebx);
+                debugOut->println(registers.ebx);
                 debugOut->print("registers.ecx = ");
-                debugOut->println<int>(registers.ecx);
+                debugOut->println(registers.ecx);
                 debugOut->print("registers.edx = ");
-                debugOut->println<int>(registers.edx);
+                debugOut->println(registers.edx);
         }
     }
 

@@ -1,29 +1,31 @@
-#include <string.h>
 #include <arch/i386/sys/asm.h>
 #include <device/display/VGATextConsole.hpp>
 
-static size_t const VGA_WIDTH = 80;
-static size_t const VGA_HEIGHT = 25;
+#include <cstdint>
+#include <cstring>
+
+static std::uint16_t const VGA_WIDTH = 80;
+static std::uint16_t const VGA_HEIGHT = 25;
 
 //======================================================
 // Helper functions
 //======================================================
-uint16_t make_vgaentry(char c, uint8_t color)
+std::uint16_t make_vgaentry(char c, uint8_t color)
 {
-    uint16_t c16 = c;
-    uint16_t color16 = color;
-    return c16 | color16 << 8;
+    auto c16 = static_cast<std::uint16_t>(c);
+    std::uint16_t color16 = color;
+    return c16 | static_cast<std::uint16_t>(color16 << 8u);
 }
 
-void move_cursor_to(size_t row, size_t col)
+void move_cursor_to(std::uint16_t row, std::uint16_t col)
 {
-    unsigned short position = (row * 80) + col;
+    auto position = static_cast<std::uint16_t>(row * 80 + col);
     // cursor LOW port to vga INDEX register
     outb(0x3D4, 0x0F);
-    outb(0x3D5, (uint8_t)(position & 0xFF));
+    outb(0x3D5, static_cast<uint8_t>(position & 0xFFu));
     // cursor HIGH port to vga INDEX register
     outb(0x3D4, 0x0E);
-    outb(0x3D5, (uint8_t)((position >> 8) & 0xFF));
+    outb(0x3D5, static_cast<uint8_t>((position >> 8u)) & 0xFFu);
 }
 
 //======================================================
@@ -49,12 +51,12 @@ void VGATextConsole::clear()
 
 void VGATextConsole::setForegroundColor(uint32_t fg)
 {
-    this->_consoleColor = (this->_consoleColor & 0xF0) | fg;
+    this->_consoleColor = static_cast<uint8_t>((this->_consoleColor & 0xF0u) | fg);
 }
 
 void VGATextConsole::setBackgroundColor(uint32_t bg)
 {
-    this->_consoleColor = (this->_consoleColor & 0x0F) | (bg << 4);
+    this->_consoleColor = static_cast<uint8_t>((this->_consoleColor & 0x0Fu) | (bg << 4u));
 }
 
 void VGATextConsole::putCharAt(char c, size_t row, size_t col)
@@ -91,8 +93,8 @@ void VGATextConsole::scroll(size_t lines)
         size_t old_row = _consoleRow;
         memcpy(_consoleBuffer, _consoleBuffer + (VGA_WIDTH * lines), 2 * (VGA_WIDTH * (VGA_HEIGHT - lines)));
         _consoleRow = VGA_HEIGHT - lines;
-        for (uint8_t j = _consoleRow; j < VGA_HEIGHT; ++j) {
-            for (uint8_t i = 0; i < VGA_WIDTH; ++i) {
+        for (size_t j = _consoleRow; j < VGA_HEIGHT; ++j) {
+            for (size_t i = 0; i < VGA_WIDTH; ++i) {
                 putCharAt(' ', j, i);
             }
         }
@@ -100,10 +102,10 @@ void VGATextConsole::scroll(size_t lines)
     }
 }
 
-void VGATextConsole::moveTo(size_t row, size_t col)
+void VGATextConsole::moveTo(std::size_t row, std::size_t col)
 {
     if (_cursorIsVisible) {
-        move_cursor_to(row, col);
+        move_cursor_to(static_cast<std::uint16_t>(row), static_cast<std::uint16_t>(col));
     }
     _consoleRow = row;
     _consoleColumn = col;
@@ -140,6 +142,6 @@ void VGATextConsole::setCursorVisible(bool isVisible)
     if (!_cursorIsVisible) {
         move_cursor_to(0xFF, 0xFF);
     } else {
-        move_cursor_to(_consoleRow, _consoleColumn);
+        move_cursor_to(static_cast<std::uint16_t>(_consoleRow), static_cast<std::uint16_t>(_consoleColumn));
     }
 }

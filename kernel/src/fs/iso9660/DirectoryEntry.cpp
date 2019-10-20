@@ -55,7 +55,7 @@ String rockRidgeName(rockridge::AltNameEntryInfo *info)
     return String(info->name, strlen);
 }
 
-rockridge::AltNameEntryInfo *findRockRidgeNameEntry(char *ptr, size_t len)
+rockridge::AltNameEntryInfo *findRockRidgeNameEntry(char *ptr, std::ptrdiff_t len)
 {
     using namespace rockridge;
     while (len > 0) {
@@ -63,7 +63,7 @@ rockridge::AltNameEntryInfo *findRockRidgeNameEntry(char *ptr, size_t len)
         if (type == RREntry::Unknown) {
             return nullptr;
         }
-        uint8_t entryLength = ptr[2];
+        auto entryLength = uint8_t(ptr[2]);
         if (type != RREntry::NM) {
             ptr += entryLength;
             len -= entryLength;
@@ -85,7 +85,7 @@ class IsoFileStream : public InputStream
 
     size_t available() const override { return _fileSize - _pos; }
 
-    int read() override
+    Byte read() override
     {
         if (_pos == _fileSize) {
             return kEndOfStream;
@@ -113,11 +113,11 @@ class IsoFileStream : public InputStream
         }
     }
 
-    uint8_t *buffer() { return _buffer.get(); }
+    std::byte *buffer() { return _buffer.get(); }
 
   private:
     size_t _fileSize = 0;
-    StaticList<uint8_t> _buffer;
+    StaticList<std::byte> _buffer;
     size_t _pos = 0;
     size_t _mark = 0;
     size_t _readsUntilInvalid = 0;

@@ -55,7 +55,7 @@ template <typename T>
 T readObject(FileReader &file, size_t offset, size_t *bytesRead = nullptr)
 {
     T object;
-    auto count = file.read(reinterpret_cast<uint8_t *>(&object), offset, sizeof(object));
+    auto count = file.read(reinterpret_cast<std::byte *>(&object), offset, sizeof(object));
     if (bytesRead) {
         *bytesRead = (size_t)count;
     }

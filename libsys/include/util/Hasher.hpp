@@ -49,11 +49,7 @@ template <> struct Hasher<char *>
     size_t operator()(char const *str) const
     {
         size_t hash = 5381;
-        int c;
-
-        while ((c = *str++))
-            hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
-
+        while (auto c = uint32_t(*str++)) { hash = ((hash << 5u) + hash) + c; } /* hash * 33 + c */
         return hash;
     }
 };

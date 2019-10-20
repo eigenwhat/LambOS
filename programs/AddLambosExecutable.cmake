@@ -8,8 +8,7 @@ function(add_lambos_executable)
             ${CMAKE_SOURCE_DIR}/programs/crti.s
             ${ALEX_SOURCES}
             ${CMAKE_SOURCE_DIR}/programs/crtn.s
-            ${CMAKE_SOURCE_DIR}/programs/start.c
-            ${CMAKE_SOURCE_DIR}/programs/lang_support.cpp)
+            ${CMAKE_SOURCE_DIR}/programs/start.c)
 
     target_compile_options(${ALEX_NAME} PRIVATE
             $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}>

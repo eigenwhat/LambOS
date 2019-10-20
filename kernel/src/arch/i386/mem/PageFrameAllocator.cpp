@@ -21,7 +21,7 @@ PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length,
         if (mmap->type == 1) {
             for (uint64_t i = page_offset; i < page_offset + num_pages; ++i) {
                 uint64_t bitmap_index = i / 8;
-                _bitmapUsable[bitmap_index] &= ~(1u << (i % 8));
+                _bitmapUsable[bitmap_index] &= static_cast<std::uint8_t>(~(1u << (i % 8)));
             }
         }
     }
@@ -36,16 +36,16 @@ void PageFrameAllocator::markFrameUsable(PageFrame frame, bool usable)
     uint32_t frameNumber = _frameToIndex(frame);
     uint32_t index = frameNumber / 8;
     uint8_t bitNumber = frameNumber % 8;
-    _bitmapUsable[index] &= ~(1 << bitNumber);
-    _bitmapUsable[index] |= (!usable) << bitNumber;
+    _bitmapUsable[index] &= std::uint8_t(~(1u << bitNumber));
+    _bitmapUsable[index] |= std::uint8_t((!usable) << bitNumber);
 }
 
 bool PageFrameAllocator::requestFrame(PageFrame frame)
 {
-    int index = _frameToIndex(frame);
+    uint32_t index = _frameToIndex(frame);
     bool retval = _frameIsFree(index);
     if (retval) {
-        _bitmapFree[index / 8] |= 1 << (index % 8);
+        _bitmapFree[index / 8] |= std::uint8_t(1u << (index % 8));
     }
 
     return retval;
@@ -53,23 +53,23 @@ bool PageFrameAllocator::requestFrame(PageFrame frame)
 
 PageFrame PageFrameAllocator::alloc()
 {
-    int startIndex = _frameToIndex(_lastAllocFrame);
+    uint32_t startIndex = _frameToIndex(_lastAllocFrame);
     // start checking from the last place we allocated since the next page is likely available
-    for (int i = startIndex + 1; i < PAGES_IN_BITMAP; ++i) {
+    for (uint32_t i = startIndex + 1; i < PAGES_IN_BITMAP; ++i) {
         // printf("checking bitmap idx %d\n", i);
         if (_frameIsUsable(i) && _frameIsFree(i)) {
             // puts("got 'em");
             _lastAllocFrame = _indexToFrame(i);
-            _bitmapFree[i / 8] |= 1 << (i % 8);
+            _bitmapFree[i / 8] |= std::uint8_t(1u << (i % 8));
             return _lastAllocFrame;
         }
     }
 
     // we didn't find anything yet, so check the rest
-    for (int i = 0; i < startIndex; ++i) {
+    for (uint32_t i = 0; i < startIndex; ++i) {
         if (_frameIsUsable(i) && _frameIsFree(i)) {
             _lastAllocFrame = _indexToFrame(i);
-            _bitmapFree[i / 8] |= 1 << (i % 8);
+            _bitmapFree[i / 8] |= std::uint8_t(1 << (i % 8));
             return _lastAllocFrame;
         }
     }
@@ -82,6 +82,6 @@ PageFrame PageFrameAllocator::alloc()
 
 void PageFrameAllocator::free(PageFrame frame)
 {
-    int index = _frameToIndex(frame);
-    _bitmapFree[index / 8] &= ~(1 << (index % 8));
+    auto index = _frameToIndex(frame);
+    _bitmapFree[index / 8] &= std::uint8_t(~(1u << (index % 8)));
 }

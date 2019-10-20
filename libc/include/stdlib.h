@@ -22,6 +22,51 @@ __BEGIN_DECLS
 char *itoa(int value, char *str, int base);
 
 /**
+ * Long to string. Nonstandard.
+ * @param value The long to stringify.
+ * @param str The char buffer to place the string.
+ * @param base The numeric base to generate the number in. [2-32]
+ * @return A pointer to the string for convenience. (equal to str)
+ */
+char *ltoa(long value, char *str, int base);
+
+/**
+ * Long long to string. Nonstandard.
+ * @param value The long to stringify.
+ * @param str The char buffer to place the string.
+ * @param base The numeric base to generate the number in. [2-32]
+ * @return A pointer to the string for convenience. (equal to str)
+ */
+char *lltoa(long long value, char *str, int base);
+
+/**
+ * Unsigned int to string. Nonstandard.
+ * @param value The unsigned to stringify.
+ * @param str The char buffer to place the string.
+ * @param base The numeric base to generate the number in. [2-32]
+ * @return A pointer to the string for convenience. (equal to str)
+ */
+char *uitoa(unsigned int value, char *str, int base);
+
+/**
+ * Unsigned long to string. Nonstandard.
+ * @param value The unsigned to stringify.
+ * @param str The char buffer to place the string.
+ * @param base The numeric base to generate the number in. [2-32]
+ * @return A pointer to the string for convenience. (equal to str)
+ */
+char *ultoa(unsigned long value, char *str, int base);
+
+/**
+ * Unsigned long long to string. Nonstandard.
+ * @param value The unsigned to stringify.
+ * @param str The char buffer to place the string.
+ * @param base The numeric base to generate the number in. [2-32]
+ * @return A pointer to the string for convenience. (equal to str)
+ */
+char *ulltoa(unsigned long long value, char *str, int base);
+
+/**
  * Allocates a block of memory of `size` bytes.
  * @param size The size of the memory block to allocate.
  * @return A pointer to the allocated block, or NULL if it failed.

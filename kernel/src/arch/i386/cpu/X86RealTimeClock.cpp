@@ -34,8 +34,8 @@ uint8_t get_update_in_progress_flag()
 
 uint8_t convert_bcd_if_needed(uint8_t value)
 {
-    if (!(readRtcRegister(RtcRegister::StatusB) & 0x04)) {
-        value = (value & 0x0F) + ((value / 16) * 10);
+    if (!(readRtcRegister(RtcRegister::StatusB) & 0x04u)) {
+        value = static_cast<uint8_t>((value & 0x0Fu) + ((value / 16u) * 10u));
     }
 
     return value;

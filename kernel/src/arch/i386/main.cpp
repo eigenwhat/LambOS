@@ -260,7 +260,7 @@ int log_task(char const *printstr, int success)
 
 int check_flag(multiboot_info_t *info, char const *printstr, uint32_t flag)
 {
-    return log_result(printstr, info->flags & flag, "FOUND", "FAIL");
+    return log_result(printstr, int(info->flags & flag), "FOUND", "FAIL");
 }
 
 int log_test(char const *printstr, int success)

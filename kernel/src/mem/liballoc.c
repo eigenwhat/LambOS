@@ -1,5 +1,9 @@
 #include <mem/liballoc.h>
 
+#pragma GCC diagnostic ignored "-Wshadow"
+#pragma GCC diagnostic ignored "-Wconversion"
+#pragma GCC diagnostic ignored "-Wsign-conversion"
+
 /**  Durand's Amazing Super Duper Memory functions.  */
 
 #define VERSION    "1.1"
@@ -107,7 +111,7 @@ static void *liballoc_memset(void *s, int c, size_t n)
 {
     unsigned int i;
     for (i = 0; i < n; i++)
-        ((char *) s)[i] = c;
+        ((char *) s)[i] = (char)c;
 
     return s;
 }

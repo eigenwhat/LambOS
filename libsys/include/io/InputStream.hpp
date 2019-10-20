@@ -1,15 +1,17 @@
 #pragma once
 
+#include <monad/Maybe.hpp>
 #include <Object.hpp>
 
-#include <stdint.h>
+#include <cstdint>
 #include <cstddef>
 
 /** A stream of bytes that can be read from. */
 class InputStream : public Object
 {
   public:
-    static constexpr int kEndOfStream = -1;
+    using Byte = Maybe<std::byte>;
+    static inline const Byte kEndOfStream = Nothing;
     /**
      * Returns an estimate of the number of bytes available for reading without
      * blocking for more data.
@@ -43,7 +45,7 @@ class InputStream : public Object
      * @return The next byte of data, or `kEndOfStream` if the end of the stream
      *         has been reached.
      */
-    virtual int read() = 0;
+    virtual Byte read() = 0;
 
     /**
      * Reads in the next `bytesToRead` bytes of data from the stream, storing
@@ -52,13 +54,13 @@ class InputStream : public Object
      * @param bytesToRead The maximum number of bytes to read.
      * @return The number of bytes actually read.
      */
-    virtual size_t read(uint8_t *bytes, size_t bytesToRead)
+    virtual size_t read(std::byte *bytes, size_t bytesToRead)
     {
         size_t bytesRead = 0;
         for (; bytesToRead > 0; --bytesToRead) {
-            int byte = read();
+            Byte byte = read();
             if (byte == kEndOfStream) break; // reached end of stream.
-            *bytes++ = byte;
+            *bytes++ = *byte;
             ++bytesRead;
         }
 

@@ -1,6 +1,6 @@
 #include <io/FileReader.hpp>
 
-int FileReader::read(size_t offset)
+InputStream::Byte FileReader::read(size_t offset)
 {
     if (offset >= _fileExtent) {
         if (_eofReached) {
@@ -30,7 +30,7 @@ int FileReader::read(size_t offset)
     return _fileBytes[offset];
 }
 
-size_t FileReader::read(uint8_t *buf, size_t offset, size_t bytesToRead)
+size_t FileReader::read(std::byte *buf, size_t offset, size_t bytesToRead)
 {
     if (bytesToRead == 0) {
         return 0;

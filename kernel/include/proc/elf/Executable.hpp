@@ -61,7 +61,7 @@ class Executable : public Object
     struct Section
     {
         String name;
-        uint8_t const *data = nullptr;
+        std::byte const *data = nullptr;
         uintptr_t vaddress = 0;
         uint32_t size = 0;
 
@@ -85,7 +85,7 @@ class Executable : public Object
 
     struct Segment
     {
-        uint8_t const *data = nullptr;
+        std::byte const *data = nullptr;
         uintptr_t vaddress = 0;
         uint32_t alignment = 0;
         uint32_t dataSize = 0;

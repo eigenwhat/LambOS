@@ -1,7 +1,8 @@
 cmake_minimum_required(VERSION 3.14)
 project(lambos VERSION 0.1 LANGUAGES C CXX ASM-ATT)
 
-set (COMMON_COMPILER_FLAGS -ffreestanding -fstack-protector-all -Wall -Wextra -Werror)
+set (WARNING_FLAGS -Werror -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion)
+set (COMMON_COMPILER_FLAGS -ffreestanding -fstack-protector-all ${WARNING_FLAGS})
 set (C_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS})
 set (CXX_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -fno-exceptions -fno-rtti -fconcepts)
 set (LAMBOS_CXX_STANDARD 20)

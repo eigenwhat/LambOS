@@ -69,5 +69,5 @@ int main([[maybe_unused]] int argc, [[maybe_unused]] char *argv[])
         c = readCommand();
     } while (c != Command::kExit);
 
-    return 0xDEADC0DE;
+    return (int)0xDEADC0DE;
 }

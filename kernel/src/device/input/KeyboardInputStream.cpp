@@ -45,7 +45,7 @@ char charWithModKeys(const Keyboard &keyboard, KeyCode keyCode)
 
 }
 
-int KeyboardInputStream::read()
+auto KeyboardInputStream::read() -> Byte
 {
     KeyEvent event;
     do {
@@ -54,5 +54,5 @@ int KeyboardInputStream::read()
 
     auto c = charWithModKeys(*_keyboard, event.keyCode);
     kernel->out()->print(c);
-    return c;
+    return std::byte(c);
 }

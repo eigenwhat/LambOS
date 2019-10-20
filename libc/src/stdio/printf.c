@@ -4,7 +4,6 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "xtoa.h"
 #include <sys/syscall.h>
 
 /* Function pointer for the print function passed into `vsprintf_internal()`.
@@ -128,7 +127,7 @@ incomprehensible_conversion:
                 break;
             case 'u':
                 ++format;
-                int u = (int) va_arg(parameters, int);
+                unsigned int u = (unsigned int) va_arg(parameters, unsigned int);
                 uitoa(u, sbuf, 10);
                 print(str, &written, sbuf, strlen(sbuf));
                 break;
@@ -137,7 +136,7 @@ incomprehensible_conversion:
                 unsigned int hexnum = (unsigned int) va_arg(parameters, unsigned int);
                 sbuf[0] = '0';
                 sbuf[1] = 'x';
-                itoa(hexnum, sbuf+2, 16);
+                uitoa(hexnum, sbuf+2, 16);
                 print(str, &written, sbuf, strlen(sbuf));
                 break;
             default:

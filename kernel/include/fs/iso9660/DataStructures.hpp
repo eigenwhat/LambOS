@@ -54,9 +54,9 @@ struct DirectoryInfo
     }
 
     // length of SUSP attribute set.
-    size_t suspLength()
+    std::ptrdiff_t suspLength()
     {
-        size_t lengthSoFar = suspStart() - (char*)this;
+        std::ptrdiff_t lengthSoFar = suspStart() - (char*)this;
         return length - lengthSoFar;
     }
 } __attribute__((packed));

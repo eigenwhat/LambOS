@@ -28,7 +28,6 @@ set (LIBALLOC_SOURCES
         src/mem/liballoc_hook.cpp)
 
 set (SOURCES
-        src/runtime/cpplang.cpp
         ${I386_SOURCES}
         ${LIBALLOC_SOURCES}
         src/device/display/ConsoleOutputStream.cpp

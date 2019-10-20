@@ -26,7 +26,7 @@ class Syscall
     {
         auto fd = registers.ebx;
         if (fd == kStdIn) {
-            uint8_t *buf = reinterpret_cast<uint8_t *>(registers.ecx);
+            std::byte *buf = reinterpret_cast<std::byte *>(registers.ecx);
             auto len = registers.edx;
             return k.in()->read(buf, len);
         }

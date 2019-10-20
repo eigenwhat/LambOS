@@ -306,7 +306,7 @@ class ArrayList
     }
 
   private:
-    static constexpr size_t npos = -1;
+    static constexpr size_t npos = static_cast<size_t>(-1);
     /**
      * Shifts the data back. Resizes if necessary so no data gets lost.
      * @param offset The amount to shift the data right by.

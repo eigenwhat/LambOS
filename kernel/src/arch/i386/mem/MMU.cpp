@@ -25,7 +25,7 @@ namespace {
 //==========================================================
 // Prototypes
 //==========================================================
-PageTable PageTableForDirectoryIndex(int index);
+PageTable PageTableForDirectoryIndex(uint32_t index);
 
 }
 
@@ -75,7 +75,7 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
     }
 
     uint32_t address = 0;
-    for (uint32_t i = 0; i <= lastUsedPage; ++i) {
+    for (uint16_t i = 0; i <= static_cast<uint16_t>(lastUsedPage); ++i) {
         PageEntry entry(address);
         entry.setFlag(kPresentBit);
         // make sure pages for read only data are marked read only
@@ -107,13 +107,13 @@ void MMU::install()
 void *MMU::palloc(size_t numberOfPages)
 {
     size_t contiguousFoundPages = 0;
-    size_t retpde = 0, retpte = 0;
+    uintptr_t retpde = 0, retpte = 0;
     void *retval = nullptr;
-    for (size_t pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
+    for (uint16_t pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
         PageTable table = getOrCreateTable(pde);
 
         // look through page table
-        for (size_t pte = 0; pte < 1024; ++pte) {
+        for (uint16_t pte = 0; pte < 1024; ++pte) {
             PageEntry entry = table.entryAtIndex(pte);
             if (!entry.getFlag(kPresentBit)) { // found a page that isn't present (is available)
                 if (contiguousFoundPages == 0) { // this is the first available page, set our return pointer to it
@@ -123,7 +123,7 @@ void *MMU::palloc(size_t numberOfPages)
 
                 ++contiguousFoundPages;
                 if (contiguousFoundPages == numberOfPages) { // done
-                    retval = (void *) ((retpde << 22) | (retpte << 12));
+                    retval = (void *) ((retpde << 22u) | (retpte << 12u));
                     break;
                 }
             } else if (contiguousFoundPages) { // current page is used, reset our contiguous page count
@@ -171,8 +171,8 @@ int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
     if (!numberOfPages) return -1;
 
     while (numberOfPages--) {
-        uint32_t pdeIndex = virtualAddress >> 22;
-        uint32_t pteIndex = virtualAddress >> 12 & 0x03FF;
+        uint32_t pdeIndex = virtualAddress >> 22u;
+        uint16_t pteIndex = virtualAddress >> 12u & 0x03FF;
         PageTable table = PageTableForDirectoryIndex(pdeIndex);
         PageEntry pte = table.entryAtIndex(pteIndex);
         _pageFrameAllocator.free(pte.address());
@@ -211,8 +211,8 @@ PageTable MMU::getOrCreateTable(uint16_t directoryIndex)
 
 PageTable MMU::tableForAddress(void *virtualAddress)
 {
-    uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
-    uint32_t pdeIndex = address >> 22;
+    auto address = reinterpret_cast<uintptr_t>(virtualAddress);
+    auto pdeIndex = uint16_t(address >> 22u);
     return getOrCreateTable(pdeIndex);
 }
 
@@ -220,20 +220,20 @@ PageEntry MMU::pageForAddress(void *virtualAddress)
 {
     auto table = tableForAddress(virtualAddress);
     uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
-    uint32_t pteIndex = address >> 12 & 0x03FF;
+    uint16_t pteIndex = address >> 12u & 0x03FFu;
     return table.entryAtIndex(pteIndex);
 }
 
 
 void MMU::allocatePages(void *address, size_t numberOfPages)
 {
-    uintptr_t virtualAddress = reinterpret_cast<uintptr_t>(address);
-    uint32_t currpde = virtualAddress >> 22;
-    uint32_t currpte = virtualAddress >> 12 & 0x03FF;
+    auto virtualAddress = reinterpret_cast<uintptr_t>(address);
+    uint32_t currpde = virtualAddress >> 22u;
+    uint16_t currpte = virtualAddress >> 12u & 0x03FFu;
     size_t pagesLeft = numberOfPages;
     while (pagesLeft > 0) { // map the pages
         PageTable table = PageTableForDirectoryIndex(currpde);
-        PageEntry entry = PageEntry(_pageFrameAllocator.alloc());
+        PageEntry entry{_pageFrameAllocator.alloc()};
         entry.setFlags(kPresentBit | kReadWriteBit);
         table.setEntry(currpte, entry);
 
@@ -266,7 +266,7 @@ namespace {
 // Pulls the page table from the self-mapped page directory.
 // Trust me, you need to use this. Don't use the address from the page directory
 // entry. That's the physical page frame!
-PageTable PageTableForDirectoryIndex(int index)
+PageTable PageTableForDirectoryIndex(uint32_t index)
 {
     uint32_t *addr = (uint32_t *) 0xFFC00000 + (0x400 * index);
     return PageTable(addr);

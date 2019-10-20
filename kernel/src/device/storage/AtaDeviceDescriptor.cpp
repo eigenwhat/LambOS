@@ -13,7 +13,7 @@ void fixAtaWordString(char *str, size_t len)
     // ATAPI info is read one 16-bit word at a time, which means strings got scrambled by little-endian
     // (e.g. str is 214365 instead of 123456)
     for (size_t i = 0; i < len; i += 2) {
-        uint8_t tmp = str[i + 1];
+        char tmp = str[i + 1];
         str[i + 1] = str[i];
         str[i] = tmp;
     }

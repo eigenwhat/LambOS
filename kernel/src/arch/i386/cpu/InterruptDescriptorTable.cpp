@@ -98,20 +98,20 @@ void InterruptDescriptorTable::encodeEntry(uint8_t entryNumber, IDTEntry source)
     uint8_t *target = (uint8_t * ) & (this->idt[entryNumber]);
 
     // offset
-    target[0] = source.offset & 0xFF;
-    target[1] = (source.offset >> 8) & 0xFF;
-    target[6] = (source.offset >> 16) & 0xFF;
-    target[7] = (source.offset >> 24) & 0xFF;
+    target[0] = static_cast<std::uint8_t>(source._offset & 0xFFu);
+    target[1] = static_cast<std::uint8_t>((source._offset >> 8u) & 0xFFu);
+    target[6] = static_cast<std::uint8_t>((source._offset >> 16u) & 0xFFu);
+    target[7] = static_cast<std::uint8_t>((source._offset >> 24u) & 0xFFu);
 
     // a code segment selector in GDT or LDT
-    target[2] = source.selector & 0xFF;
-    target[3] = (source.selector >> 8) & 0xFF;
+    target[2] = static_cast<std::uint8_t>(source._selector & 0xFFu);
+    target[3] = static_cast<std::uint8_t>(source._selector >> 8u) & 0xFFu;
 
     // unused, set to 0
     target[4] = 0;
 
     // type and attributes
-    target[5] = source.type_attr;
+    target[5] = source._typeAttr;
 }
 
 uint8_t stub_isr_mem[sizeof(StubISR)];

@@ -63,7 +63,7 @@ public:
         if(isEmpty()) {
             return T{};
         } else {
-            int retIndex = _front;
+            uint32_t retIndex = _front;
             _front = _next(_front);
             --_size;
             return _buffer[retIndex];
