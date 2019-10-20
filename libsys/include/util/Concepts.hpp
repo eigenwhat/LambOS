@@ -6,6 +6,8 @@
 
 #include <type_traits>
 
+namespace concepts {
+
 template <typename T, typename U>
 concept Same = std::is_same<T, U>::value;
 
@@ -89,3 +91,5 @@ concept Sized = requires(T a)
      */
     { a.size() } -> Same<size_t>;
 };
+
+} // namespace concepts

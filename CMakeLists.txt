@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 project(lambos VERSION 0.1 LANGUAGES C CXX ASM-ATT)
 
-set (COMMON_COMPILER_FLAGS -ffreestanding -O2 -fstack-protector-all -Wall -Wextra -Werror)
+set (COMMON_COMPILER_FLAGS -ffreestanding -fstack-protector-all -Wall -Wextra -Werror)
 set (C_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS})
 set (CXX_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -fno-exceptions -fno-rtti -fconcepts)
 set (LAMBOS_CXX_STANDARD 20)
@@ -61,7 +61,6 @@ else ()
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kvshell> ${CMAKE_BINARY_DIR}/iso/bin
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:elf-test> ${CMAKE_BINARY_DIR}/iso/bin
             COMMAND ${GRUB_MKRESCUE} --output=${ISO_PATH} ${CMAKE_BINARY_DIR}/iso)
-    add_dependencies(${ISO_TARGET} ${KERNEL_TARGET} ${ALL_PROGRAMS})
 
     # set up convenience target to boot generated ISO in qemu (if available)
     find_program(QEMU qemu-system-i386)

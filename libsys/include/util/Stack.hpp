@@ -2,6 +2,8 @@
 
 #include <util/Collection.hpp>
 
+namespace concepts {
+
 template <typename T>
 concept Stack = DynamicCollection<T> && requires(T a)
 {
@@ -22,5 +24,6 @@ concept Stack = DynamicCollection<T> && requires(T a)
      * Returns the element at the top of the Stack without removing it.
      * @return The object. If the Stack is empty, the return value is undefined.
      */
-    { a.peek() } -> Same<typename T::ValueType const &>;
+    { a.peek() } -> Same<typename T::ValueType const> &;
 };
+} // namespace concepts

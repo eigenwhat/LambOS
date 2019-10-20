@@ -2,11 +2,11 @@
 
 #include <util/Collection.hpp>
 
+namespace concepts {
+
 /**
- * A Deque is a Queue and a Stack. A Queuestack, if you will. To avoid any
- * potential association with a certain MS Paint Adventure, we'll stick to the
- * Java Collections Framework's name for the structure (pronounced like "deck").
- * @tparam T The type of object the Deque contains.
+ * A Queue is a FIFO container.
+ * @tparam T The type of object the Queue contains.
  */
 template <typename T>
 concept Queue = DynamicCollection<T> && requires(T a)
@@ -28,5 +28,7 @@ concept Queue = DynamicCollection<T> && requires(T a)
      * Returns the element at the front of the queue without removing it.
      * @return The object. If the queue is empty, the return value is undefined.
      */
-    { a.peek() } -> Same<typename T::ValueType const &>;
+    { a.peek() } -> Same<typename T::ValueType const> &;
 };
+
+} // namespace concepts

@@ -3,6 +3,8 @@
 #include <util/Stack.hpp>
 #include <util/Queue.hpp>
 
+namespace concepts {
+
 /**
  * A Deque is a Queue and a Stack. A Queuestack, if you will. To avoid any
  * potential association with a certain MS Paint Adventure, we'll stick to the
@@ -22,5 +24,7 @@ concept Deque = Stack<T> && Queue<T> && requires(T a)
      * Returns the element at the back of the Deque without removing it.
      * @return The object. If the Deque is empty, the return value is undefined.
      */
-    { a.peekBack() } -> Same<typename T::ValueType const &>;
+    { a.peekBack() } -> typename T::ValueType const &;
 };
+
+} // namespace concepts

@@ -3,6 +3,7 @@
 #include <util/Deque.hpp>
 #include <util/Iterable.hpp>
 
+namespace concepts {
 /**
  * A List is, well, a list of things. Like Queues and Stacks, List elements are
  * ordered. Unlike them, elements are indexed and thus supports random access.
@@ -18,5 +19,7 @@ concept List = Deque<T> && Iterable<T> && requires(T const &a, size_t idx)
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    { a[idx] } -> Same<typename T::ValueType &>;
+    { a[idx] } -> Same<typename T::ValueType> &;
 };
+
+} // namespace concepts

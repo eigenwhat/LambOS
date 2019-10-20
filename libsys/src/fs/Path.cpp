@@ -40,7 +40,7 @@ String Path::pathString() const
         result.append('/');
     }
 
-    for (String &c : _pathComponents) {
+    for (const String &c : _pathComponents) {
         result.append(c);
         if (c != _pathComponents.peekBack()) {
             result.append('/');

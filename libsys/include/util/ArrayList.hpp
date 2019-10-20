@@ -2,6 +2,7 @@
 
 #include <util/DynamicArray.hpp>
 #include <util/List.hpp>
+#include <util/Iterator.hpp>
 
 /**
  * An ArrayList is an ordered list where the elements are stored in a contiguous
@@ -32,7 +33,12 @@
 template <typename T>
 class ArrayList
 {
+    class ALIteratorImpl;
   public:
+    using ValueType = T;
+    using iterator = Iterator<ALIteratorImpl>;
+    using const_iterator = ConstIterator<ALIteratorImpl>;
+
     /** Constructs an ArrayList with the default pre-allocation. */
     ArrayList() : ArrayList(8) {}
 
@@ -133,7 +139,7 @@ class ArrayList
      *       the ordering of your data, or use a different List implementation.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    T pop()
+    ValueType pop()
     {
         T ret = std::move(_data[0]);
         _data.shift(1, true);
@@ -145,19 +151,19 @@ class ArrayList
      * Removes an element from the back of the ArrayList.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    T popBack() { --_size; return std::move(_data[_size]); }
+    ValueType popBack() { --_size; return std::move(_data[_size]); }
 
     /**
      * Returns the element at the top of the ArrayList without removing it.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    const T &peek() const { return _data[0]; }
+    const ValueType &peek() const { return _data[0]; }
 
     /**
      * Returns the element at the back of the ArrayList without removing it.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    const T &peekBack() const { return _data[_size-1]; }
+    const ValueType &peekBack() const { return _data[_size-1]; }
 
     /**
      * Returns whether or not the ArrayList is empty.
@@ -265,12 +271,10 @@ class ArrayList
     T& operator[](size_t idx) const { return _data[idx]; }
 
     /** An iterator pointing to the first element in the list. */
-    Iterator<T> begin() const
-    {
-        auto *llit = new ALIterator{0, this};
-        autorelease(llit);
-        return Iterator<T>::newIterator(llit);
-    }
+    /** @{ */
+    const_iterator begin() const { return const_iterator{ALIteratorImpl{0, this}}; }
+    iterator begin() { return iterator{ALIteratorImpl{0, this}}; }
+    /** @} */
 
     /**
      * An Iterator "past the end" of the list. When encountered, it means there
@@ -278,12 +282,10 @@ class ArrayList
      *
      * @return An iterator signifying the end of this ArrayList.
      */
-    Iterator<T> end() const
-    {
-        auto *llit = new ALIterator{npos, this};
-        autorelease(llit);
-        return Iterator<T>::newIterator(llit);
-    }
+    /** @{ */
+    const_iterator end() const { return const_iterator{ALIteratorImpl{npos, this}}; }
+    iterator end() { return iterator{ALIteratorImpl{npos, this}}; }
+    /** @} */
 
     /**
      * The maximum capacity of the currently allocated block.
@@ -325,73 +327,38 @@ class ArrayList
         }
     }
 
-    class ALIterator : public IteratorImpl<T>
+    class ALIteratorImpl
     {
         friend class ArrayList;
-        using IteratorImpl<T>::publicInstance;
-        using IteratorImpl<T>::implOf;
       public:
-        /**
-         * (pre-increment) Advances the iterator one element forward.
-         * @return A reference to the next Iterator in the Collection.
-         */
-        Iterator<T>& operator++()
+        using ValueType = ArrayList::ValueType;
+        void increment()
         {
             ++_index;
-            if (_index == _parent->size()) {
-                _index = npos;
-            }
-
-            return *publicInstance();
+            if (_index == _parent->size()) { _index = npos; }
         }
 
-        /**
-         * (post-increment) Advances the Iterator one element forward.
-         * @return An Iterator equal to this before the increment.
-         */
-        Iterator<T> operator++(int)
+        void decrement()
         {
-            ALIterator *it = new ALIterator(*this);
-            autorelease(it);
-            this->operator++();
-            return Iterator<T>::newIterator(it);
+            if (_index == npos) { _index = _parent->size() - 1;
+            } else { --_index; }
         }
 
-        /**
-         * Retrieves a reference to the pointed-to element.
-         * @return A reference to the element the Iterator is pointing at. If it
-         *         isn't pointing to anything (e.g. end of the Collection), the
-         *         result is undefined.
-         */
-        T& operator*() const { return (*_parent)[_index]; }
+        T& get_value() const { return (*_parent)[_index]; }
+        T * get_ptr() const { return &(*_parent)[_index]; }
 
         /**
          * Equality operator.
          * @param rhs The iterator to compare to.
          * @return `true` if they are equal, `false` otherwise.
          */
-        bool operator==(Iterator<T> const &rhs) const
+        bool operator==(ALIteratorImpl const &rhs) const
         {
-            if (classId() != rhs.classId()) {
-                return false;
-            }
-
-            ALIterator *iterator = reinterpret_cast<ALIterator *>(implOf(rhs));
-            if (!iterator) {
-                return false;
-            }
-
-            if (iterator == this) {
-                return true;
-            }
-
-            return _index == iterator->_index && _parent == iterator->_parent;
+            return _index == rhs._index && _parent == rhs._parent;
         }
 
-        size_t classId() const { return 0xA88A1757; }
-
       private:
-        ALIterator(size_t index, ArrayList const *parent)
+        ALIteratorImpl(size_t index, ArrayList const *parent)
                 : _index(index), _parent(parent)
         {}
 
@@ -402,3 +369,9 @@ class ArrayList
     DynamicArray<T> _data;
     size_t _size = 0;
 };
+
+namespace concept_check {
+using namespace concepts;
+template <typename T> requires List<ArrayList<T>> using ArrayListCheck = ArrayList<T>;
+static_assert(DefaultConstructible<ArrayListCheck<int>>, "ArrayList does not meet the requirements of List.");
+}

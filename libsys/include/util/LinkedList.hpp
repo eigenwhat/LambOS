@@ -1,6 +1,7 @@
 #pragma once
 
 #include <util/List.hpp>
+#include <cstdio>
 
 /**
  * A LinkedList is an ordered list where each element is contained in a node,
@@ -25,7 +26,12 @@
  */
 template <typename T> class LinkedList
 {
+    class LLIteratorImpl;
   public:
+    using ValueType = T;
+    using iterator = Iterator<LLIteratorImpl>;
+    using const_iterator = ConstIterator<LLIteratorImpl>;
+
     /**
      * Adds an element to the front of the List.
      * @param obj The object to add.
@@ -245,12 +251,10 @@ template <typename T> class LinkedList
     bool operator!=(const LinkedList &rhs) const { return !operator==(rhs); }
 
     /** An iterator pointing to the first element in the list. */
-    Iterator<T> begin() const
-    {
-        auto *llit = new LLIterator{_first.get(), this};
-        autorelease(llit);
-        return Iterator<T>::newIterator(llit);
-    }
+    /** @{ */
+    const_iterator begin() const { return const_iterator{LLIteratorImpl{_first.get(), this}}; }
+    iterator begin() { return iterator{LLIteratorImpl{_first.get(), this}}; }
+    /** @} */
 
     /**
      * An Iterator "past the end" of the list. When encountered, it means there
@@ -258,15 +262,13 @@ template <typename T> class LinkedList
      *
      * @return An iterator signifying the end of this LinkedList.
      */
-    Iterator<T> end() const
-    {
-        auto *llit = new LLIterator{nullptr, this};
-        autorelease(llit);
-        return Iterator<T>::newIterator(llit);
-    }
+     /** @{ */
+    const_iterator end() const { return const_iterator{LLIteratorImpl{nullptr, this}}; }
+    iterator end() { return iterator{LLIteratorImpl{nullptr, this}}; }
+    /** @} */
 
   private:
-    struct Node : public Object
+    struct Node
     {
         Node(const T &v) : value(v) {}
         Node(T &&v) : value(std::move(v)) {}
@@ -338,8 +340,8 @@ template <typename T> class LinkedList
          */
         ArcPtr<Node> remove()
         {
-            // store this in an ArcPtr in case our neighbors are our sole owners
-            ArcPtr<Node> self = this;
+            // store this in a ArcPtr in case our neighbors are our sole owners
+            ArcPtr<Node> self{this};
             if (prev) prev->next = next;
             if (next) next->prev = prev;
             return self;
@@ -350,71 +352,19 @@ template <typename T> class LinkedList
         ArcPtr<Node> next = nullptr;
     };
 
-    class LLIterator : public IteratorImpl<T>
+    class LLIteratorImpl
     {
-        friend class LinkedList;
-        using IteratorImpl<T>::publicInstance;
-        using IteratorImpl<T>::implOf;
       public:
-        /**
-         * (pre-increment) Advances the iterator one element forward.
-         * @return A reference to the next Iterator in the Collection.
-         */
-        Iterator<T>& operator++()
-        {
-            _obj = _obj->next.get();
-            return *publicInstance();
-        }
+        using ValueType = LinkedList::ValueType;
 
-        /**
-         * (post-increment) Advances the Iterator one element forward.
-         * @return An Iterator equal to this before the increment.
-         */
-        Iterator<T> operator++(int)
-        {
-            LLIterator *it = new LLIterator(*this);
-            autorelease(it);
-            this->operator++();
-            return Iterator<T>::newIterator(it);
-        }
-
-        /**
-         * Retrieves a reference to the pointed-to element.
-         * @return A reference to the element the Iterator is pointing at. If it
-         *         isn't pointing to anything (e.g. end of the Collection), the
-         *         result is undefined.
-         */
-        T& operator*() const { return _obj->value; }
-
-        /**
-         * Equality operator.
-         * @param rhs The iterator to compare to.
-         * @return `true` if they are equal, `false` otherwise.
-         */
-        bool operator==(Iterator<T> const &rhs) const
-        {
-            if (classId() != rhs.classId()) {
-                return false;
-            }
-
-            LLIterator *iterator = reinterpret_cast<LLIterator *>(implOf(rhs));
-            if (!iterator) {
-                return false;
-            }
-
-            if (iterator == this) {
-                return true;
-            }
-
-            return _obj == iterator->_obj && _parent == iterator->_parent;
-        }
-
-        size_t classId() const { return 0x21ED7157; }
+        void increment() { _obj = _obj->next.get(); }
+        void decrement() { _obj = _obj->prev; }
+        T& get_value() const { return _obj->value; }
+        T* get_ptr() const { return &_obj->value; }
+        bool operator==(LLIteratorImpl const &rhs) const { return _obj == rhs._obj && _parent == rhs._parent; }
 
       private:
-        LLIterator(Node *node, LinkedList const *parent)
-                : _obj(node), _parent(parent)
-        {}
+        LLIteratorImpl(Node *node, LinkedList const *parent) : _obj(node), _parent(parent) {}
 
         Node *_obj;
         LinkedList const *_parent;
@@ -424,3 +374,10 @@ template <typename T> class LinkedList
     ArcPtr<Node> _last = nullptr;
     size_t _size = 0;
 };
+
+
+namespace concept_check {
+using namespace concepts;
+template <typename T> requires List<LinkedList<T>> using LinkedListCheck = LinkedList<T>;
+static_assert(DefaultConstructible<LinkedListCheck<int>>, "LinkedList does not meet the requirements of List.");
+}
