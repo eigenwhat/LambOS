@@ -1,5 +1,9 @@
-#include <cstring>
+//
+// Created by Martin Miralles-Cordal on 8/8/2013.
+//
+
 #include <Kernel.hpp>
+#include <cstring>
 
 //======================================================
 // Kernel

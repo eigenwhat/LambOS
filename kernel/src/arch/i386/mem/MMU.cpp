@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 8/28/2013.
+//
+
 #include <mem/MMU.hpp>
 #include <mem/PageFrameAllocator.hpp>
 #include <mem/PageTable.hpp>
@@ -5,9 +9,9 @@
 #include <Kernel.hpp>
 
 #include <cstdio>
+#include <cstdlib>
 #include <new>
 
-#include <stdlib.h>
 
 #define kPDESelfMapIndex 1023
 #define kVGAPage (0xB8000/0x1000)
@@ -20,47 +24,46 @@ extern uint32_t readonly_end;
 extern "C" int log_task(char const *printstr, int success);
 extern "C" int log_test(char const *printstr, int success);
 
+//==========================================================
+// Utility methods
+//==========================================================
 namespace {
 
-//==========================================================
-// Prototypes
-//==========================================================
-PageTable PageTableForDirectoryIndex(uint32_t index);
-
+// Pulls the page table from the self-mapped page directory.
+// Trust me, you need to use this. Don't use the address from the page directory
+// entry. That's the physical page frame!
+PageTable PageTableForDirectoryIndex(uint32_t index)
+{
+    uint32_t *addr = (uint32_t *) 0xFFC00000 + (0x400 * index);
+    return PageTable(addr);
 }
 
-//==========================================================
-// Page Frame Allocator init hook
-//==========================================================
-struct MMUPFAHook : PageFrameInitializationHook
+// lock frames in low memory, mark kernel frames as used
+void MMUPFAHook(PageFrameAllocator *allocator)
 {
-    // lock frames in low memory, mark kernel frames as used
-    virtual void operator()(PageFrameAllocator *allocator)
-    {
-        uint32_t i = 0;
-        for (; i < 0x100000; i += 0x1000) {
-            allocator->markFrameUsable(i, false);
-        }
+    uint32_t i = 0;
+    for (; i < 0x100000; i += 0x1000) {
+        allocator->markFrameUsable(i, false);
+    }
 
-        uint32_t kernel_end_addr = (uint32_t) & kernel_end;
+    uint32_t kernel_end_addr = (uint32_t) & kernel_end;
 
-        for (; i <= kernel_end_addr; i += 0x1000) {
-            if (!allocator->requestFrame(i)) {
-                kernel->panic("Page allocation error: unable to reserve kernel memory frames.");
-            }
+    for (; i <= kernel_end_addr; i += 0x1000) {
+        if (!allocator->requestFrame(i)) {
+            kernel->panic("Page allocation error: unable to reserve kernel memory frames.");
         }
     }
-};
+}
 
-uint8_t hook1[sizeof(MMUPFAHook)];
+} // anonymous namespace
 
 //===========================================================
 // MMU Public Methods
 //===========================================================
 
 MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
-        : _pageFrameAllocator(mmap_addr, mmap_length, new(hook1) MMUPFAHook),
-          _pageDirectory((uint32_t *) _pageFrameAllocator.alloc())
+        : _pageFrameAllocator(mmap_addr, mmap_length, MMUPFAHook)
+        ,_pageDirectory((uint32_t *) _pageFrameAllocator.alloc())
 {
     _pageDirectory.clear();
     PageTable firstTable((uint32_t * )(_pageFrameAllocator.alloc()));
@@ -257,21 +260,3 @@ void MMU::_flush()
             "movl %eax, %cr3"
             );
 }
-
-//===========================================================
-// Utility methods
-//===========================================================
-namespace {
-
-// Pulls the page table from the self-mapped page directory.
-// Trust me, you need to use this. Don't use the address from the page directory
-// entry. That's the physical page frame!
-PageTable PageTableForDirectoryIndex(uint32_t index)
-{
-    uint32_t *addr = (uint32_t *) 0xFFC00000 + (0x400 * index);
-    return PageTable(addr);
-}
-
-}
-
-

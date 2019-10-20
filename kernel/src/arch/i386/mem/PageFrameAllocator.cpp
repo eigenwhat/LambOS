@@ -1,12 +1,16 @@
-#include <string.h>
+//
+// Created by Martin Miralles-Cordal on 8/26/2013.
+//
+
 #include <mem/PageFrameAllocator.hpp>
 #include <arch/i386/cpu/multiboot.h>
 #include <Kernel.hpp>
 #include <cstdio>
+#include <cstring>
 
 #define FRAME_TO_INDEX(frame) (((frame) & k4KPageAddressMask) / 0x1000)
 
-PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length, PageFrameInitializationHook *hook)
+PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length)
         : _lastAllocFrame(0)
 {
     memset(_bitmapUsable, 0xFF, PAGES_IN_BITMAP / 8);
@@ -24,10 +28,6 @@ PageFrameAllocator::PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length,
                 _bitmapUsable[bitmap_index] &= static_cast<std::uint8_t>(~(1u << (i % 8)));
             }
         }
-    }
-
-    if (hook != nullptr) {
-        (*hook)(this);
     }
 }
 

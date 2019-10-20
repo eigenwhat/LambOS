@@ -1,7 +1,11 @@
+//
+// Created by Martin Miralles-Cordal on 4/16/2018.
+//
+
 #pragma once
 
 #include <device/input/PS2Keyboard.hpp>
-#include <arch/i386/cpu/X86CPU.hpp>
+#include <arch/i386/cpu/X86.hpp>
 #include <arch/i386/sys/asm.h>
 
 #define KBD_DEVICE    0x60
@@ -15,7 +19,7 @@ class PS2KeyboardISR : public InterruptServiceRoutine
      * @param cpu The CPU to install into.
      * @param keyboard The PS2Keyboard driver object to send events to.
      */
-    static void install(X86CPU &cpu, PS2Keyboard *keyboard) {
+    static void install(X86 &cpu, PS2Keyboard *keyboard) {
         cpu.idt()->setISR(InterruptNumber::kKeyboardIRQ, new PS2KeyboardISR(keyboard));
         cpu.unmaskIRQ(1);
     }

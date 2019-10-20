@@ -1,6 +1,10 @@
+//
+// Created by Martin Miralles-Cordal on 8/14/2013.
+//
+
 #include <arch/i386/cpu/multiboot.h>
 #include <arch/i386/cpu/PageFaultPanicISR.hpp>
-#include <arch/i386/cpu/X86CPU.hpp>
+#include <arch/i386/cpu/X86.hpp>
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
 #include <arch/i386/device/input/PS2KeyboardISR.hpp>
 #include <arch/i386/device/storage/X86AtaDevice.hpp>
@@ -25,6 +29,7 @@ extern uint32_t kernel_end;
 VGA4BitColor defaultTextColor = COLOR_LIGHT_GREY;
 
 Kernel *kernel = nullptr;
+X86Kernel *x86Kernel = nullptr;
 uint8_t kern_mem[sizeof(X86Kernel)];
 
 uint8_t dbgout_mem[sizeof(PrintStream)];
@@ -51,7 +56,7 @@ int log_test(char const *printstr, int success);
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
     // Get this party started
-    X86Kernel *x86Kernel = new(kern_mem) X86Kernel;
+    x86Kernel = new(kern_mem) X86Kernel;
     kernel = x86Kernel;
 
     // Set up output to bochs as a debug output stream
@@ -64,16 +69,15 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 
     read_multiboot(info);
 
-    kernel->cpu()->install();
+    x86Kernel->cpu().install();
     log_task("Installing CPU descriptor tables...", true);
 
     x86Kernel->installMMU(info->mmap_addr, info->mmap_length);
     log_task("Setting up memory management unit...", true);
-    x86Kernel->x86CPU()->idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
+    x86Kernel->cpu().idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
 
     x86Kernel->installSyscalls();
-
-    kernel->cpu()->enableInterrupts();
+    x86Kernel->cpu().enableInterrupts();
     init_system();
 }
 
@@ -81,7 +85,7 @@ void init_system()
 {
     // prepare stdin
     auto *kb = new PS2Keyboard();
-    PS2KeyboardISR::install(*(X86CPU*)kernel->cpu(), kb);
+    PS2KeyboardISR::install(x86Kernel->cpu(), kb);
     kernel->setIn(Autorelease(new KeyboardInputStream(kb)));
     kb->release();
 
@@ -89,8 +93,7 @@ void init_system()
 
     kernel->console()->setForegroundColor(COLOR_WHITE);
     puts("\n* * *");
-    X86RealTimeClock clock;
-    DateTime now = clock.currentTime();
+    DateTime now = X86RealTimeClock::currentTime();
     printf("The current date and time is %d/%d/%d", now.month, now.monthday, now.year + (now.century * 100));
     printf(" %d", now.hours);
     uint8_t minsec[2] {now.minutes, now.seconds};

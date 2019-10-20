@@ -1,11 +1,14 @@
+//
+// Created by Martin Miralles-Cordal on 10/20/2015.
+//
+
 #pragma once
 
-#include <cstddef>
-#include <stdint.h>
 #include <cpu/RealTimeClock.hpp>
 
-class X86RealTimeClock : public RealTimeClock
-{
-public:
-    DateTime currentTime() override;
-};
+#include <cstddef>
+#include <cstdint>
+
+namespace X86RealTimeClock {
+    DateTime currentTime();
+}

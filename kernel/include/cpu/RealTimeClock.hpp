@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 10/20/2015.
+//
+
 #pragma once
 
 #include <cstddef>
@@ -15,9 +19,12 @@ struct DateTime
     uint8_t century;
 };
 
-class RealTimeClock
-{
-public:
-    virtual DateTime currentTime() = 0;
+
+namespace concepts {
+
+template <typename T>
+concept RealTimeClock = requires(T a) {
+    {a.currentTime()} -> DateTime;
 };
 
+} // namespace concepts

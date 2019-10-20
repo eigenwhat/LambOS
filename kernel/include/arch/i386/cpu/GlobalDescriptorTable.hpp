@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 8/10/2013.
+//
+
 #pragma once
 
 #include <cstddef>

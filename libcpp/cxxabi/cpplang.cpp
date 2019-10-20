@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 9/2/2013.
+//
+
 extern "C" {
 
 void * __stack_chk_guard = nullptr;

@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 8/14/2013.
+//
+
 #ifndef __REGISTER_TABLE_H
 #define __REGISTER_TABLE_H
 

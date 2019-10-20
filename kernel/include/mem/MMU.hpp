@@ -1,11 +1,16 @@
+//
+// Created by Martin Miralles-Cordal on 8/28/2013.
+//
+
 #pragma once
+
 #include "PageFrameAllocator.hpp"
 #include "PageTable.hpp"
 
 /** Abstraction for the X86 memory management unit. Implements paging. */
 class MMU
 {
-public:
+  public:
     MMU(uint32_t mmap_addr, uint32_t mmap_length);
 
     /**
@@ -34,7 +39,7 @@ public:
     /** Installs the managed page table. */
     void install();
 
-private:
+  private:
     PageTable getOrCreateTable(uint16_t directoryIndex);
     PageTable tableForAddress(void *virtualAddress);
     PageEntry pageForAddress(void *virtualAddress);

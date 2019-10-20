@@ -1,23 +1,27 @@
+//
+// Created by Martin Miralles-Cordal on 9/4/2013.
+//
+
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 
 #include <cpu/CPU.hpp>
 #include "GlobalDescriptorTable.hpp"
 #include "InterruptDescriptorTable.hpp"
 
-class X86CPU : public CPU
+class X86
 {
   public:
-    X86CPU();
+    X86();
 
-    virtual void install();
+    void install();
     InterruptDescriptorTable *idt() { return &_idt; }
-    virtual void enableInterrupts();
-    virtual void disableInterrupts() { asm volatile ("cli"); }
-    virtual void maskIRQ(unsigned int IRQ);
-    virtual void unmaskIRQ(unsigned int IRQ);
+    void enableInterrupts();
+    void disableInterrupts() { asm volatile ("cli"); }
+    void maskIRQ(unsigned int IRQ);
+    void unmaskIRQ(unsigned int IRQ);
 
   private:
     GlobalDescriptorTable _gdt;

@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 8/26/2013.
+//
+
 #pragma once
 
 #include <cstddef>
@@ -10,15 +14,20 @@ typedef uint32_t PageFrame;
 
 class PageFrameAllocator;
 
-struct PageFrameInitializationHook
-{
-    virtual void operator()(PageFrameAllocator *allocator) = 0;
-};
+namespace concepts {
+template <typename Hook>
+concept PageFrameInitializationHook = requires(Hook hook, PageFrameAllocator *allocator) { hook(allocator); };
+} // namespace concepts
 
 class PageFrameAllocator
 {
 public:
-    PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length, PageFrameInitializationHook *hook = NULL);
+    PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length);
+
+    template <concepts::PageFrameInitializationHook Func>
+    PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length, Func &&hook)
+        : PageFrameAllocator{mmap_addr, mmap_length} { hook(this); }
+
     PageFrame alloc();
     void free(PageFrame frame);
     void markFrameUsable(PageFrame frame, bool usable);

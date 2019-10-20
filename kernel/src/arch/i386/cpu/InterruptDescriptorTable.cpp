@@ -1,13 +1,17 @@
+//
+// Created by Martin Miralles-Cordal on 8/12/2013.
+//
+
 #include <arch/i386/cpu/InterruptDescriptorTable.hpp>
-
-#include <stdlib.h>
-#include <new>
-
-#include <arch/i386/cpu/X86CPU.hpp>
-#include <io/debug.h>
+#include <arch/i386/cpu/X86.hpp>
 #include <arch/i386/sys/asm.h>
-#include <Kernel.hpp>
+#include <arch/i386/X86Kernel.hpp>
+
+#include <io/debug.h>
+
 #include <cstdio>
+#include <cstdlib>
+#include <new>
 
 #include "isr.h"
 
@@ -85,8 +89,8 @@ class PanicISR : public InterruptServiceRoutine
 
 extern "C" void interrupt_handler(RegisterTable registers)
 {
-    X86CPU *cpu = (X86CPU *) kernel->cpu();
-    cpu->idt()->callISR(static_cast<InterruptNumber>(registers.int_no), registers);
+    auto &cpu = static_cast<X86Kernel*>(kernel)->cpu();
+    cpu.idt()->callISR(static_cast<InterruptNumber>(registers.int_no), registers);
 }
 
 //======================================================

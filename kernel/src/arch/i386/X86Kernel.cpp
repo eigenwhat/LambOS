@@ -54,8 +54,7 @@ struct SyscallHandler : public InterruptServiceRoutine
 
 }
 
-X86Kernel::X86Kernel() : Kernel(&_x86cpu, nullptr)
-        , _vgaConsole(), _consoleOutputStream(_vgaConsole), _stdOut(_consoleOutputStream)
+X86Kernel::X86Kernel() : _x86cpu{}, _vgaConsole(), _consoleOutputStream(_vgaConsole), _stdOut(_consoleOutputStream)
 {
     setConsole(&_vgaConsole);
     setOut(&_stdOut);
@@ -69,5 +68,5 @@ void X86Kernel::installMMU(uint32_t mmap_addr, uint32_t mmap_length)
 
 void X86Kernel::installSyscalls()
 {
-    x86CPU()->idt()->setISR(InterruptNumber::kSystemCall, new SyscallHandler{*this});
+    cpu().idt()->setISR(InterruptNumber::kSystemCall, new SyscallHandler{*this});
 }

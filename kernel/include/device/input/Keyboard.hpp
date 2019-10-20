@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 9/16/2013.
+//
+
 #pragma once
 
 #include <Object.hpp>

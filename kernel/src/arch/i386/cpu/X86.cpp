@@ -1,7 +1,13 @@
-#include <arch/i386/cpu/X86CPU.hpp>
+//
+// Created by Martin Miralles-Cordal on 9/4/2013.
+//
+
+#include <arch/i386/cpu/X86.hpp>
 #include <arch/i386/sys/asm.h>
-#include <string.h>
-#include <stdlib.h>
+
+#include <cstring>
+#include <cstdlib>
+
 #include <io/debug.h>
 
 void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2);
@@ -26,7 +32,7 @@ void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2);
 #define ICW4_BUF_MASTER 0x0C        /* Buffered mode/master */
 #define ICW4_SFNM   0x10        /* Special fully nested (not) */
 
-X86CPU::X86CPU()
+X86::X86()
 {
     // Set up GDT
     _gdt.encodeEntry(0, GDTEntry());
@@ -44,7 +50,7 @@ X86CPU::X86CPU()
 
 }
 
-void X86CPU::install()
+void X86::install()
 {
     // Set up IDT
     _idt.encodeISRs();
@@ -59,7 +65,7 @@ void X86CPU::install()
     _idt.install();
 }
 
-void X86CPU::enableInterrupts()
+void X86::enableInterrupts()
 {
     static bool pic_initialized = false;
     if (!pic_initialized) {
@@ -70,7 +76,7 @@ void X86CPU::enableInterrupts()
     asm volatile ("sti");
 }
 
-void X86CPU::maskIRQ(unsigned int IRQ)
+void X86::maskIRQ(unsigned int IRQ)
 {
     uint16_t port;
     uint8_t value;
@@ -86,7 +92,7 @@ void X86CPU::maskIRQ(unsigned int IRQ)
     outb(port, value);
 }
 
-void X86CPU::unmaskIRQ(unsigned int IRQ)
+void X86::unmaskIRQ(unsigned int IRQ)
 {
     uint16_t port;
     uint8_t value;

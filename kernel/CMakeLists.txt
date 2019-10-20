@@ -9,7 +9,7 @@ file(GLOB_RECURSE INCLUDE_FILES include/*.h include/*.hpp)
 set(I386_SOURCES
         src/arch/i386/cpu/GlobalDescriptorTable.cpp
         src/arch/i386/cpu/InterruptDescriptorTable.cpp
-        src/arch/i386/cpu/X86CPU.cpp
+        src/arch/i386/cpu/X86.cpp
         src/arch/i386/cpu/X86RealTimeClock.cpp
         src/arch/i386/cpu/boot.s
         src/arch/i386/cpu/interrupt.s

@@ -1,7 +1,11 @@
+//
+// Created by Martin Miralles-Cordal on 8/14/2013.
+//
+
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 #include <proc/Context.hpp>
 #include <mem/MMU.hpp>
 #include <cpu/CPU.hpp>
@@ -12,9 +16,6 @@ class Kernel : public Context
     /** Returns the kernel's representation of the memory management unit. */
     MMU *mmu() { return this->_mmu; }
 
-    /** Returns the kernel's representation of the CPU. */
-    CPU *cpu() { return this->_cpu; }
-
     /**
      * Kills the system.
      *
@@ -24,12 +25,10 @@ class Kernel : public Context
     void panic(char const *errorMessage);
 
   protected:
-    Kernel(CPU *cpu, MMU *mmu) : _cpu(cpu), _mmu(mmu) {}
-    void setCPU(CPU *cpu) { _cpu = cpu; }
+    Kernel() = default;
     void setMMU(MMU *mmu) { _mmu = mmu; }
 
   private:
-    CPU *_cpu = nullptr;
     MMU *_mmu = nullptr;
 };
 

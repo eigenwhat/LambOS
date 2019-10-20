@@ -1,6 +1,10 @@
+//
+// Created by Martin Miralles-Cordal on 9/16/2013.
+//
+
 #pragma once
 
-#include <arch/i386/cpu/X86CPU.hpp>
+#include <arch/i386/cpu/X86.hpp>
 #include <device/input/Keyboard.hpp>
 #include <util/RingBuffer.hpp>
 
