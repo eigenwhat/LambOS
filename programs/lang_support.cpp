@@ -15,7 +15,7 @@ void __stack_chk_guard_setup()
     p[3] = 0xFF;
 }
 
-void __attribute__((noreturn)) __stack_chk_fail()
+[[noreturn]] void __stack_chk_fail()
 {
     for(;;);
 }

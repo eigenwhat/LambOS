@@ -14,7 +14,7 @@ struct Void
     constexpr bool operator>(const Void&)  const { return false; }
 };
 
-constexpr const Void Nothing;
+[[maybe_unused]] constexpr const Void Nothing;
 
 template <typename T> struct regular { using type = T; };
 template <> struct regular<void> { using type = Void; };

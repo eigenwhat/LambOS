@@ -42,11 +42,7 @@ constexpr OutputIt fill_n(OutputIt first, Size count, const T& value)
 }
 
 template<typename ForwardIt1, typename ForwardIt2>
-constexpr void iter_swap(ForwardIt1 a, ForwardIt2 b) // constexpr since C++20
-{
-    using std::swap;
-    swap(*a, *b);
-}
+constexpr void iter_swap(ForwardIt1 a, ForwardIt2 b) { using std::swap; swap(*a, *b); }
 
 template<typename InputIt1, typename InputIt2>
 constexpr bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2 first2, InputIt2 last2)

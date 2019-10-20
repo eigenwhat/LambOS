@@ -2,4 +2,8 @@
 
 #include <Memory.hpp>
 
-class Object : public IntrusiveRefCount {};
+class Object : public IntrusiveRefCount
+{
+  public:
+    virtual ~Object() = default;
+};
