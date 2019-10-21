@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 5/8/2018.
+//
+
 #pragma once
 
 #include <fs/DirectoryEntry.hpp>
@@ -8,7 +12,7 @@
 
 namespace elf {
 
-class Executable : public Object
+class Executable
 {
   public:
     /** The function signature for the program's entry point. */
@@ -29,12 +33,12 @@ class Executable : public Object
      * Reads the referred to ELF binary into memory.
      * @param entry The DirectoryEntry for the binary.
      */
-    Executable(DirectoryEntry &entry);
+    explicit Executable(DirectoryEntry &entry);
 
     ~Executable();
 
     /** The sections as listed in the binary's section header table. */
-    ArrayList<Section> const &sections() const { return _sections; }
+    [[nodiscard]] ArrayList<Section> const &sections() const { return _sections; }
 
     /**
      * Loads the program segments into memory.
@@ -47,10 +51,10 @@ class Executable : public Object
      * @note VERY TEMPORARY AND VERY SUBJECT TO CHANGE.
      * @return The exit status of the program.
      */
-    int exec()
-    {
-        return loadSegments() ? _entry(0, nullptr) : -1;
-    }
+     /** @{ */
+    int exec() { return loadSegments() ? _entry(0, nullptr) : -1; }
+    int operator()() { return exec(); }
+    /** @} */
 
     /**
      * Unloads the program segments from memory.

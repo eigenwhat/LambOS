@@ -4,11 +4,7 @@ function(add_lambos_executable)
     set(multiValueArgs SOURCES)
     cmake_parse_arguments(ALEX "${options}" "${oneValueArgs}" "${multiValueArgs}" ${ARGN})
 
-    add_executable(${ALEX_NAME}
-            ${CMAKE_SOURCE_DIR}/programs/crti.s
-            ${ALEX_SOURCES}
-            ${CMAKE_SOURCE_DIR}/programs/crtn.s
-            ${CMAKE_SOURCE_DIR}/programs/start.c)
+    add_executable(${ALEX_NAME} ${ALEX_SOURCES} ${CMAKE_SOURCE_DIR}/programs/start.c)
 
     target_compile_options(${ALEX_NAME} PRIVATE
             $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}>

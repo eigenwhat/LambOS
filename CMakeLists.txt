@@ -30,6 +30,8 @@ set (LIBC_TARGET lambosc)
 set (LIBK_TARGET lambosk)
 # libc++ target name
 set (LIBCPP_TARGET lambosc++)
+# libkc++ target name
+set (LIBKPP_TARGET lamboskc++)
 # lambos system library target name
 set (LIBSYS_TARGET lambos)
 

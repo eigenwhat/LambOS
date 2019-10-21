@@ -1,0 +1,8 @@
+#!/bin/sh
+
+TARGET=i686-elf
+AS=${TARGET}-as
+SRCFILE=crti.s
+DESTFILE=crti.o
+
+${AS} -o ${TARGET}/${DESTFILE} ${SRCFILE}

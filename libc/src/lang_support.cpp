@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 10/21/19.
+//
+
 extern "C" {
 
 void * __stack_chk_guard = nullptr;
@@ -15,9 +19,14 @@ void __stack_chk_guard_setup()
     p[3] = 0xFF;
 }
 
-void __attribute__((noreturn)) __stack_chk_fail()
+/*
+[[noreturn]] void __stack_chk_fail()
 {
+    kernel->panic("Stack buffer overflow detected!");
     for(;;);
 }
+*/
 
-}
+[[noreturn]] void __stack_chk_fail() { for(;;); }
+
+} // extern "C"

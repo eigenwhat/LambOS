@@ -23,13 +23,8 @@ set(I386_SOURCES
         src/arch/i386/X86Kernel.cpp
         src/arch/i386/main.cpp)
 
-set (LIBALLOC_SOURCES
-        src/mem/liballoc.c
-        src/mem/liballoc_hook.cpp)
-
 set (SOURCES
         ${I386_SOURCES}
-        ${LIBALLOC_SOURCES}
         src/device/display/ConsoleOutputStream.cpp
         src/device/input/KeyboardInputStream.cpp
         src/device/input/PS2Keyboard.cpp
@@ -62,10 +57,10 @@ else ()
     target_link_libraries(${KERNEL_TARGET} ${LIBK_TARGET})
 endif ()
 
-if (NOT DEFINED LIBCPP_TARGET)
+if (NOT DEFINED LIBKPP_TARGET)
     message (SEND_ERROR "LIBCPP_TARGET not defined or not visible to ${KERNEL_TARGET}.")
 else ()
-    target_link_libraries(${KERNEL_TARGET} ${LIBCPP_TARGET})
+    target_link_libraries(${KERNEL_TARGET} ${LIBKPP_TARGET})
 endif ()
 
 if (NOT DEFINED LIBSYS_TARGET)

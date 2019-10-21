@@ -1,0 +1,7 @@
+#!/bin/sh
+
+TARGET=i686-elf
+AS=${TARGET}-as
+
+${AS} -o ${TARGET}/crti.o crti.s
+${AS} -o ${TARGET}/crtn.o crtn.s

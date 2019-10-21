@@ -6,7 +6,7 @@
 
 #include <device/Device.hpp>
 #include <device/storage/AtaDevice.hpp>
-#include <stdint.h>
+#include <cstdint>
 #include <cstring>
 #include "device/storage/AtaDeviceDescriptor.hpp"
 #include "device/storage/AtapiCommand.hpp"

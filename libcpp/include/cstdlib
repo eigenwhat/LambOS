@@ -5,3 +5,18 @@
 #pragma once
 
 #include <stdlib.h>
+
+namespace std {
+
+using ::itoa;
+using ::ltoa;
+using ::lltoa;
+using ::uitoa;
+using ::ultoa;
+using ::ulltoa;
+using ::malloc;
+using ::realloc;
+using ::calloc;
+using ::free;
+
+} // namespace std

@@ -161,9 +161,11 @@ template <typename T> class ArcPtr<T, true>
 template <ReferenceCountable T, typename ... Args>
 static ArcPtr<T> make_arc(Args && ...args)
 {
-    ArcPtr<T> ptr(new T(std::forward<Args>(args)...), false);
-    return ptr;
+    return ArcPtr<T>{new T(std::forward<Args>(args)...), false};
 }
+
+template <typename T, typename... Args>
+static ArcPtr<T> New(Args &&...args) { return make_arc<T>(args...); }
 
 template <typename T>
 ArcPtr<T> as_arc(T *ptr, bool initialRetain = true)

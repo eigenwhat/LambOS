@@ -10,11 +10,15 @@ if (NOT DEFINED LIBK_TARGET)
 endif ()
 
 set (STDIO_SOURCES
-    src/stdio/gets.c
-    src/stdio/printf.c)
+        src/stdio/gets.c
+        src/stdio/printf.c
+        )
 
 set (STDLIB_SOURCES
-    src/stdlib/itoa.c)
+        src/stdlib/liballoc.c
+        src/stdlib/itoa.c
+        src/stdlib/liballoc_hook.cpp
+        )
 
 set (SOURCES
     ${STDIO_SOURCES}
@@ -22,7 +26,8 @@ set (SOURCES
     src/ctype.c
     src/string.c
     src/sys/syscall.cpp
-    src/sys/syscall_kernel.cpp)
+    src/sys/syscall_kernel.cpp
+    src/lang_support.cpp)
 
 macro(add_libc TARGET_NAME IS_KERNEL)
     add_library(${TARGET_NAME} STATIC ${SOURCES})

@@ -1,8 +1,72 @@
-#pragma once
-#include <stddef.h>
-#include <stdint.h>
+//
+// Created by Martin Miralles-Cordal on 8/13/2013.
+//
 
-inline void *operator new(size_t, void *p)     noexcept { return p; }
-inline void *operator new[](size_t, void *p)   noexcept { return p; }
-inline void  operator delete  (void *, void *) noexcept { };
-inline void  operator delete[](void *, void *) noexcept { };
+#pragma once
+
+#include <bits/cxxconfig.hpp>
+
+#include <cstddef>
+#include <cstdint>
+#include <cstdlib>
+
+namespace std {
+class bad_alloc {};
+class bad_array_new_length {};
+
+struct destroying_delete_t { explicit destroying_delete_t() = default; };
+inline constexpr destroying_delete_t destroying_delete{};
+
+enum class align_val_t : size_t {};
+
+struct nothrow_t { explicit nothrow_t() = default; };
+extern const nothrow_t nothrow;
+
+using new_handler = void (*)();
+new_handler get_new_handler() noexcept;
+new_handler set_new_handler(new_handler new_p) noexcept;
+
+#define __cpp_lib_launder 201606
+template<typename T>
+[[nodiscard]] constexpr T* launder(T *p) noexcept { return __builtin_launder(p); }
+template<typename Ret, typename... Args NOEXCEPT_TPARAM>
+void launder(Ret (*)(Args...) NOEXCEPT_QUALIFIER) = delete;
+template<typename Ret, typename... Args NOEXCEPT_TPARAM>
+void launder(Ret (*)(Args......) NOEXCEPT_QUALIFIER) = delete;
+void launder(void*) = delete;
+void launder(const void*) = delete;
+void launder(volatile void*) = delete;
+void launder(const volatile void*) = delete;
+
+#if __cpp_impl_destroying_delete
+# define __cpp_lib_destroying_delete 201806L
+#endif
+
+} // namespace std
+
+void *operator new  (std::size_t size);
+void *operator new[](std::size_t size);
+void *operator new  (std::size_t size, [[maybe_unused]] std::align_val_t alignment);
+void *operator new[](std::size_t size, [[maybe_unused]] std::align_val_t alignment);
+void operator delete  (void* ptr) noexcept;
+void operator delete[](void* ptr) noexcept;
+void operator delete  (void* ptr, [[maybe_unused]] std::size_t size) noexcept;
+void operator delete[](void* ptr, [[maybe_unused]] std::size_t size) noexcept;
+void operator delete  (void* ptr, [[maybe_unused]] std::align_val_t alignment) noexcept;
+void operator delete[](void* ptr, [[maybe_unused]] std::align_val_t alignment) noexcept;
+void operator delete  (void* ptr, [[maybe_unused]] std::size_t size, [[maybe_unused]] std::align_val_t alignment) noexcept;
+void operator delete[](void* ptr, [[maybe_unused]] std::size_t size, [[maybe_unused]] std::align_val_t alignment) noexcept;
+
+void *operator new  (std::size_t size, const std::nothrow_t&) noexcept;
+void *operator new[](std::size_t size, const std::nothrow_t&) noexcept;
+void *operator new  (std::size_t size, [[maybe_unused]] std::align_val_t alignment, const std::nothrow_t&) noexcept;
+void *operator new[](std::size_t size, [[maybe_unused]] std::align_val_t alignment, const std::nothrow_t&) noexcept;
+void operator delete  (void* ptr, const std::nothrow_t&) noexcept;
+void operator delete[](void* ptr, const std::nothrow_t&) noexcept;
+void operator delete  (void* ptr, [[maybe_unused]] std::align_val_t alignment, const std::nothrow_t&) noexcept;
+void operator delete[](void* ptr, [[maybe_unused]] std::align_val_t alignment, const std::nothrow_t&) noexcept;
+
+inline void *operator new  ([[maybe_unused]] std::size_t size, void* p) noexcept { return p; }
+inline void *operator new[]([[maybe_unused]] std::size_t size, void* p) noexcept { return p; }
+inline void  operator delete  (void *, void *) noexcept { }
+inline void  operator delete[](void *, void *) noexcept { }

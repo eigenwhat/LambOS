@@ -1,7 +1,11 @@
+//
+// Created by Martin Miralles-Cordal on 5/18/2018.
+//
+
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 
 namespace elf {
 

@@ -176,15 +176,18 @@ Volume *read_ata()
                 bool isIso9660 = Iso9660::instance().hasFileSystem(device);
                 puts(isIso9660 ? "yes!" : "no");
                 if (isIso9660) {
-                    auto heapDevice = Autorelease(new X86AtaDevice(device));
-                    cdVolume = Iso9660::instance().createVolume(*heapDevice.get());
+                    auto heapDevice = New<X86AtaDevice>(device);
+                    cdVolume = Iso9660::instance().createVolume(*heapDevice);
                     auto entry = cdVolume->find("/bin/elf-test");
                     printf("    Found '/bin/elf-test'? %s\n", entry ? "yes!" : "no");
                     if (!entry) break;
                     bool isElf = elf::Executable::isElf(*entry);
                     printf("    Recognized ELF? %s\n", isElf ? "yes!" : "no");
-                    auto exec = elf::Executable(*entry);
-                    printf("    Executing entry point... -> %x\n", exec.exec());
+                    puts  ("    Executing entry point...");
+                    puts  ("    ======");
+                    int retval = elf::Executable(*entry)();
+                    puts  ("    ======");
+                    printf("    Returning from entry point... -> %x\n", retval);
                 }
 
                 break;

@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 1/27/2014.
+//
+
 #include <Object.hpp>
 #include <device/display/Console.hpp>
 #include <io/PrintStream.hpp>
