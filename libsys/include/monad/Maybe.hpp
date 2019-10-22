@@ -1,14 +1,14 @@
 #pragma once
 
-#include <new>
 #include <util/TypeTraits.hpp>
 #include <util/Void.hpp>
-#include <Object.hpp>
 
-#include <stdint.h>
+#include <cstdint>
+#include <new>
+#include <functional>
 
 template <typename T>
-class Maybe : public Object
+class Maybe
 {
   public:
     // our custom types
@@ -175,13 +175,13 @@ class Maybe : public Object
         constexpr Storage(Reference aValue) noexcept : _value(&aValue) {}
 
         constexpr void destroy(bool) noexcept {}
-        constexpr void init(Reference val) noexcept { _value = &val; }
-        constexpr auto rvRef() noexcept { return *_value; }
-        constexpr value_type& ref() const noexcept { return *_value; }
+        constexpr void init(Reference val) noexcept { _value = val; }
+        constexpr auto rvRef() noexcept { return _value.get(); }
+        constexpr value_type& ref() const noexcept { return _value.get(); }
 
       private:
         Void _nothing;
-        value_type *_value;
+        std::reference_wrapper<value_type> _value;
     };
 
     Storage<MutableType> _store{};

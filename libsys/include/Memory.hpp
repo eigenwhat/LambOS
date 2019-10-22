@@ -159,16 +159,13 @@ template <typename T> class ArcPtr<T, true>
  * @return The ArcPtr.
  */
 template <ReferenceCountable T, typename ... Args>
-static ArcPtr<T> make_arc(Args && ...args)
+inline ArcPtr<T> make_arc(Args && ...args)
 {
     return ArcPtr<T>{new T(std::forward<Args>(args)...), false};
 }
 
-template <typename T, typename... Args>
-static ArcPtr<T> New(Args &&...args) { return make_arc<T>(args...); }
-
 template <typename T>
-ArcPtr<T> as_arc(T *ptr, bool initialRetain = true)
+inline ArcPtr<T> as_arc(T *ptr, bool initialRetain = true)
 {
     return ArcPtr<T>(ptr, initialRetain);
 }
@@ -244,7 +241,7 @@ template <typename T> class UniquePtr
 };
 
 template <typename T, typename ... Args>
-static UniquePtr<T> make_unique(Args && ...args) { return UniquePtr<T>{new T(std::forward<Args>(args)...)}; }
+inline UniquePtr<T> make_unique(Args && ...args) { return UniquePtr<T>{new T(std::forward<Args>(args)...)}; }
 
 
 /**
@@ -358,4 +355,7 @@ template <typename T> class ArcPtr<T, false>
 };
 
 template <typename T, typename ... Args> requires !ReferenceCountable<T>
-static ArcPtr<T> make_arc(Args && ...args) { return ArcPtr<T>{new T(std::forward<Args>(args)...)}; }
+inline ArcPtr<T> make_arc(Args && ...args) { return ArcPtr<T>{new T(std::forward<Args>(args)...)}; }
+
+template <typename T, typename... Args>
+inline ArcPtr<T> New(Args &&...args) { return make_arc<T>(args...); }

@@ -4,6 +4,9 @@
 
 namespace std {
 
+template<typename T> inline constexpr T *addressof(T &r) noexcept { return __builtin_addressof(r); }
+template<typename T> const T *addressof(const T&&) = delete;
+
 template <class T>
 constexpr remove_reference_t<T> &&move(T&& a) { return static_cast<typename std::remove_reference_t<T>&&>(a); }
 

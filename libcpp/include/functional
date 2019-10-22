@@ -39,19 +39,19 @@ struct function<R(Args...)> {
 
     R operator()(Args... args) const {
         auto* s = static_cast<const void*>(&storage[0]);
-        auto* c = static_cast<const concept*>(s);
+        auto* c = static_cast<const concept_t*>(s);
         return (*c)(forward<Args>(args)...);
     }
 
   private:
     size_t storage[2];
 
-    struct concept {
+    struct concept_t {
         virtual R operator()(Args...) const = 0;
     };
 
     template<typename T>
-    struct model : concept {
+    struct model : concept_t {
         template<typename U> model(U&& u) : t(forward<U>(u)) {}
 
         R operator()(Args... args) const override {
@@ -63,5 +63,49 @@ struct function<R(Args...)> {
 };
 
 } // end namespace thor_os
+
+template<typename T>
+class reference_wrapper
+{
+    static T *_lvalue_ptr(T &r) noexcept { return std::addressof(r); }
+    static void _lvalue_ptr(T&&) = delete;
+  public:
+    using type = T;
+
+    template<typename U, typename = enable_if_t<!is_same_v<reference_wrapper, remove_cvref_t<U>>>,
+            typename = decltype(reference_wrapper::_lvalue_ptr(std::declval<U>()))>
+    reference_wrapper(U&& u) noexcept(noexcept(reference_wrapper::_lvalue_ptr(std::declval<U>())))
+            : _data(reference_wrapper::_lvalue_ptr(std::forward<U>(u))) {}
+
+    reference_wrapper(const reference_wrapper&) = default;
+    reference_wrapper& operator=(const reference_wrapper&) = default;
+
+    operator T&() const noexcept { return get(); }
+    T& get() const noexcept { return *_data; }
+
+//    template<typename... Args>
+//    typename result_of<T&(Args&&...)>::type operator()(Args&&... args) const
+//    {
+//        return std::invoke(get(), std::forward<Args>(args)...);
+//    }
+
+  private:
+    T *_data;
+};
+
+template<typename T>
+reference_wrapper(T&) -> reference_wrapper<T>;
+
+template<typename T>
+inline reference_wrapper<T> ref(T& t) noexcept { return reference_wrapper<T>(t); }
+
+template<typename T>
+inline reference_wrapper<const T> cref(const T& t) noexcept { return reference_wrapper<const T>(t); }
+
+template<typename T> void ref(const T&&) = delete;
+template<typename T> void cref(const T&&) = delete;
+
+template<typename T> inline reference_wrapper<T> ref(reference_wrapper<T> t) noexcept { return t; }
+template<typename T> inline reference_wrapper<const T> cref(reference_wrapper<T> t) noexcept { return {t.get()}; }
 
 } // end namespace std

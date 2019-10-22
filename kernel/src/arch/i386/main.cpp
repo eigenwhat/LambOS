@@ -84,11 +84,9 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
 void init_system()
 {
     // prepare stdin
-    auto *kb = new PS2Keyboard();
+    auto kb = New<PS2Keyboard>();
     PS2KeyboardISR::install(x86Kernel->cpu(), kb);
-    kernel->setIn(Autorelease(new KeyboardInputStream(kb)));
-    kb->release();
-
+    kernel->setIn(New<KeyboardInputStream>(kb));
     auto cd = read_ata();
 
     kernel->console()->setForegroundColor(COLOR_WHITE);

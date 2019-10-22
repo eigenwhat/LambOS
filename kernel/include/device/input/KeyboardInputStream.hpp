@@ -10,7 +10,7 @@
 class KeyboardInputStream : public InputStream
 {
 public:
-    KeyboardInputStream(Keyboard *keyboard) : _keyboard(keyboard) {}
+    KeyboardInputStream(ArcPtr<Keyboard> keyboard) : _keyboard(std::move(keyboard)) {}
     Byte read() override;
 
 private:

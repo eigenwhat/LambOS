@@ -7,7 +7,7 @@
 #include <io/PrintStream.hpp>
 #include <io/InputStream.hpp>
 
-class Context : public Object
+class Context
 {
 public:
     Context() : _console(nullptr), _out(nullptr) { }
@@ -46,7 +46,7 @@ public:
      * Sets the InputStream for the stdin of this Context.
      * @param in The InputStream to set.
      */
-    void setIn(InputStream *in) { _in = in; }
+    void setIn(ArcPtr<InputStream> in) { _in = std::move(in); }
 
   private:
     Console *_console;

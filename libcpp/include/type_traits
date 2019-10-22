@@ -91,27 +91,28 @@ template <typename T> struct remove_reference<T&&> { using type = T; };
 template <typename T>
 using remove_reference_t = typename remove_reference<T>::type;
 
-// remove_volatile
-template<typename T> struct remove_volatile { using type = T; };
-template<typename T> struct remove_volatile<volatile T> { using type = T; };
-template<typename T> using remove_volatile_t = typename remove_volatile<T>::type;
-
 // remove_const
 template<typename T> struct remove_const { using type = T; };
 template<typename T> struct remove_const<const T> { using type = T; };
 template<typename T> using remove_const_t = typename remove_const<T>::type;
 
+// remove_volatile
+template<typename T> struct remove_volatile { using type = T; };
+template<typename T> struct remove_volatile<volatile T> { using type = T; };
+template<typename T> using remove_volatile_t = typename remove_volatile<T>::type;
+
+// remove_cv
+template<typename T> struct remove_cv { using type = std::remove_volatile_t<typename std::remove_const_t<T>>; };
+template<typename T> using remove_cv_t = typename remove_cv<T>::type;
+
+// remove_cvref
+template<typename T> struct remove_cvref { using type = std::remove_cv_t<std::remove_reference_t<T>>; };
+template<typename T> using remove_cvref_t = typename remove_cvref<T>::type;
+
 // remove_pointer
 template<typename T> struct remove_pointer { using type = T; };
 template<typename T> struct remove_pointer<T*> { using type = T; };
 template<typename T> using remove_pointer_t = typename remove_pointer<T>::type;
-
-// remove_cv
-template<typename T>
-struct remove_cv {
-    using type = std::remove_volatile_t<typename std::remove_const_t<T>>;
-};
-template<typename T> using remove_cv_t = typename remove_cv<T>::type;
 
 // remove_all_extents
 template<typename T> struct remove_all_extents { using type = T; };
