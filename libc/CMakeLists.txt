@@ -15,6 +15,7 @@ set (STDIO_SOURCES
         )
 
 set (STDLIB_SOURCES
+        src/stdlib/exit.c
         src/stdlib/liballoc.c
         src/stdlib/itoa.c
         src/stdlib/liballoc_hook.cpp

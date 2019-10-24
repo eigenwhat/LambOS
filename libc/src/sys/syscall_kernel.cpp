@@ -33,6 +33,12 @@ int sys_read(uint32_t fd, uint8_t *buf, size_t bytes)
     return (int)Syscall::read((X86Kernel&)*kernel, registers);
 }
 
+int sys_exit(int status)
+{
+    auto registers = fake_syscall((uint32_t)status);
+    return (int)Syscall::exit((X86Kernel&)*kernel, registers);
+}
+
 } // extern "C"
 
 #endif

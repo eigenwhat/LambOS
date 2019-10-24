@@ -101,6 +101,12 @@ void *calloc(size_t num, size_t size);
  */
 void free(void *ptr);
 
+/**
+ * Exits the program with normal termination.
+ * @param exit_code The exit status of the program.
+ */
+void exit(int exit_code);
+
 __END_DECLS
 
 #endif

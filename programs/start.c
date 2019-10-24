@@ -3,6 +3,7 @@
 //
 
 int main(int argc, char *argv[]);
+void exit(int exit_code);
 
 // provided by crti.o. Though, until we either build the OS-specific toolchain
 // or figure out how to direct CMake to link crtbegin/crtend.o in the correct
@@ -19,5 +20,6 @@ int _start(int argc, char *argv[])
     int ret = main(argc, argv);
     __cxa_finalize(0);
     _fini();
+    exit(ret);
     return ret;
 }

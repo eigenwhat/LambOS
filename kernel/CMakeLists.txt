@@ -20,6 +20,7 @@ set(I386_SOURCES
         src/arch/i386/mem/MMU.cpp
         src/arch/i386/mem/PageFrameAllocator.cpp
         src/arch/i386/mem/PageTable.cpp
+        src/arch/i386/sys/Syscall.cpp
         src/arch/i386/X86Kernel.cpp
         src/arch/i386/main.cpp)
 
