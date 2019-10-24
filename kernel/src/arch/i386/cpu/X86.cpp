@@ -116,13 +116,13 @@ public:
     virtual void operator()(RegisterTable &registers)
     {
         char hexval[33];
-        _out.write((uint8_t *) "(IRQ) int 0x", 12);
+        _out.write((std::byte *) "(IRQ) int 0x", 12);
         uitoa(registers.int_no, hexval, 16);
-        _out.write((uint8_t *) hexval, 2);
-        _out.write((uint8_t *) ", err 0x", 8);
+        _out.write((std::byte *) hexval, 2);
+        _out.write((std::byte *) ", err 0x", 8);
         uitoa(registers.err_code, hexval, 16);
-        _out.write((uint8_t *) hexval, 2);
-        _out.write('\n');
+        _out.write((std::byte *) hexval, 2);
+        _out.write((std::byte)'\n');
         outb(0x20, 0x20);
     }
 

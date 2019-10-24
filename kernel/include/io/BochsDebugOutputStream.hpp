@@ -6,5 +6,5 @@
 class BochsDebugOutputStream : public OutputStream
 {
 public:
-    virtual void write(uint8_t byte) { outb(0xe9, byte); }
+    virtual void write(std::byte byte) { outb(0xe9, (uint8_t)byte); }
 };

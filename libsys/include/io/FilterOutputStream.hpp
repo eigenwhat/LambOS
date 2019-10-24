@@ -7,15 +7,9 @@ public:
     FilterOutputStream(OutputStream &out) : _out(out) {}
 
     void close() override { _out.close(); }
-
     void flush() override { _out.flush(); }
-
-    void write(uint8_t const *bytes, size_t bytesToWrite) override
-    {
-        for(; bytesToWrite--; _out.write(*bytes++));
-    }
-
-    void write(uint8_t byte) override { _out.write(byte); }
+    void write(std::byte byte) override { _out.write(byte); }
+    using OutputStream::write;
 
 protected:
     OutputStream &_out;

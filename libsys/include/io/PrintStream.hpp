@@ -11,7 +11,7 @@ class PrintStream : public FilterOutputStream
   public:
     PrintStream(OutputStream &out) : FilterOutputStream(out) {}
 
-    void print(char character) { _out.write((uint8_t)character); }
+    void print(char character) { _out.write((std::byte)character); }
     void print(char const *str);
 
     template <typename T> requires concepts::Integral<T>

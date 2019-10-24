@@ -19,12 +19,13 @@ void doBackspace(Console &console) {
 
 }
 
-void ConsoleOutputStream::write(uint8_t byte)
+void ConsoleOutputStream::write(std::byte byte)
 {
-    switch (byte) {
+    char c = (char)byte;
+    switch (c) {
         case '\b':
             doBackspace(_console); break;
         default:
-            _console.putChar((char) byte);
+            _console.putChar(c);
     }
 }

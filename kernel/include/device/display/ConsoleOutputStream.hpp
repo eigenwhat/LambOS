@@ -7,7 +7,7 @@ class ConsoleOutputStream : public OutputStream
 {
 public:
     ConsoleOutputStream(Console &term) : _console(term) {}
-    void write(uint8_t byte) override;
+    void write(std::byte byte) override;
 
 private:
     Console &_console;
