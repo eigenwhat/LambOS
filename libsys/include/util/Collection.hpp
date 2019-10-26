@@ -31,7 +31,7 @@ concept DynamicCollection = InsertableCollection<T> && Clearable<T> && requires(
     * @param object The object to remove.
     * @return `true` if the Collection changed. `false` otherwise.
     */
-    { a.remove(std::declval<typename T::ValueType>()) } -> Same<bool>;
+    { a.remove(std::declval<typename T::ValueType>()) } -> std::same_as<bool>;
 };
 
 } // namespace concepts

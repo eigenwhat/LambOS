@@ -352,10 +352,12 @@ class ArrayList
          * @param rhs The iterator to compare to.
          * @return `true` if they are equal, `false` otherwise.
          */
-        bool operator==(ALIteratorImpl const &rhs) const
+        constexpr bool operator==(ALIteratorImpl const &rhs) const
         {
             return _index == rhs._index && _parent == rhs._parent;
         }
+
+        constexpr bool operator!=(ALIteratorImpl const &rhs) const { return !(rhs == *this); }
 
       private:
         ALIteratorImpl(size_t index, ArrayList const *parent)
@@ -373,5 +375,5 @@ class ArrayList
 namespace concept_check {
 using namespace concepts;
 template <typename T> requires List<ArrayList<T>> using ArrayListCheck = ArrayList<T>;
-static_assert(DefaultConstructible<ArrayListCheck<int>>, "ArrayList does not meet the requirements of List.");
+static_assert(std::default_constructible<ArrayListCheck<int>>, "ArrayList does not meet the requirements of List.");
 }

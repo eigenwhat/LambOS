@@ -1,25 +1,39 @@
 #pragma once
 
 #include <type_traits>
+#include <cstdlib>
+#include <cstdio>
 
 namespace std {
+
+template <typename T> using __rref_t = remove_reference_t<T>;
 
 template<typename T> inline constexpr T *addressof(T &r) noexcept { return __builtin_addressof(r); }
 template<typename T> const T *addressof(const T&&) = delete;
 
-template <class T>
-constexpr remove_reference_t<T> &&move(T&& a) { return static_cast<typename std::remove_reference_t<T>&&>(a); }
+template <typename T> constexpr __rref_t<T> &&move(T&& a) { return static_cast<__rref_t<T>&&>(a); }
 
 template<typename T>
-constexpr T && forward(typename std::remove_reference<T>::type & t) noexcept { return static_cast<T &&>(t); }
+constexpr conditional_t<is_nothrow_move_constructible_v<T> || !is_copy_constructible_v<T>, T &&, T const &>
+move_if_noexcept(T& x) noexcept { return std::move(x); }
+
+template<typename T> constexpr T && forward(__rref_t<T> & t) noexcept { return static_cast<T &&>(t); }
+template<typename T> constexpr T && forward(__rref_t<T> && t) noexcept { return static_cast<T &&>(t); }
 
 template<typename T>
-constexpr T && forward(typename std::remove_reference<T>::type && t) noexcept { return static_cast<T &&>(t); }
+constexpr void swap(T& a, T& b) noexcept(is_nothrow_move_constructible<T>::value &&
+                                         is_nothrow_move_assignable<T>::value)
+{
+    T tmp = std::move(a);
+    a = std::move(b);
+    b = std::move(tmp);
+}
 
-template<typename T>
-constexpr void swap(T& a, T& b) noexcept(std::is_nothrow_move_constructible<T>::value &&
-                                         std::is_nothrow_move_assignable<T>::value);
 template<class T2, std::size_t N>
-constexpr void swap(T2 (&a)[N], T2 (&b)[N]) noexcept(std::is_nothrow_swappable<T2>::value);
+constexpr void swap(T2 (&a)[N], T2 (&b)[N]) noexcept(is_nothrow_swappable<T2>::value)
+{
+    for (size_t n = 0; n < N; ++n) { swap(a[n], b[n]); }
+}
+
 
 } // namespace std

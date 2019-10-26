@@ -60,7 +60,7 @@ struct Array
 };
 
 template<typename T, typename... Ts>
-Array(T, Ts...) -> Array<std::enable_if_t<(Same<T, Ts> && ...), T>, 1 + sizeof...(Ts)>;
+Array(T, Ts...) -> Array<std::enable_if_t<(std::same_as<T, Ts> && ...), T>, 1 + sizeof...(Ts)>;
 
 namespace std {
 

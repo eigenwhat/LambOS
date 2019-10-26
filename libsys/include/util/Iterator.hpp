@@ -8,16 +8,16 @@
 namespace concepts {
 
 template <typename T>
-concept Iterator = CopyConstructible<T> && CopyAssignable<T> && Destructible<T> && Swappable<T> && requires(T a)
-{
-    { a++ };
-    { ++a };
-    { *a };
-};
+concept Iterator = std::copy_constructible<T>
+                   && std::copy_assignable<T>
+                   && std::destructible<T>
+                   && std::swappable<T>
+                   && Dereferencable<T>
+                   && requires(T a) { a++; ++a; };
 
 template <typename T>
 concept InputIterator = Pointer<T>
-                        || (EqualityComparable<T> && Iterator<T> && requires(T a)
+                        || (std::equality_comparable<T> && Iterator<T> && requires(T a)
                            {
                                typename T::ValueType;
                                typename T::reference;
@@ -28,13 +28,13 @@ concept InputIterator = Pointer<T>
                            });
 
 template <typename T, typename ValueType>
-concept IteratorImpl = EqualityComparable<T> && requires(T a)
+concept IteratorImpl = std::equality_comparable<T> && requires(T a)
 {
     typename T::ValueType;
-    { a.increment() } -> Convertible<void>;
-    { a.decrement() } -> Convertible<void>;
-    { a.get_value() } -> Convertible<ValueType>;
-    { a.get_ptr() } -> Convertible<ValueType*>;
+    { a.increment() } -> std::convertible_to<void>;
+    { a.decrement() } -> std::convertible_to<void>;
+    { a.get_value() } -> std::convertible_to<ValueType>;
+    { a.get_ptr() } -> std::convertible_to<ValueType*>;
 };
 
 } // namespace concepts

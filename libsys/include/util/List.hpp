@@ -19,7 +19,7 @@ concept List = Deque<T> && Iterable<T> && requires(T const &a, size_t idx)
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    { a[idx] } -> Same<typename T::ValueType> &;
+    { a[idx] } -> std::same_as<typename T::ValueType> &;
 };
 
 } // namespace concepts

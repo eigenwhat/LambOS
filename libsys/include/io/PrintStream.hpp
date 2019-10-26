@@ -1,12 +1,12 @@
 #pragma once
 
 #include <io/FilterOutputStream.hpp>
-#include <util/Concepts.hpp>
+#include <concepts>
 #include <cstdlib>
 
 class PrintStream : public FilterOutputStream
 {
-    template <typename T>
+    template <std::integral T>
     static void xtoa(T num, char *intstr, int base);
   public:
     PrintStream(OutputStream &out) : FilterOutputStream(out) {}
@@ -14,8 +14,8 @@ class PrintStream : public FilterOutputStream
     void print(char character) { _out.write((std::byte)character); }
     void print(char const *str);
 
-    template <typename T> requires concepts::Integral<T>
-    void print(T item)
+    template <std::integral Integral>
+    void print(Integral item)
     {
         char intstr[33];
         xtoa(item, intstr, 10);

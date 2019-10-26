@@ -10,7 +10,15 @@
 namespace std {
 
 using ::size_t;
-using ::strlen;
+
+//using ::strlen;
+constexpr size_t strlen(char const *str)
+{
+    size_t ret = 0;
+    while (str[ret] != 0) ++ret;
+    return ret;
+}
+
 using ::strcpy;
 using ::strncpy;
 using ::strcmp;

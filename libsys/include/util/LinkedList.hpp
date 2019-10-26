@@ -362,6 +362,7 @@ template <typename T> class LinkedList
         T& get_value() const { return _obj->value; }
         T* get_ptr() const { return &_obj->value; }
         bool operator==(LLIteratorImpl const &rhs) const { return _obj == rhs._obj && _parent == rhs._parent; }
+        constexpr bool operator!=(LLIteratorImpl const &rhs) const { return !(rhs == *this); }
 
       private:
         LLIteratorImpl(Node *node, LinkedList const *parent) : _obj(node), _parent(parent) {}
@@ -379,5 +380,5 @@ template <typename T> class LinkedList
 namespace concept_check {
 using namespace concepts;
 template <typename T> requires List<LinkedList<T>> using LinkedListCheck = LinkedList<T>;
-static_assert(DefaultConstructible<LinkedListCheck<int>>, "LinkedList does not meet the requirements of List.");
+static_assert(std::default_constructible<LinkedListCheck<int>>, "LinkedList does not meet the requirements of List.");
 }
