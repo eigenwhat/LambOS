@@ -4,6 +4,7 @@
 #include <util/Collection.hpp>
 #include <util/Hasher.hpp>
 
+namespace _ns_LIBSYS {
 namespace detail {
 
 template <typename T>
@@ -21,7 +22,7 @@ constexpr size_t strlen(T const *str)
     return ret;
 }
 
-}
+} // namespace detail
 
 /**
  * A string of character-like objects.
@@ -333,3 +334,5 @@ template <typename T> class BasicString
     DynamicArray<T> _data;
     size_t _size = 0;
 };
+
+} // libsys namespace

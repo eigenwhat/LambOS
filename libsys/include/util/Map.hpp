@@ -3,6 +3,8 @@
 #include <util/Collection.hpp>
 #include <util/Pair.hpp>
 
+namespace _ns_LIBSYS {
+
 template <typename K, typename V>
 class Map : public virtual Object
 {
@@ -92,3 +94,5 @@ class Map : public virtual Object
      */
     virtual V& operator[](K const &key) = 0;
 };
+
+} // libsys namespace

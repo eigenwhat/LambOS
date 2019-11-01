@@ -1,9 +1,9 @@
 #pragma once
 
 #include <Object.hpp>
-#include <stdint.h>
+#include <cstdint>
 
-class AtaDeviceDescriptor : public Object
+class AtaDeviceDescriptor : public sys::Object
 {
   public:
     /**

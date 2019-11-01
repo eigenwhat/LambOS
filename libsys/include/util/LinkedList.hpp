@@ -3,6 +3,8 @@
 #include <util/List.hpp>
 #include <cstdio>
 
+namespace _ns_LIBSYS {
+
 /**
  * A LinkedList is an ordered list where each element is contained in a node,
  * and each node has a pointer to the next node which comes after it, forming a
@@ -382,3 +384,5 @@ using namespace concepts;
 template <typename T> requires List<LinkedList<T>> using LinkedListCheck = LinkedList<T>;
 static_assert(std::default_constructible<LinkedListCheck<int>>, "LinkedList does not meet the requirements of List.");
 }
+
+} // libsys namespace

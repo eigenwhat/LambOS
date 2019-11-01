@@ -7,9 +7,9 @@
 #include <Object.hpp>
 #include <sys/keys.h>
 
-class Keyboard : public Object
+class Keyboard : public sys::Object
 {
-public:
+  public:
     virtual KeyEvent read() = 0;
     virtual bool keyIsPressed(KeyCode key) const = 0;
 };

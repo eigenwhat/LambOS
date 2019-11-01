@@ -1,12 +1,14 @@
 #pragma once
 
+#include <util/Comparator.hpp>
 #include <util/DynamicArray.hpp>
-#include <util/EqualTo.hpp>
 #include <util/Hasher.hpp>
 #include <util/LinkedList.hpp>
 #include <util/Map.hpp>
 
-template <typename K, typename V, typename KeyHasher = Hasher<K>, typename KeyEqual = EqualTo<K>>
+namespace _ns_LIBSYS {
+
+template <typename K, typename V, typename KeyHasher = Hasher<K>, typename KeyEqual = decltype(EqualTo<K>)>
 class HashMap : public virtual Map<K, V>
 {
   public:
@@ -175,3 +177,5 @@ class HashMap : public virtual Map<K, V>
     KeyHasher _hasher;
     KeyEqual _keyEqual;
 };
+
+} // libsys namespace

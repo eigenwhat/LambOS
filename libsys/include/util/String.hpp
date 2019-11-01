@@ -1,6 +1,12 @@
+//
+// Created by Martin Miralles-Cordal on 5/3/2018.
+//
+
 #pragma once
 
 #include <util/BasicString.hpp>
+
+namespace _ns_LIBSYS {
 
 /** A char string. */
 using String = BasicString<char>;
@@ -19,3 +25,5 @@ template <typename T> struct Hasher<BasicString<T>>
         return hash;
     }
 };
+
+} // libsys namespace

@@ -14,7 +14,7 @@ bool Iso9660::hasFileSystem(AtaDevice &device)
     // Bytes 1-6 of an ISO9660 volume descriptor contain the string "CD001",
     // so we check for it. The first volume descriptor is at 0x10.
     const auto volumeDescriptor = 0x10;
-    StaticList<uint8_t> buf{device.sectorSize()};
+    sys::StaticList<uint8_t> buf{device.sectorSize()};
     device.read(volumeDescriptor, (uint16_t *)buf.get());
     char *cd001 = reinterpret_cast<char*>(&buf[1]);
     cd001[5] = 0;

@@ -1,4 +1,12 @@
+//
+// Created by Martin Miralles-Cordal on 4/29/2018.
+//
+
+#pragma once
+
 #include <Object.hpp>
+
+namespace _ns_LIBSYS {
 
 /** A Pair is a pairing of two objects of possibly differing types. */
 template <typename A, typename B> class Pair : public virtual Object
@@ -56,3 +64,5 @@ template <typename A, typename B> class Pair : public virtual Object
 
 template <typename A, typename B>
 Pair<A, B> MakePair(const A &a, const B &b) { return Pair{a, b}; };
+
+} // libsys namespace

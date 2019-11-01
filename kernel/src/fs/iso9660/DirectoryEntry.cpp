@@ -49,10 +49,10 @@ RREntry decodeSignature(char *ptr)
     return RREntry::Unknown;
 }
 
-String rockRidgeName(rockridge::AltNameEntryInfo *info)
+sys::String rockRidgeName(rockridge::AltNameEntryInfo *info)
 {
     size_t strlen = info->header.length - (size_t)&((decltype(info))0)->name;
-    return String(info->name, strlen);
+    return sys::String(info->name, strlen);
 }
 
 rockridge::AltNameEntryInfo *findRockRidgeNameEntry(char *ptr, std::ptrdiff_t len)
@@ -77,7 +77,7 @@ rockridge::AltNameEntryInfo *findRockRidgeNameEntry(char *ptr, std::ptrdiff_t le
     return nullptr;
 }
 
-class IsoFileStream : public InputStream
+class IsoFileStream : public sys::InputStream
 {
   public:
     IsoFileStream(size_t fileSize, size_t bufferSize)
@@ -117,7 +117,7 @@ class IsoFileStream : public InputStream
 
   private:
     size_t _fileSize = 0;
-    StaticList<std::byte> _buffer;
+    sys::StaticList<std::byte> _buffer;
     size_t _pos = 0;
     size_t _mark = 0;
     size_t _readsUntilInvalid = 0;
@@ -129,7 +129,7 @@ class IsoFileStream : public InputStream
 DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
         : ::DirectoryEntry(volume,
                            info.flags & 0x2 ? Type::Directory : Type::File,
-                           String(info.name, info.nameLength))
+                           sys::String(info.name, info.nameLength))
         , _extentLba(info.extentLba.lsb)
         , _extentLength(info.extentLength.lsb)
 {
@@ -145,18 +145,18 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
 {
     static constexpr char const *delimiters = "/";
     // get first element in path
-    StringTokenizer tokenizer(path, delimiters);
+    sys::StringTokenizer tokenizer(path, delimiters);
     return find(tokenizer);
 }
 
-::DirectoryEntry *DirectoryEntry::find(StringTokenizer &tokenizer)
+::DirectoryEntry *DirectoryEntry::find(sys::StringTokenizer &tokenizer)
 {
     auto elem = tokenizer.nextToken();
 
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();
     const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
-    StaticList<uint8_t> buf{sectorSize * sectorCount};
+    sys::StaticList<uint8_t> buf{sectorSize * sectorCount};
     volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorCount);
 
     // go over entries
@@ -180,18 +180,18 @@ DirectoryEntry::DirectoryEntry(iso9660::DirectoryInfo &info, Volume &volume)
     return nullptr;
 }
 
-Maybe<LinkedList<String>> DirectoryEntry::readdir() const
+sys::Maybe<sys::LinkedList<sys::String>> DirectoryEntry::readdir() const
 {
     if (type() != Type::Directory) {
-        return Nothing; // not a directory...
+        return sys::Nothing; // not a directory...
     }
 
-    Maybe contents{LinkedList<String>{}};
+    sys::Maybe contents{sys::LinkedList<sys::String>{}};
 
     // read directory contents
     const auto sectorSize = volume().parentDevice()->sectorSize();
     const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
-    StaticList<uint8_t> buf{sectorSize * sectorCount};
+    sys::StaticList<uint8_t> buf{sectorSize * sectorCount};
     volume().parentDevice()->read(_extentLba, (uint16_t *)buf.get(), sectorCount);
 
     // go over entries
@@ -207,7 +207,7 @@ Maybe<LinkedList<String>> DirectoryEntry::readdir() const
             contents->insert("..");
         } else {
             DirectoryEntry entry(*info, (iso9660::Volume&)volume());
-            contents->insert(String(entry.name()));
+            contents->insert(sys::String(entry.name()));
         }
         infoBytes += info->length;
         info = reinterpret_cast<DirectoryInfo *>(infoBytes);
@@ -216,7 +216,7 @@ Maybe<LinkedList<String>> DirectoryEntry::readdir() const
     return contents;
 }
 
-InputStream *DirectoryEntry::fileStream() const
+sys::InputStream *DirectoryEntry::fileStream() const
 {
     if (isDir()) return nullptr;
 

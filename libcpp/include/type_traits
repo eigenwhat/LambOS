@@ -703,7 +703,7 @@ template <class T> inline constexpr bool is_reference_v = is_reference<T>::value
 template <class T> inline constexpr bool is_arithmetic_v = is_arithmetic<T>::value;
 template <class T> inline constexpr bool is_fundamental_v = is_fundamental<T>::value;
 template <class T> inline constexpr bool is_object_v = is_object<T>::value;
-//template <class T> inline constexpr bool is_scalar_v = is_scalar<T>::value;
+template <class T> inline constexpr bool is_scalar_v = is_scalar<T>::value;
 //template <class T> inline constexpr bool is_compound_v = is_compound<T>::value;
 //template <class T> inline constexpr bool is_member_pointer_v = is_member_pointer<T>::value;
 // See C++14 20.10.4.3, type properties

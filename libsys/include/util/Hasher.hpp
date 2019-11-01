@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
+
+namespace _ns_LIBSYS {
 
 template <typename T> struct Hasher;
 
@@ -54,3 +56,5 @@ template <> struct Hasher<char *>
     }
 };
 template <> struct Hasher<char const *> : public Hasher<char *> {};
+
+} // libsys namespace

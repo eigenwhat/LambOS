@@ -4,7 +4,9 @@
 
 #include <utility>
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
+
+namespace _ns_LIBSYS {
 
 template <typename T>
 class DefaultResizer
@@ -137,3 +139,5 @@ class DynamicArray : public Object
     size_t _capacity = 0;
     T *_data = nullptr;
 };
+
+} // libsys namespace

@@ -2,7 +2,7 @@
 
 #include <util/Collection.hpp>
 
-namespace concepts {
+namespace _ns_LIBSYS::concepts {
 
 template <typename T>
 concept Stack = DynamicCollection<T> && requires(T a)
@@ -26,4 +26,5 @@ concept Stack = DynamicCollection<T> && requires(T a)
      */
     { a.peek() } -> std::same_as<typename T::ValueType const> &;
 };
+
 } // namespace concepts

@@ -1,10 +1,12 @@
 #pragma once
 
-#include <monad/Maybe.hpp>
+#include <util/Maybe.hpp>
 #include <Object.hpp>
 
 #include <cstdint>
 #include <cstddef>
+
+namespace _ns_LIBSYS {
 
 /** A stream of bytes that can be read from. */
 class InputStream : public Object
@@ -92,3 +94,5 @@ class InputStream : public Object
      */
     virtual void reset() {}
 };
+
+} // libsys namespace

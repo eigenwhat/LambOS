@@ -1,8 +1,15 @@
+//
+// Created by Martin Miralles-Cordal on 4/28/2018.
+//
+
 #pragma once
 
+#include <Defines.hpp>
 #include <util/Void.hpp>
 
 #include <utility>
+
+namespace _ns_LIBSYS {
 
 template <typename T>
 concept ReferenceCountable = requires(T a) {
@@ -359,3 +366,5 @@ inline ArcPtr<T> make_arc(Args && ...args) { return ArcPtr<T>{new T(std::forward
 
 template <typename T, typename... Args>
 inline ArcPtr<T> New(Args &&...args) { return make_arc<T>(args...); }
+
+} // libsys namespace

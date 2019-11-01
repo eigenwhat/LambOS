@@ -1,5 +1,5 @@
 //
-// Created by Martin Miralles-Cordal on 10/6/19.
+// Created by Martin Miralles-Cordal on 10/6/2019.
 //
 
 #pragma once
@@ -8,6 +8,8 @@
 
 #include <algorithm>
 #include <utility>
+
+namespace _ns_LIBSYS {
 
 /** Fixed-length array object where the size is known at compile time. Basically std::array. */
 template<typename T, std::size_t Size>
@@ -61,6 +63,8 @@ struct Array
 
 template<typename T, typename... Ts>
 Array(T, Ts...) -> Array<std::enable_if_t<(std::same_as<T, Ts> && ...), T>, 1 + sizeof...(Ts)>;
+
+} // libsys namespace
 
 namespace std {
 

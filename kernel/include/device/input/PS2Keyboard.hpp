@@ -22,6 +22,6 @@ public:
 private:
     void pushScanCode(uint8_t code);
 
-    RingBuffer<int> _buffer;
+    sys::RingBuffer<int> _buffer;
     bool _keysPressed[256];
 };

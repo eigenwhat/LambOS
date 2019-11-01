@@ -1,4 +1,10 @@
+//
+// Created by Martin Miralles-Cordal on 5/6/2018.
+//
+
 #include <util/StringTokenizer.hpp>
+
+namespace _ns_LIBSYS {
 
 StringTokenizer::StringTokenizer(String const &str, String const &delimiters)
         : _string(str), _delimiters(delimiters)
@@ -60,3 +66,5 @@ size_t StringTokenizer::tokenEnd(size_t startIndex) const
 
     return _string.size() - 1;
 }
+
+} // libsys namespace

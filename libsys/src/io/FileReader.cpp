@@ -1,4 +1,10 @@
+//
+// Created by Martin Miralles-Cordal on 5/10/2018.
+//
+
 #include <io/FileReader.hpp>
+
+namespace _ns_LIBSYS {
 
 InputStream::Byte FileReader::read(size_t offset)
 {
@@ -58,3 +64,5 @@ void FileReader::readAll()
     size_t i = 0;
     while (read(i++) != InputStream::kEndOfStream);
 }
+
+} // libsys namespace

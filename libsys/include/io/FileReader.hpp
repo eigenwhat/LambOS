@@ -1,9 +1,13 @@
+
+
 #pragma once
 
 #include <Object.hpp>
 #include <io/InputStream.hpp>
 #include <util/DynamicArray.hpp>
 #include <cstdio>
+
+namespace _ns_LIBSYS {
 
 class FileReader : public Object
 {
@@ -68,3 +72,5 @@ class FileReader : public Object
     size_t _fileExtent = 0;
     bool _eofReached = false;
 };
+
+} // libsys namespace

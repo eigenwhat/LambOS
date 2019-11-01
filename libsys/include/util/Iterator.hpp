@@ -5,6 +5,7 @@
 
 #include <utility>
 
+namespace _ns_LIBSYS {
 namespace concepts {
 
 template <typename T>
@@ -85,3 +86,5 @@ struct BasicIterator
 
 template <typename Impl> using Iterator = BasicIterator<Impl, false>;
 template <typename Impl> using ConstIterator = BasicIterator<Impl, true>;
+
+} // libsys namespace

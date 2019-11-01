@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 5/16/2018.
+//
+
 #pragma once
 
 #include <util/TypeTraits.hpp>
@@ -6,6 +10,8 @@
 #include <cstdint>
 #include <new>
 #include <functional>
+
+namespace _ns_LIBSYS {
 
 template <typename T>
 class Maybe
@@ -238,3 +244,5 @@ constexpr static Maybe<T> AsMaybe(Args && ...args)
 {
     return Maybe<T>(T(std::forward<Args>(args)...));
 }
+
+} // libsys namespace

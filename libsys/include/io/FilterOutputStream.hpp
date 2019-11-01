@@ -1,5 +1,12 @@
+//
+// Created by Martin Miralles-Cordal on 9/1/2013.
+//
+
 #pragma once
+
 #include <io/OutputStream.hpp>
+
+namespace _ns_LIBSYS {
 
 class FilterOutputStream : public OutputStream
 {
@@ -14,3 +21,5 @@ public:
 protected:
     OutputStream &_out;
 };
+
+} // libsys namespace

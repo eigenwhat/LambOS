@@ -2,6 +2,6 @@
 
 #include <io/PrintStream.hpp>
 
-extern PrintStream *debugOut;
+extern sys::PrintStream *debugOut;
 
 inline void magicBreakpoint() { asm volatile ("xchg %bx, %bx"); }

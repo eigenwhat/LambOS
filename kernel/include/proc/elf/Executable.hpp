@@ -38,7 +38,7 @@ class Executable
     ~Executable();
 
     /** The sections as listed in the binary's section header table. */
-    [[nodiscard]] ArrayList<Section> const &sections() const { return _sections; }
+    [[nodiscard]] sys::ArrayList<Section> const &sections() const { return _sections; }
 
     /**
      * Loads the program segments into memory.
@@ -64,7 +64,7 @@ class Executable
 
     struct Section
     {
-        String name;
+        sys::String name;
         std::byte const *data = nullptr;
         uintptr_t vaddress = 0;
         uint32_t size = 0;
@@ -117,9 +117,9 @@ class Executable
     size_t loadSections(size_t offset, size_t entryCount, size_t nameTableIndex);
     void loadNameTable(size_t offset, size_t entryIndex);
 
-    FileReader _file;
-    ArrayList<Section> _sections{1};
-    ArrayList<Segment> _segments{1};
+    sys::FileReader _file;
+    sys::ArrayList<Section> _sections{1};
+    sys::ArrayList<Segment> _segments{1};
     Section const *_nameTable = nullptr;
     EntryType _entry = nullptr;
     bool _isLoaded = false;

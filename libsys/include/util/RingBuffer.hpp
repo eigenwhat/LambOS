@@ -1,9 +1,15 @@
+//
+// Created by Martin Miralles-Cordal on 9/12/2013.
+//
+
 #pragma once
 
 #include <util/Queue.hpp>
 
-#include <stdint.h>
+#include <cstdint>
 #include <utility>
+
+namespace _ns_LIBSYS {
 
 /**
  * A RingBuffer is a Queue of fixed size. If an object is enqueued while the
@@ -110,3 +116,5 @@ private:
     size_t _size;
     T *_buffer;
 };
+
+} // libsys namespace

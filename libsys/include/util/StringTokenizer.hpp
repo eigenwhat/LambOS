@@ -3,6 +3,8 @@
 #include <util/String.hpp>
 #include <Object.hpp>
 
+namespace _ns_LIBSYS {
+
 class StringTokenizer : public Object
 {
   public:
@@ -54,3 +56,5 @@ class StringTokenizer : public Object
     String _delimiters;
     size_t _currentIndex = 0;
 };
+
+} // libsys namespace

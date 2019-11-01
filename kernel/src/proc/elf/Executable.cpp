@@ -56,7 +56,7 @@ class SegmentRAII
 };
 
 template <typename T>
-T readObject(FileReader &file, size_t offset, size_t *bytesRead = nullptr)
+T readObject(sys::FileReader &file, size_t offset, size_t *bytesRead = nullptr)
 {
     T object;
     auto count = file.read(reinterpret_cast<std::byte *>(&object), offset, sizeof(object));
@@ -86,7 +86,7 @@ bool Executable::isElf(DirectoryEntry const &entry)
         return false;
     }
 
-    auto file = FileReader{Autorelease(entry.fileStream())};
+    auto file = sys::FileReader{sys::Autorelease(entry.fileStream())};
 
     size_t bytesRead = 0;
     auto const header32 = readObject<ElfHeader32>(file, 0, &bytesRead);
@@ -99,7 +99,7 @@ bool Executable::isElf(DirectoryEntry const &entry)
 }
 
 Executable::Executable(DirectoryEntry &entry)
-        : _file(Autorelease(entry.fileStream()))
+        : _file(sys::Autorelease(entry.fileStream()))
 {
     _file.readAll();
     auto header = readObject<ElfHeader32>(_file, 0);
@@ -225,7 +225,7 @@ bool Executable::loadSegments()
         return true; // already loaded
     }
 
-    LinkedList<SegmentRAII> cleanup;
+    sys::LinkedList<SegmentRAII> cleanup;
     for (auto &ps : _segments) {
         if (ps.alignment == 0x1000) {
             size_t pages = ps.memorySize / 0x1000 + ((ps.memorySize % 0x1000) ? 1 : 0);

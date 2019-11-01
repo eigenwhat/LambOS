@@ -4,6 +4,10 @@
 
 #pragma once
 
+#include <Defines.hpp>
+
+namespace _ns_LIBSYS {
+
 struct Void
 {
     constexpr bool operator==(const Void&) const { return true; }
@@ -26,3 +30,5 @@ template <> struct nonvoid<void> { using type = Void; };
  * you cannot declare instances of or otherwise use void like any other type.
  */
 template <typename T> using regular_t = typename nonvoid<T>::type;
+
+} // libsys namespace

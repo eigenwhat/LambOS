@@ -4,6 +4,8 @@
 #include <util/List.hpp>
 #include <util/Iterator.hpp>
 
+namespace _ns_LIBSYS {
+
 /**
  * An ArrayList is an ordered list where the elements are stored in a contiguous
  * array, which is dynamically resized as needed.
@@ -373,7 +375,8 @@ class ArrayList
 };
 
 namespace concept_check {
-using namespace concepts;
-template <typename T> requires List<ArrayList<T>> using ArrayListCheck = ArrayList<T>;
+template <typename T> requires concepts::List<ArrayList<T>> using ArrayListCheck = ArrayList<T>;
 static_assert(std::default_constructible<ArrayListCheck<int>>, "ArrayList does not meet the requirements of List.");
 }
+
+} // libsys namespace

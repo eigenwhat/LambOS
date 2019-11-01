@@ -110,7 +110,7 @@ void X86::unmaskIRQ(unsigned int IRQ)
 class IRQHandler : public InterruptServiceRoutine
 {
 public:
-    IRQHandler(OutputStream &out) : _out(out)
+    IRQHandler(sys::OutputStream &out) : _out(out)
     {}
 
     virtual void operator()(RegisterTable &registers)
@@ -127,7 +127,7 @@ public:
     }
 
 private:
-    OutputStream &_out;
+    sys::OutputStream &_out;
 };
 
 /*

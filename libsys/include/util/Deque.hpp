@@ -3,7 +3,7 @@
 #include <util/Stack.hpp>
 #include <util/Queue.hpp>
 
-namespace concepts {
+namespace _ns_LIBSYS::concepts {
 
 /**
  * A Deque is a Queue and a Stack. A Queuestack, if you will. To avoid any

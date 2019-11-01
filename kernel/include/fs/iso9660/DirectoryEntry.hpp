@@ -26,13 +26,13 @@ class DirectoryEntry : public ::DirectoryEntry
      * If the DirectoryEntry describes a file, `nullptr` is returned.
      * @return A list of the directory contents, or `nullptr` if this is a file.
      */
-    Maybe<LinkedList<String>> readdir() const override;
+    sys::Maybe<sys::LinkedList<sys::String>> readdir() const override;
 
     /**
      * Prepares an InputStream for reading the contents of the file.
      * @return The InputStream, or `nullptr` if this is a directory.
      */
-    InputStream *fileStream() const override;
+    sys::InputStream *fileStream() const override;
 
     /**
      * Does nothing. Read-only file system.
@@ -65,7 +65,7 @@ class DirectoryEntry : public ::DirectoryEntry
     int unlink(char const *) override;
 
   private:
-    ::DirectoryEntry *find(StringTokenizer &tokenizer);
+    ::DirectoryEntry *find(sys::StringTokenizer &tokenizer);
 
     uint32_t _extentLba = 0;
     uint32_t _extentLength = 0;

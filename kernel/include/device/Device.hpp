@@ -3,7 +3,7 @@
 #include <Object.hpp>
 
 /** Abstract interface for a device on the machine. */
-class Device : public Object
+class Device : public sys::Object
 {
   public:
     /**

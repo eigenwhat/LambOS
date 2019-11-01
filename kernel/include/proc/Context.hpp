@@ -2,6 +2,8 @@
 // Created by Martin Miralles-Cordal on 1/27/2014.
 //
 
+#pragma once
+
 #include <Object.hpp>
 #include <device/display/Console.hpp>
 #include <io/PrintStream.hpp>
@@ -28,28 +30,28 @@ public:
      * Returns stdout for this Context.
      * @return A PrintStream connected to stdout.
      */
-    PrintStream *out() const { return _out.get(); }
+    sys::PrintStream *out() const { return _out.get(); }
 
     /**
      * Sets the PrintStream for the stdout of this Context.
      * @param out The PrintStream to set.
      */
-    void setOut(PrintStream *out) { _out = out; }
+    void setOut(sys::PrintStream *out) { _out = out; }
 
     /**
      * Returns stdin for this Context.
      * @return An InputStream connected to stdin.
      */
-    InputStream *in() const { return _in.get(); }
+    sys::InputStream *in() const { return _in.get(); }
 
     /**
      * Sets the InputStream for the stdin of this Context.
      * @param in The InputStream to set.
      */
-    void setIn(ArcPtr<InputStream> in) { _in = std::move(in); }
+    void setIn(sys::ArcPtr<sys::InputStream> in) { _in = std::move(in); }
 
   private:
     Console *_console;
-    ArcPtr<PrintStream> _out;
-    ArcPtr<InputStream> _in;
+    sys::ArcPtr<sys::PrintStream> _out;
+    sys::ArcPtr<sys::InputStream> _in;
 };

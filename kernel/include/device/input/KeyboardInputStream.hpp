@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 9/12/2013.
+//
+
 #pragma once
 
 #include <util/RingBuffer.hpp>
@@ -7,12 +11,12 @@
 #include <cstdint>
 #include <cstddef>
 
-class KeyboardInputStream : public InputStream
+class KeyboardInputStream : public sys::InputStream
 {
-public:
-    KeyboardInputStream(ArcPtr<Keyboard> keyboard) : _keyboard(std::move(keyboard)) {}
+  public:
+    KeyboardInputStream(sys::ArcPtr<Keyboard> keyboard) : _keyboard(std::move(keyboard)) {}
     Byte read() override;
 
-private:
-    ArcPtr<Keyboard> _keyboard;
+  private:
+    sys::ArcPtr<Keyboard> _keyboard;
 };

@@ -4,6 +4,8 @@
 #include <concepts>
 #include <cstdlib>
 
+namespace _ns_LIBSYS {
+
 class PrintStream : public FilterOutputStream
 {
     template <std::integral T>
@@ -32,3 +34,5 @@ template <> inline void PrintStream::xtoa(long long int num, char *intstr, int b
 template <> inline void PrintStream::xtoa(unsigned int num, char *intstr, int base)       { uitoa(num, intstr, base); }
 template <> inline void PrintStream::xtoa(unsigned long num, char *intstr, int base)      { ultoa(num, intstr, base); }
 template <> inline void PrintStream::xtoa(unsigned long long num, char *intstr, int base) { ulltoa(num, intstr, base); }
+
+} // libsys namespace

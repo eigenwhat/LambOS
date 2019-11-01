@@ -22,6 +22,8 @@
 #include <cstring>
 #include <new>
 
+using sys::New;
+
 // ====================================================
 // Globals
 // ====================================================
@@ -32,9 +34,9 @@ Kernel *kernel = nullptr;
 X86Kernel *x86Kernel = nullptr;
 uint8_t kern_mem[sizeof(X86Kernel)];
 
-uint8_t dbgout_mem[sizeof(PrintStream)];
+uint8_t dbgout_mem[sizeof(sys::PrintStream)];
 uint8_t bochsout_mem[sizeof(BochsDebugOutputStream)];
-PrintStream *debugOut;
+sys::PrintStream *debugOut;
 
 extern "C" {
 
@@ -60,8 +62,8 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     kernel = x86Kernel;
 
     // Set up output to bochs as a debug output stream
-    OutputStream *stream = new(bochsout_mem) BochsDebugOutputStream();
-    debugOut = new(dbgout_mem) PrintStream(*stream);
+    sys::OutputStream *stream = new(bochsout_mem) BochsDebugOutputStream();
+    debugOut = new(dbgout_mem) sys::PrintStream(*stream);
 
     if (magic != 0x2BADB002) {
         kernel->panic("Operating system not loaded by multiboot compliant bootloader.");

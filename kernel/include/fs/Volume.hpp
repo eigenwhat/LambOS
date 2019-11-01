@@ -4,7 +4,7 @@
 #include <fs/DirectoryEntry.hpp>
 #include <Object.hpp>
 
-class Volume : public virtual Object
+class Volume : public virtual sys::Object
 {
   public:
     Volume() : _parentDevice(nullptr) {}
@@ -14,7 +14,7 @@ class Volume : public virtual Object
      * The label of the volume.
      * @return The String containing the volume's label.
      */
-    String const &label() { return _label; }
+    sys::String const &label() { return _label; }
 
     /**
      * Returns the DirectoryEntry corresponding to the root of the Volume.
@@ -37,6 +37,6 @@ class Volume : public virtual Object
     AtaDevice *parentDevice() const { return _parentDevice.get(); }
 
   protected:
-    String _label;
-    ArcPtr<AtaDevice> _parentDevice;
+    sys::String _label;
+    sys::ArcPtr<AtaDevice> _parentDevice;
 };

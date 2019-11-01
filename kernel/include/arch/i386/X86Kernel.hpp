@@ -27,6 +27,6 @@ private:
     X86 _x86cpu;
     VGATextConsole _vgaConsole;
     ConsoleOutputStream _consoleOutputStream;
-    PrintStream _stdOut;
+    sys::PrintStream _stdOut;
     uint8_t _mmuMem[sizeof(MMU)];
 };

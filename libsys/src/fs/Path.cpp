@@ -1,6 +1,12 @@
+//
+// Created by Martin Miralles-Cordal on 5/6/2018.
+//
+
 #include <fs/Path.hpp>
 #include <util/StaticList.hpp>
 #include <util/StringTokenizer.hpp>
+
+namespace _ns_LIBSYS {
 
 namespace {
 
@@ -74,3 +80,5 @@ String Path::extension() const
 
     return token;
 }
+
+} // libsys namespace

@@ -1,6 +1,12 @@
+//
+// Created by Martin Miralles-Cordal on 4/23/2018.
+//
+
 #pragma once
 
 #include <util/Collection.hpp>
+
+namespace _ns_LIBSYS {
 
 /**
  * C++ container for a simple fixed-width array.
@@ -108,3 +114,5 @@ template <typename T> class StaticList
 };
 
 ASSERT_IS_COLLECTION(StaticList)
+
+} // libsys namespace

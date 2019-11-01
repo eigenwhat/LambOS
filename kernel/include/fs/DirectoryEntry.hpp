@@ -1,8 +1,8 @@
 #pragma once
 
 #include <Object.hpp>
-#include <stdint.h>
-#include <monad/Maybe.hpp>
+#include <cstdint>
+#include <util/Maybe.hpp>
 #include <util/LinkedList.hpp>
 #include <util/String.hpp>
 #include <io/InputStream.hpp>
@@ -10,7 +10,7 @@
 class Volume;
 
 // not sure if this or "Dirent" is more identifiable
-class DirectoryEntry : public Object
+class DirectoryEntry : public sys::Object
 {
   public:
     enum class Type {
@@ -21,7 +21,7 @@ class DirectoryEntry : public Object
 
     DirectoryEntry(Volume &volume) : _volume(volume) {}
 
-    DirectoryEntry(Volume &volume, Type type, String const &name)
+    DirectoryEntry(Volume &volume, Type type, sys::String const &name)
             : _volume(volume), _type(type), _name(name) {}
 
     /**
@@ -61,13 +61,13 @@ class DirectoryEntry : public Object
      * If the DirectoryEntry describes a file, `nullptr` is returned.
      * @return A list of the directory contents, or `nullptr` if this is a file.
      */
-    virtual Maybe<LinkedList<String>> readdir() const = 0;
+    virtual sys::Maybe<sys::LinkedList<sys::String>> readdir() const = 0;
 
     /**
      * Prepares an InputStream for reading the contents of the file.
      * @return The InputStream, or `nullptr` if this is a directory.
      */
-    virtual InputStream *fileStream() const = 0;
+    virtual sys::InputStream *fileStream() const = 0;
 
     /**
      * Creates a new file in the directory of this DirectoryEntry.
@@ -82,10 +82,10 @@ class DirectoryEntry : public Object
 
   protected:
     void setType(Type type) { _type = type; }
-    void setName(String const &name) { _name = name; }
+    void setName(sys::String const &name) { _name = name; }
 
   private:
     Volume &_volume;
     Type _type = Type::Unknown;
-    String _name;
+    sys::String _name;
 };

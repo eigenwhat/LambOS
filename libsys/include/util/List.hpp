@@ -1,9 +1,10 @@
+// Created by Martin Miralles-Cordal on 9/12/2013.
 #pragma once
 
 #include <util/Deque.hpp>
 #include <util/Iterable.hpp>
 
-namespace concepts {
+namespace _ns_LIBSYS::concepts {
 /**
  * A List is, well, a list of things. Like Queues and Stacks, List elements are
  * ordered. Unlike them, elements are indexed and thus supports random access.

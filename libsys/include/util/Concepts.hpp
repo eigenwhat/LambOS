@@ -4,9 +4,12 @@
 
 #pragma once
 
-#include <concepts>
+#include <Defines.hpp>
 
-namespace concepts {
+#include <concepts>
+#include <utility>
+
+namespace _ns_LIBSYS::concepts {
 
 template <typename T> concept CopyMutable = std::copy_constructible<T> && std::copy_assignable<T>;
 template <typename T> concept MoveMutable = std::move_constructible<T> && std::move_assignable<T>;
@@ -21,9 +24,8 @@ concept WeaklyIncrementable = std::default_constructible<I> && std::movable<I> &
     i++;
 };
 
-template <typename I> concept Incrementable = std::regular<I> &&
-                                              WeaklyIncrementable<I> &&
-                                              requires(I i) { { i++ } -> std::same_as<I>; };
+template <typename I> concept Incrementable = std::regular<I> && WeaklyIncrementable<I>
+                                            && requires(I i) { { i++ } -> std::same_as<I>; };
 
 template <typename T, typename V>
 concept Insertable = requires(T a, V &&v)

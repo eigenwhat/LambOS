@@ -37,7 +37,7 @@ class Volume : public ::Volume
     ::DirectoryEntry *find(char const *path) const override;
 
   private:
-    ArcPtr<DirectoryEntry> _root;
+    sys::ArcPtr<DirectoryEntry> _root;
 };
 
 }

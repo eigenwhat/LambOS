@@ -19,12 +19,12 @@ class PS2KeyboardISR : public InterruptServiceRoutine
      * @param cpu The CPU to install into.
      * @param keyboard The PS2Keyboard driver object to send events to.
      */
-    static void install(X86 &cpu, ArcPtr<PS2Keyboard> keyboard) {
+    static void install(X86 &cpu, sys::ArcPtr<PS2Keyboard> keyboard) {
         cpu.idt()->setISR(InterruptNumber::kKeyboardIRQ, new PS2KeyboardISR(std::move(keyboard)));
         cpu.unmaskIRQ(1);
     }
 
-    PS2KeyboardISR(ArcPtr<PS2Keyboard> keyboard) : _keyboard(std::move(keyboard)) {}
+    PS2KeyboardISR(sys::ArcPtr<PS2Keyboard> keyboard) : _keyboard(std::move(keyboard)) {}
 
     virtual void operator()(RegisterTable &)
     {
@@ -36,5 +36,5 @@ class PS2KeyboardISR : public InterruptServiceRoutine
     }
 
   private:
-    ArcPtr<PS2Keyboard> _keyboard;
+    sys::ArcPtr<PS2Keyboard> _keyboard;
 };

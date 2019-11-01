@@ -1,9 +1,13 @@
+//
+// Created by Martin Miralles-Cordal on 5/6/2018.
+//
+
 #pragma once
 
 #include <util/Collection.hpp>
 #include <util/Iterator.hpp>
 
-namespace concepts {
+namespace _ns_LIBSYS::concepts {
 /**
  * An Iterable Collection is a Collection that supports traversal via special
  * pointer objects called {@ref Iterator}s.

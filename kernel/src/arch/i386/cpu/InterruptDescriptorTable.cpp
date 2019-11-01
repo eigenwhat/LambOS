@@ -62,7 +62,7 @@ static constexpr const char *exception_messages[32] = {
 class StubISR : public InterruptServiceRoutine
 {
   public:
-    StubISR(PrintStream &out) : _out(out) {}
+    StubISR(sys::PrintStream &out) : _out(out) {}
 
     virtual void operator()(RegisterTable &registers)
     {
@@ -75,7 +75,7 @@ class StubISR : public InterruptServiceRoutine
     }
 
 private:
-    PrintStream &_out;
+    sys::PrintStream &_out;
 };
 
 class PanicISR : public InterruptServiceRoutine

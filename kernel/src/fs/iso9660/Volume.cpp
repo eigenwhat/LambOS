@@ -44,7 +44,7 @@ void Volume::init()
 {
     uint64_t lba = 0x10;
     bool reachedEnd = false;
-    StaticList<uint8_t> buf{_parentDevice->sectorSize()};
+    sys::StaticList<uint8_t> buf{_parentDevice->sectorSize()};
     do {
         _parentDevice->read(lba, (uint16_t *)buf.get());
         auto type = getDescriptorType(buf);
