@@ -20,7 +20,7 @@ void fixAtaWordString(char *str, size_t len)
 }
 
 /** ATA/ATAPI IDENTIFY sends us device information in a 512-byte structure. */
-struct AtaInfo
+struct [[gnu::packed]] AtaInfo
 {
     uint16_t flags;
     uint16_t unused1[9];
@@ -39,7 +39,7 @@ struct AtaInfo
     uint16_t unused6[38];
     uint64_t sectors_48;
     uint16_t unused7[152];
-} __attribute__((packed));
+};
 
 }
 

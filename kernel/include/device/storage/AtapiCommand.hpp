@@ -6,7 +6,7 @@
 class AtapiCommand
 {
   public:
-    union Packet
+    union [[gnu::packed]] Packet
     {
         /**
          * The packet as bytes. Used for setting the values.
@@ -31,7 +31,7 @@ class AtapiCommand
          * The packet as words. Used for sending to device.
          */
         uint16_t words[6];
-    } __attribute__((packed));
+    };
 
     /**
      * The READ CAPACITY command fetches the sector size and last reachable LBA.

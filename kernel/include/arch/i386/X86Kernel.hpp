@@ -28,5 +28,5 @@ private:
     VGATextConsole _vgaConsole;
     ConsoleOutputStream _consoleOutputStream;
     sys::PrintStream _stdOut;
-    uint8_t _mmuMem[sizeof(MMU)];
+    alignas(MMU) std::byte _mmuMem[sizeof(MMU)];
 };

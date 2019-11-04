@@ -5,13 +5,13 @@
 
 namespace iso9660 {
 
-template <typename T> struct DualEndian
+template <typename T> struct [[gnu::packed]] DualEndian
 {
     T lsb;
     T msb;
-}__attribute__((packed));
+};
 
-struct DateTime
+struct [[gnu::packed]] DateTime
 {
     char year[4];
     char month[2];
@@ -21,11 +21,11 @@ struct DateTime
     char second[2];
     char hundredths[2];
     int8_t timezone;
-} __attribute__((packed));
+};
 
-struct DirectoryInfo
+struct [[gnu::packed]] DirectoryInfo
 {
-    struct Date {
+    struct [[gnu::packed]] Date {
         uint8_t year;
         uint8_t month;
         uint8_t day;
@@ -33,7 +33,7 @@ struct DirectoryInfo
         uint8_t minute;
         uint8_t second;
         int8_t timezone;
-    } __attribute__((packed));
+    };
 
     uint8_t length;
     uint8_t extendedAttributeLength;
@@ -59,9 +59,9 @@ struct DirectoryInfo
         std::ptrdiff_t lengthSoFar = suspStart() - (char*)this;
         return length - lengthSoFar;
     }
-} __attribute__((packed));
+};
 
-struct PrimaryVolumeDescriptorInfo
+struct [[gnu::packed]] PrimaryVolumeDescriptorInfo
 {
     uint8_t type; // 0x01
     char id[5]; // CD001
@@ -108,20 +108,20 @@ struct PrimaryVolumeDescriptorInfo
 
     uint8_t applicationUsed[512];
     uint8_t reserved[];
-} __attribute__((packed));
+};
 
 namespace rockridge {
 
 /** Common header for Rock Ridge Interchange Protocol entries. */
-struct EntryHeader
+struct [[gnu::packed]] EntryHeader
 {
     char signature[2];
     uint8_t length;
     uint8_t entryVersion;
-} __attribute__((packed));
+};
 
 /** Rock Ridge "PX" entry. */
-struct PosixFileEntryInfo
+struct [[gnu::packed]] PosixFileEntryInfo
 {
     EntryHeader header;
     char mode[8];
@@ -129,75 +129,75 @@ struct PosixFileEntryInfo
     char uid[8];
     char gid[8];
     char serial[8];
-} __attribute__((packed));
+};
 
 /** Rock Ridge "PD" entry. */
-struct PosixDeviceEntryInfo
+struct [[gnu::packed]] PosixDeviceEntryInfo
 {
     EntryHeader header;
     DualEndian<uint32_t> devtHigh;
     DualEndian<uint32_t> devtLow;
-} __attribute__((packed));
+};
 
 /** Rock Ridge "SL" entry. */
-struct SymbolicLinkEntryInfo
+struct [[gnu::packed]] SymbolicLinkEntryInfo
 {
-    struct Component
+    struct [[gnu::packed]] Component
     {
         uint8_t flags;
         uint8_t length;
         char name[];
-    } __attribute__((packed));
+    };
 
     EntryHeader header;
     uint8_t flags;
     Component components[];
-} __attribute__((packed));
+};
 
 /** Rock Ridge "NM" entry. */
-struct AltNameEntryInfo
+struct [[gnu::packed]] AltNameEntryInfo
 {
     EntryHeader header;
     uint8_t flags;
     char name[];
-} __attribute__((packed));
+};
 
 /** Rock Ridge "CL" entry. */
-struct ChildLinkEntryInfo
+struct [[gnu::packed]] ChildLinkEntryInfo
 {
     EntryHeader header;
     DualEndian<uint32_t> childLba;
-} __attribute__((packed));
+};
 
 /** Rock Ridge "PL" entry. */
-struct ParentLinkEntryInfo
+struct [[gnu::packed]] ParentLinkEntryInfo
 {
     EntryHeader header;
     DualEndian<uint32_t> parentLba;
-} __attribute__((packed));
+};
 
 /** Rock Ridge "RE" entry. */
-struct RelocatedDirectoryEntryInfo
+struct [[gnu::packed]] RelocatedDirectoryEntryInfo
 {
     EntryHeader header;
-} __attribute__((packed));
+};
 
 /** Rock Ridge "TF" entry. */
-struct TimeStampEntryInfo
+struct [[gnu::packed]] TimeStampEntryInfo
 {
     EntryHeader header;
     uint8_t flags;
     uint8_t timestamps[]; // depending on flag bit 7, either 7 or 17 bit stamps.
-} __attribute__((packed));
+};
 
 /** Rock Ridge "SF" entry. */
-struct SparseFileEntryInfo
+struct [[gnu::packed]] SparseFileEntryInfo
 {
     EntryHeader header;
     DualEndian<uint32_t> virtualSizeHigh;
     DualEndian<uint32_t> virtualSizeLow;
     uint8_t tableDepth;
-} __attribute__((packed));
+};
 
 } // namespace rockridge
 

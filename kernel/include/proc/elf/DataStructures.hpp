@@ -27,7 +27,7 @@ enum class InstructionSet : uint16_t
     AArch64 = 0xB7
 };
 
-struct ElfHeader32
+struct [[gnu::packed]] ElfHeader32
 {
     static constexpr uint8_t kMagicNumber = 0x7F;
     static constexpr uint32_t kCurrentVersion = 1;
@@ -59,9 +59,9 @@ struct ElfHeader32
     uint16_t sectionEntrySize;
     uint16_t sectionEntryCount;
     uint16_t sectionNameEntryIndex;
-} __attribute__((packed));
+};
 
-struct ProgramHeader32
+struct [[gnu::packed]] ProgramHeader32
 {
     enum class Type : uint32_t
     {
@@ -84,9 +84,9 @@ struct ProgramHeader32
     uint32_t sizeInMemory;
     uint32_t flags;
     uint32_t alignment;
-} __attribute__((packed));
+};
 
-struct SectionHeader32
+struct [[gnu::packed]] SectionHeader32
 {
     enum Flags
     {
@@ -137,9 +137,9 @@ struct SectionHeader32
     uint32_t info;
     uint32_t alignment;
     uint32_t entrySize;
-} __attribute__((packed));
+};
 
-struct SymbolTableEntry
+struct [[gnu::packed]] SymbolTableEntry
 {
     // Binding and Type are not enum classes because we can't bit pack those
     struct Binding
@@ -169,6 +169,6 @@ struct SymbolTableEntry
     uint8_t type:4; // Type
     uint8_t other;
     uint16_t sectionHeaderIndex; // may be a SpecialIndex
-} __attribute__((packed));
+};
 
 } // namespace elf

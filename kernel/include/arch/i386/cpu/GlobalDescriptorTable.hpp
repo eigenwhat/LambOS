@@ -77,7 +77,7 @@ private:
     uint64_t gdt[GDT_SIZE];
 };
 
-typedef struct tss_entry
+struct [[gnu::packed]] TaskStateSegment
 {
     uint32_t prev_tss;
     uint32_t esp0;
@@ -106,4 +106,4 @@ typedef struct tss_entry
     uint32_t ldt;
     uint16_t trap;
     uint16_t iomap_base;
-} __attribute__ ((packed)) TaskStateSegment;
+};
