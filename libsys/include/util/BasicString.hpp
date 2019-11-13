@@ -32,7 +32,7 @@ template <typename T> class BasicString
 {
   public:
     static constexpr size_t npos = static_cast<size_t>(-1);
-    using ValueType = T;
+    using value_type = T;
 
     static BasicString const &emptyString()
     {
@@ -99,7 +99,7 @@ template <typename T> class BasicString
      * @param object The object to add.
      * @return `true` if the BasicString changed. `false` otherwise.
      */
-    constexpr bool insert(ValueType const &object)
+    constexpr bool insert(value_type const &object)
     {
         if (_size == capacity()) {
             _data.resize();
@@ -195,7 +195,7 @@ template <typename T> class BasicString
      * @param str The null-terminated string to append.
      * @return A reference to this.
      */
-    constexpr BasicString &append(ValueType const *str)
+    constexpr BasicString &append(value_type const *str)
     {
         return append(str, detail::strlen(str));
     }
@@ -207,7 +207,7 @@ template <typename T> class BasicString
      * @param strlen The number of characters to read from it.
      * @return A reference to this.
      */
-    constexpr BasicString &append(ValueType const *str, size_t strlen)
+    constexpr BasicString &append(value_type const *str, size_t strlen)
     {
         const size_t requiredSize = _size + strlen + 1;
         if (requiredSize > capacity())
@@ -230,7 +230,7 @@ template <typename T> class BasicString
      * @param ch The character to append.
      * @return A reference to this.
      */
-    constexpr BasicString &append(ValueType ch)
+    constexpr BasicString &append(value_type ch)
     {
         insert(ch);
         return *this;
@@ -276,7 +276,7 @@ template <typename T> class BasicString
      * @param str The character to append.
      * @return A reference to this.
      */
-    constexpr BasicString operator+(ValueType rhs) const
+    constexpr BasicString operator+(value_type rhs) const
     {
         BasicString ret(*this);
         ret.insert(rhs);
@@ -309,14 +309,14 @@ template <typename T> class BasicString
      * @param str The null-terminated string to append.
      * @return A reference to this.
      */
-    constexpr BasicString &operator+=(ValueType const *rhs) { return append(rhs); }
+    constexpr BasicString &operator+=(value_type const *rhs) { return append(rhs); }
 
     /**
      * Appends the provided character.
      * @param ch The character to append.
      * @return A reference to this.
      */
-    constexpr BasicString &operator+=(ValueType rhs) { return append(rhs); }
+    constexpr BasicString &operator+=(value_type rhs) { return append(rhs); }
 
     /**
      * Equality operator.

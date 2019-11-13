@@ -95,4 +95,6 @@ class InputStream : public Object
     virtual void reset() {}
 };
 
+static_assert(ReferenceCountable<InputStream>);
+
 } // libsys namespace

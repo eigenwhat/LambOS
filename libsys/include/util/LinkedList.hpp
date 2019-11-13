@@ -30,7 +30,7 @@ template <typename T> class LinkedList
 {
     class LLIteratorImpl;
   public:
-    using ValueType = T;
+    using value_type = T;
     using iterator = Iterator<LLIteratorImpl>;
     using const_iterator = ConstIterator<LLIteratorImpl>;
 
@@ -357,7 +357,9 @@ template <typename T> class LinkedList
     class LLIteratorImpl
     {
       public:
-        using ValueType = LinkedList::ValueType;
+        using value_type = LinkedList::value_type;
+
+        LLIteratorImpl(Node *node, LinkedList const *parent) : _obj(node), _parent(parent) {}
 
         void increment() { _obj = _obj->next.get(); }
         void decrement() { _obj = _obj->prev; }
@@ -367,8 +369,6 @@ template <typename T> class LinkedList
         constexpr bool operator!=(LLIteratorImpl const &rhs) const { return !(rhs == *this); }
 
       private:
-        LLIteratorImpl(Node *node, LinkedList const *parent) : _obj(node), _parent(parent) {}
-
         Node *_obj;
         LinkedList const *_parent;
     };
@@ -378,11 +378,6 @@ template <typename T> class LinkedList
     size_t _size = 0;
 };
 
-
-namespace concept_check {
-using namespace concepts;
-template <typename T> requires List<LinkedList<T>> using LinkedListCheck = LinkedList<T>;
-static_assert(std::default_constructible<LinkedListCheck<int>>, "LinkedList does not meet the requirements of List.");
-}
+static_assert(concepts::List<LinkedList<int>>);
 
 } // libsys namespace

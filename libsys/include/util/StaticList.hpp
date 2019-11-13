@@ -15,7 +15,7 @@ namespace _ns_LIBSYS {
 template <typename T> class StaticList
 {
   public:
-    using ValueType = T;
+    using value_type = T;
 
     StaticList(size_t size) : _array(nullptr), _size(size)
     {

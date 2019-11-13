@@ -18,13 +18,13 @@ concept Deque = Stack<T> && Queue<T> && requires(T a)
      * Removes an element from the back of the Deque.
      * @return The object. If the Deque is empty, the return value is undefined.
      */
-    { a.popBack() } -> std::same_as<typename T::ValueType>;
+    { a.popBack() } -> std::same_as<typename T::value_type>;
 
     /**
      * Returns the element at the back of the Deque without removing it.
      * @return The object. If the Deque is empty, the return value is undefined.
      */
-    { a.peekBack() } -> typename T::ValueType const &;
+    { a.peekBack() } -> std::same_as<typename T::value_type const &>;
 };
 
 } // namespace concepts

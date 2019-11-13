@@ -26,8 +26,8 @@ concept Iterable = Collection<T> && requires(T a)
      * the Collection is empty, begin() == end().
      * @return An Iterator pointing to the frontmost element of the Collection.
      */
-    { static_cast<const T&>(a).begin() } -> typename T::const_iterator;
-    { a.begin() } -> typename T::iterator;
+    { static_cast<const T&>(a).begin() } -> std::same_as<typename T::const_iterator>;
+    { a.begin() } -> std::same_as<typename T::iterator>;
 
     /**
      * Retrieves an Iterator marking the end of the Collection. It should *NOT*
@@ -36,8 +36,8 @@ concept Iterable = Collection<T> && requires(T a)
      * @return An Iterator with a special value signifying the end of the
      *         Collection. The return value from dereferencing it is undefined.
      */
-    { static_cast<const T&>(a).end() } -> typename T::const_iterator;
-    { a.end() } -> typename T::iterator;
+    { static_cast<const T&>(a).end() } -> std::same_as<typename T::const_iterator>;
+    { a.end() } -> std::same_as<typename T::iterator>;
 };
 
 } // namespace concepts

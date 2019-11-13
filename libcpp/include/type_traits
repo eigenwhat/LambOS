@@ -1,5 +1,6 @@
 #pragma once
 
+#include <bits/cxxconfig.hpp>
 #include <cstddef>
 
 namespace std {
@@ -32,7 +33,7 @@ template <bool Value> using bool_constant = std::integral_constant<bool, Value>;
 using true_type = bool_constant<true>;
 using false_type = bool_constant<false>;
 
-template <typename T> struct identity { using type = T; };
+template <typename T> struct type_identity { using type = T; };
 
 struct nonesuch
 {
@@ -51,8 +52,8 @@ struct nonesuch
 //struct conditional<false, Then, Else> { using type = Else; };
 
 // compiles way faster/generates less symbols than above
-template <bool Cond> struct _conditional_impl { template <typename Then, typename Else> using type = identity<Then>; };
-template <> struct _conditional_impl<false> { template <typename Then, typename Else> using type = identity<Else>; };
+template <bool Cond> struct _conditional_impl { template <typename Then, typename Else> using type = type_identity<Then>; };
+template <> struct _conditional_impl<false> { template <typename Then, typename Else> using type = type_identity<Else>; };
 
 template <bool Cond, typename Then, typename Else>
 using conditional = typename _conditional_impl<Cond>::template type<Then, Else>;
@@ -86,10 +87,10 @@ template<typename...> struct __pack_t {};
 
 // detector [nonstandard]
 template <class Default, class AlwaysVoid, template<class...> class Op, class... Args>
-struct detector : identity<Default> { using value_t = std::false_type; };
+struct detector : type_identity<Default> { using value_t = std::false_type; };
 
 template <class Default, template<class...> class Op, class... Args>
-struct detector<Default, void_t<Op<Args...>>, Op, Args...> : identity<Op<Args...>> { using value_t = std::true_type; };
+struct detector<Default, void_t<Op<Args...>>, Op, Args...> : type_identity<Op<Args...>> { using value_t = std::true_type; };
 
 template <template<class...> class Op, class... Args>
 using is_detected = typename detector<nonesuch, void, Op, Args...>::value_t;
@@ -158,7 +159,7 @@ template<typename T, std::size_t Size> struct remove_all_extents<T[Size]> { usin
 template<typename T> struct remove_all_extents<T[]> { using type = remove_all_extents_t<T>; };
 
 // add_lvalue_Reference
-template <typename T> using add_lvalue_reference = identity<T&>;
+template <typename T> using add_lvalue_reference = type_identity<T&>;
 template <typename T> using add_lvalue_reference_t = typename add_lvalue_reference<T>::type;
 
 static_assert(is_same<add_lvalue_reference_t<bool>            , bool&>::value);
@@ -172,7 +173,7 @@ static_assert(is_same<add_lvalue_reference_t<bool volatile &> , bool volatile &>
 static_assert(is_same<add_lvalue_reference_t<bool volatile &&>, bool volatile &>::value);
 
 // add_rvalue_reference
-template <typename T> using add_rvalue_reference = identity<T&&>;
+template <typename T> using add_rvalue_reference = type_identity<T&&>;
 template <typename T> using add_rvalue_reference_t = typename add_rvalue_reference<T>::type;
 
 static_assert(is_same<add_rvalue_reference_t<bool>            , bool &&>::value);
@@ -186,7 +187,7 @@ static_assert(is_same<add_rvalue_reference_t<bool volatile &> , bool volatile &>
 static_assert(is_same<add_rvalue_reference_t<bool volatile &&>, bool volatile &&>::value);
 
 // add_const
-template <typename T> using add_const = identity<T const>;
+template <typename T> using add_const = type_identity<T const>;
 template <typename T> using add_const_t = typename add_const<T>::type;
 
 static_assert(is_same<add_const_t<bool>            , bool const>::value);
@@ -200,7 +201,7 @@ static_assert(is_same<add_const_t<bool volatile &> , bool volatile &>::value);
 static_assert(is_same<add_const_t<bool volatile &&>, bool volatile &&>::value);
 
 // add_volatile
-template<typename T> using add_volatile = identity<T volatile>;
+template<typename T> using add_volatile = type_identity<T volatile>;
 template <typename T> using add_volatile_t = typename add_volatile<T>::type;
 
 static_assert(is_same<add_volatile_t<bool>            , bool volatile>::value);
@@ -236,7 +237,7 @@ template <typename T, bool V> using apply_volatile_t = conditional_t<V, add_vola
 template <typename T, bool C, bool V> using apply_cv_t = apply_const_t<apply_volatile_t<T, V>, C>;
 
 // add_pointer
-template<typename T> struct add_pointer { using type = typename std::remove_reference_t<T>*; };
+template<typename T> using add_pointer = type_identity<typename std::remove_reference_t<T>*>;
 template<typename T> using add_pointer_t = typename add_pointer<T>::type;
 
 template <typename T> class decay
@@ -271,12 +272,11 @@ template<typename> struct is_rvalue_reference : public false_type {};
 template<typename T> struct is_rvalue_reference<T&&> : public true_type {};
 
 template<typename T>
-struct is_reference : public disjunction<is_lvalue_reference<T>,
-                                         is_rvalue_reference<T>>::type {};
+using is_reference = disjunction<is_lvalue_reference<T>, is_rvalue_reference<T>>;
 
-template<typename T> struct is_enum : public bool_constant<__is_enum(T)> {};
-template<typename T> struct is_union : public bool_constant<__is_union(T)> {};
-template<typename T> struct is_class : public bool_constant<__is_class(T)> {};
+template<typename T> using is_enum = bool_constant<__is_enum(T)>;
+template<typename T> using is_union = bool_constant<__is_union(T)>;
+template<typename T> using is_class = bool_constant<__is_class(T)>;
 
 // is_pointer
 template<typename> struct _is_pointer_impl : public false_type {};
@@ -361,22 +361,14 @@ struct extent<T[], U> : public integral_constant<std::size_t, U == 0 ? 0 : exten
 template<typename T>
 struct _is_array_known_bounds : public bool_constant<(extent<T>::value > 0)> {};
 
-#if __cpp_noexcept_function_type
-#define LIBCXX_NOEXCEPT_PARAM , bool _NE
-#define LIBCXX_NOEXCEPT_QUAL noexcept (_NE)
-#else
-#define LIBCXX_NOEXCEPT_PARAM
-#define LIBCXX_NOEXCEPT_QUAL
-#endif
-
 template<typename T>
 struct _is_referenceable : public disjunction<is_object<T>, is_reference<T>>::type {};
 
-template<typename _Res, typename... Args LIBCXX_NOEXCEPT_PARAM>
-struct _is_referenceable<_Res(Args...) LIBCXX_NOEXCEPT_QUAL> : public true_type {};
+template<typename _Res, typename... Args NOEXCEPT_TPARAM>
+struct _is_referenceable<_Res(Args...) NOEXCEPT_QUALIFIER> : public true_type {};
 
-template<typename _Res, typename... Args LIBCXX_NOEXCEPT_PARAM>
-struct _is_referenceable<_Res(Args......) LIBCXX_NOEXCEPT_QUAL> : public true_type {};
+template<typename _Res, typename... Args NOEXCEPT_TPARAM>
+struct _is_referenceable<_Res(Args......) NOEXCEPT_QUALIFIER> : public true_type {};
 
 // is_constructible
 namespace internal {
@@ -390,13 +382,13 @@ template <class T, class... Args>
 using is_constructible = internal::_is_constructible<void_t<>, T, Args...>;
 
 // is_default_constructible
-template<class T> struct is_default_constructible : public is_constructible<T> {};
+template<class T> using is_default_constructible = is_constructible<T>;
 
 // is_copy_constructible
-template<class T> struct is_copy_constructible : public is_constructible<T, add_lvalue_reference_t<add_const_t<T>>> {};
+template<class T> using is_copy_constructible = is_constructible<T, add_lvalue_reference_t<add_const_t<T>>>;
 
 // is_move_constructible
-template <typename T> struct is_move_constructible : public is_constructible<T,add_rvalue_reference_t<T>> {};
+template <typename T> using is_move_constructible = is_constructible<T,add_rvalue_reference_t<T>>;
 
 template<typename T> struct _is_nt_def_ctorible_impl2 : public bool_constant<noexcept(T())> {};
 template<typename T, bool = is_array<T>::value> struct _is_nt_def_ctorible_impl;
@@ -410,7 +402,7 @@ struct _is_nt_def_ctorible_impl<T, false> : public _is_nt_def_ctorible_impl2<T> 
 
 // is_nothrow_default_constructible
 template<typename T>
-struct is_nothrow_default_constructible : public conjunction<is_default_constructible<T>, _is_nt_def_ctorible_impl<T>> {};
+using is_nothrow_default_constructible = conjunction<is_default_constructible<T>, _is_nt_def_ctorible_impl<T>>;
 
 // is_nothrow_constructible
 template<typename T, typename... Args>
@@ -422,19 +414,19 @@ struct _is_nt_ctorible_impl<T, Arg> : public bool_constant<noexcept(static_cast<
 template<typename T> struct _is_nt_ctorible_impl<T> : public is_nothrow_default_constructible<T> {};
 
 template<typename T, typename...Args>
-struct is_nothrow_constructible : public conjunction<is_constructible<T, Args...>, _is_nt_ctorible_impl<T, Args...>> {};
+using is_nothrow_constructible = conjunction<is_constructible<T, Args...>, _is_nt_ctorible_impl<T, Args...>>;
 
 // is_nothrow_move_constructible
 template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_move_ctorible_impl;
 template<typename T> struct _is_nt_move_ctorible_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_move_ctorible_impl<T, true> : public is_nothrow_constructible<T, T&&> {};
-template<typename T> struct is_nothrow_move_constructible : public _is_nt_move_ctorible_impl<T> {};
+template<typename T> using is_nothrow_move_constructible = _is_nt_move_ctorible_impl<T>;
 
 // is_nothrow_copy_constructible
 template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_copy_ctorible_impl;
 template<typename T> struct _is_nt_copy_ctorible_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_copy_ctorible_impl<T, true> : public is_nothrow_constructible<T, T const&> {};
-template<typename T> struct is_nothrow_copy_constructible : public _is_nt_copy_ctorible_impl<T> {};
+template<typename T> using is_nothrow_copy_constructible = _is_nt_copy_ctorible_impl<T>;
 
 // is_destructible
 template <typename T> using __detect_dtor = decltype(declval<T&>().~T());
@@ -477,46 +469,46 @@ template<typename T> struct __is_nt_destructible_safe<T, true, false> : public f
 
 template<typename T> struct __is_nt_destructible_safe<T, false, true> : public true_type {};
 
-/// is_nothrow_destructible
-template<typename T> struct is_nothrow_destructible : public __is_nt_destructible_safe<T>::type {};
+// is_nothrow_destructible
+template<typename T> using is_nothrow_destructible = __is_nt_destructible_safe<T>;
 
 // is_assignable
 template<typename T, typename U>
-struct is_assignable : public bool_constant<__is_assignable(T, U)> {};
+using is_assignable = bool_constant<__is_assignable(T, U)>;
 
 // is_copy_assignable
-template<typename T, bool = _is_referenceable<T>::value> struct _is_copy_assignable_impl;
-template<typename T> struct _is_copy_assignable_impl<T, false> : public false_type {};
-template<typename T> struct _is_copy_assignable_impl<T, true> : public is_assignable<T&, const T&> {};
-template<typename T> struct is_copy_assignable : public _is_copy_assignable_impl<T> {};
+template<typename T, bool = _is_referenceable<T>::value> struct __is_copy_assignable_impl;
+template<typename T> struct __is_copy_assignable_impl<T, false> : public false_type {};
+template<typename T> struct __is_copy_assignable_impl<T, true> : public is_assignable<T&, const T&> {};
+template<typename T> using is_copy_assignable = __is_copy_assignable_impl<T>;
 
 // is_move_assignable
-template<typename T, bool = _is_referenceable<T>::value> struct _is_move_assignable_impl;
-template<typename T> struct _is_move_assignable_impl<T, false> : public false_type {};
-template<typename T> struct _is_move_assignable_impl<T, true> : public is_assignable<T&, T&&> {};
-template<typename T> struct is_move_assignable : public _is_move_assignable_impl<T> {};
+template<typename T, bool = _is_referenceable<T>::value> struct __is_move_assignable_impl;
+template<typename T> struct __is_move_assignable_impl<T, false> : public false_type {};
+template<typename T> struct __is_move_assignable_impl<T, true> : public is_assignable<T&, T&&> {};
+template<typename T> using is_move_assignable = __is_move_assignable_impl<T>;
 
 // is_nothrow_assignable
 template<typename T, typename U>
 struct _is_nt_assignable_impl : public bool_constant<noexcept(declval<T>() = declval<U>())> {};
 template<typename T, typename U>
-struct is_nothrow_assignable : public conjunction<is_assignable<T, U>, _is_nt_assignable_impl<T, U>> {};
+using is_nothrow_assignable = conjunction<is_assignable<T, U>, _is_nt_assignable_impl<T, U>>;
 
 // is_nothrow_copy_assignable
 template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_copy_assignable_impl;
 template<typename T> struct _is_nt_copy_assignable_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_copy_assignable_impl<T, true> : public is_nothrow_assignable<T&, const T&> {};
-template<typename T> struct is_nothrow_copy_assignable : public _is_nt_copy_assignable_impl<T> {};
+template<typename T> using is_nothrow_copy_assignable = _is_nt_copy_assignable_impl<T>;
 
 // is_nothrow_move_assignable
 template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_move_assignable_impl;
 template<typename T> struct _is_nt_move_assignable_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_move_assignable_impl<T, true> : public is_nothrow_assignable<T&, T&&> {};
-template<typename T> struct is_nothrow_move_assignable : public _is_nt_move_assignable_impl<T> {};
+template<typename T> using is_nothrow_move_assignable = _is_nt_move_assignable_impl<T>;
 
 // is_base_of
 template <typename Base, typename Derived>
-struct is_base_of : public bool_constant<__is_base_of(Base, Derived)> {};
+using is_base_of = bool_constant<__is_base_of(Base, Derived)>;
 
 // is_convertible
 template <typename From, typename To, bool = disjunction<is_void<From>, is_function<To>, is_array<To>>::value>
@@ -571,6 +563,94 @@ template<typename T> struct is_nothrow_swappable : public _is_nothrow_swappable_
 template <typename T,typename U> struct is_nothrow_swappable_with : public _is_nothrow_swappable_impl<T, U>::type {};
 
 // ====================================================
+// Type transformations [continued]
+// ====================================================
+
+template<typename From, typename To>
+using __copy_cv_t = apply_cv_t<To, is_const<From>::value, is_volatile<From>::value>;
+
+// make_unsigned
+template<typename T> struct __make_unsigned { using type = T; };
+template<> struct __make_unsigned<char> { using type = unsigned char; };
+template<> struct __make_unsigned<signed char> { using type = unsigned char; };
+template<> struct __make_unsigned<short> { using type = unsigned short; };
+template<> struct __make_unsigned<int> { using type = unsigned int; };
+template<> struct __make_unsigned<long> { using type = unsigned long; };
+template<> struct __make_unsigned<long long> { using type = unsigned long long; };
+
+template<typename T, bool _IsInt = is_integral<T>::value, bool _IsEnum = is_enum<T>::value>
+struct __make_unsigned_selector;
+
+template<typename T>
+struct __make_unsigned_selector<T, true, false>
+{ using type = __copy_cv_t<T, typename __make_unsigned<remove_cv_t<T>>::type>; };
+
+class __make_unsigned_selector_base
+{
+  protected:
+    template<typename...> struct _List {};
+    template<typename T, typename... U>
+    struct _List<T, U...> : _List<U...> { static constexpr size_t __size = sizeof(T); };
+
+    template<size_t _Sz, typename T, bool = (_Sz <= T::__size)> struct select;
+
+    template<size_t _Sz, typename _Uint, typename... _UInts>
+    struct select<_Sz, _List<_Uint, _UInts...>, true> { using type = _Uint; };
+
+    template<size_t _Sz, typename _Uint, typename... _UInts>
+    struct select<_Sz, _List<_Uint, _UInts...>, false> : select<_Sz, _List<_UInts...>> {};
+};
+
+template<typename T>
+struct __make_unsigned_selector<T, false, true> : __make_unsigned_selector_base
+{
+    using _UInts = _List<unsigned char, unsigned short, unsigned int, unsigned long, unsigned long long>;
+    using type = __copy_cv_t<T, typename select<sizeof(T), _UInts>::type>;
+};
+
+template<>
+struct __make_unsigned<char16_t> { using type = typename __make_unsigned_selector<char16_t, false, true>::type; };
+
+template<>
+struct __make_unsigned<char32_t> { using type = typename __make_unsigned_selector<char32_t, false, true>::type; };
+
+template<typename T> struct make_unsigned { using type = typename __make_unsigned_selector<T>::type; };
+template<> struct make_unsigned<bool>;
+
+// make_signed
+template<typename T> struct __make_signed { using type = T; };
+template<> struct __make_signed<char> { using type = signed char; };
+template<> struct __make_signed<unsigned char> { using type = signed char; };
+template<> struct __make_signed<unsigned short> { using type = signed short; };
+template<> struct __make_signed<unsigned int> { using type = signed int; };
+template<> struct __make_signed<unsigned long> { using type = signed long; };
+template<> struct __make_signed<unsigned long long> { using type = signed long long; };
+
+// Select between integral and enum: not possible to be both.
+template<typename T, bool _IsInt = is_integral<T>::value, bool _IsEnum = is_enum<T>::value>
+struct __make_signed_selector;
+
+template<typename T>
+struct __make_signed_selector<T, true, false>
+        : type_identity<__copy_cv_t<T, typename __make_signed<typename remove_cv<T>::type>::type>> {};
+
+template<typename T>
+struct __make_signed_selector<T, false, true>
+        : type_identity<typename __make_signed_selector<typename __make_unsigned_selector<T>::type>::type> {};
+
+template<>
+struct __make_signed<char16_t> { using type = typename __make_signed_selector<char16_t, false, true>::type; };
+
+template<>
+struct __make_signed<char32_t> { using type = typename __make_signed_selector<char32_t, false, true>::type; };
+
+template<typename T> struct make_signed { using type = typename __make_signed_selector<T>::type; };
+template<> struct make_signed<bool>;
+
+template<typename T> using make_signed_t = typename make_signed<T>::type;
+template<typename T> using make_unsigned_t = typename make_unsigned<T>::type;
+
+// ====================================================
 // Related types
 // ====================================================
 
@@ -580,7 +660,7 @@ template <typename...Ts> struct common_type {};
 template <typename T> using __member_type_t = typename T::type;
 template<typename T1, typename T2> using __cond_t = decltype(false ? declval<T1>() : declval<T2>());
 
-template <typename T, typename U> using __common_type_impl = identity<decay_t<detected_t<__cond_t, T, U>>>;
+template <typename T, typename U> using __common_type_impl = type_identity<decay_t<detected_t<__cond_t, T, U>>>;
 template<typename T, typename U, typename... Rest>
 using __multi_common_type_impl = conditional_t<is_detected_v<__member_type_t, common_type<T, U>>,
                                                common_type<common_type<T, U>, Rest...>, nonesuch>;
@@ -600,9 +680,6 @@ template<typename CT, typename R> struct __common_type_fold<CT, R, void> {};
 
 template<typename A, typename B, typename = void> struct __common_ref_impl {};
 
-template<typename From, typename To>
-using __copy_cv_t = apply_cv_t<To, is_const<From>::value, is_volatile<From>::value>;
-
 template<typename... _Cond> using __require = enable_if_t<conjunction<_Cond...>::value>;
 
 template<typename T> struct __xref { template<typename U> using type = __copy_cv_t<T, U>; };
@@ -617,17 +694,17 @@ using __common_ref = typename __common_ref_impl<A, B>::type;
 
 template<typename X, typename Y>
 struct __common_ref_impl<X&, Y&, void_t<__cond_res<__copy_cv_t<X, Y>&, __copy_cv_t<Y, X>&>>>
-        : identity<__cond_res<__copy_cv_t<X, Y>&, __copy_cv_t<Y, X>&>> {};
+        : type_identity<__cond_res<__copy_cv_t<X, Y>&, __copy_cv_t<Y, X>&>> {};
 
 template<typename X, typename Y>
 using __common_ref_C = remove_reference_t<__common_ref<X&, Y&>>&&;
 template<typename X, typename Y>
 struct __common_ref_impl<X&&, Y&&,
-        __require<is_convertible<X&&, __common_ref_C<X, Y>>, is_convertible<Y&&, __common_ref_C<X, Y>>>> : identity<__common_ref_C<X, Y>> {};
+        __require<is_convertible<X&&, __common_ref_C<X, Y>>, is_convertible<Y&&, __common_ref_C<X, Y>>>> : type_identity<__common_ref_C<X, Y>> {};
 template<typename X, typename Y>
 using __common_ref_D = __common_ref<const X&, Y&>;
 template<typename X, typename Y>
-struct __common_ref_impl<X&&, Y&, __require<is_convertible<X&&, __common_ref_D<X, Y>>>> : identity<__common_ref_D<X, Y>> {};
+struct __common_ref_impl<X&&, Y&, __require<is_convertible<X&&, __common_ref_D<X, Y>>>> : type_identity<__common_ref_D<X, Y>> {};
 template<typename X, typename Y> struct __common_ref_impl<X&, Y&&> : __common_ref_impl<Y&&, X&> {};
 
 template<typename T, typename U, template<typename> class TQual, template<typename> class UQual>
@@ -641,7 +718,7 @@ using __basic_common_ref = __basic_common_reference_t<remove_cvref_t<T1>, remove
 template<typename... T> struct common_reference;
 
 template<> struct common_reference<> {};
-template<typename T> struct common_reference<T> : identity<T> {};
+template<typename T> struct common_reference<T> : type_identity<T> {};
 template<typename... Ts> using common_reference_t = typename common_reference<Ts...>::type;
 
 template<typename T1, typename T2, int _Bullet = 1, typename = void>
@@ -649,19 +726,19 @@ struct __common_reference_impl : __common_reference_impl<T1, T2, _Bullet + 1> {}
 template<typename T1, typename T2>
 struct common_reference<T1, T2> : __common_reference_impl<T1, T2> {};
 template<typename T1, typename T2>
-struct __common_reference_impl<T1&, T2&, 1, void_t<__common_ref<T1&, T2&>>> : identity<__common_ref<T1&, T2&>> {};
+struct __common_reference_impl<T1&, T2&, 1, void_t<__common_ref<T1&, T2&>>> : type_identity<__common_ref<T1&, T2&>> {};
 template<typename T1, typename T2>
-struct __common_reference_impl<T1&&, T2&&, 1, void_t<__common_ref<T1&&, T2&&>>> : identity<__common_ref<T1&&, T2&&>> {};
+struct __common_reference_impl<T1&&, T2&&, 1, void_t<__common_ref<T1&&, T2&&>>> : type_identity<__common_ref<T1&&, T2&&>> {};
 template<typename T1, typename T2>
-struct __common_reference_impl<T1&, T2&&, 1, void_t<__common_ref<T1&, T2&&>>> : identity<__common_ref<T1&, T2&&>> {};
+struct __common_reference_impl<T1&, T2&&, 1, void_t<__common_ref<T1&, T2&&>>> : type_identity<__common_ref<T1&, T2&&>> {};
 template<typename T1, typename T2>
-struct __common_reference_impl<T1&&, T2&, 1, void_t<__common_ref<T1&&, T2&>>> : identity<__common_ref<T1&&, T2&>> {};
+struct __common_reference_impl<T1&&, T2&, 1, void_t<__common_ref<T1&&, T2&>>> : type_identity<__common_ref<T1&&, T2&>> {};
 template<typename T1, typename T2>
-struct __common_reference_impl<T1, T2, 2, void_t<__basic_common_ref<T1, T2>>> : identity<__basic_common_ref<T1, T2>> {};
+struct __common_reference_impl<T1, T2, 2, void_t<__basic_common_ref<T1, T2>>> : type_identity<__basic_common_ref<T1, T2>> {};
 template<typename T1, typename T2>
-struct __common_reference_impl<T1, T2, 3, void_t<__cond_res<T1, T2>>> : identity<__cond_res<T1, T2>> {};
+struct __common_reference_impl<T1, T2, 3, void_t<__cond_res<T1, T2>>> : type_identity<__cond_res<T1, T2>> {};
 template<typename T1, typename T2>
-struct __common_reference_impl<T1, T2, 4, void_t<common_type_t<T1, T2>>> : identity<common_type_t<T1, T2>> {};
+struct __common_reference_impl<T1, T2, 4, void_t<common_type_t<T1, T2>>> : type_identity<common_type_t<T1, T2>> {};
 template<typename T1, typename T2>
 struct __common_reference_impl<T1, T2, 5, void> {};
 
@@ -673,7 +750,7 @@ struct __common_type_fold<common_reference<T1, T2>, __pack_t<_Rest...>, void_t<c
         : public common_reference<common_reference_t<T1, T2>, _Rest...> {};
 
 // underlying_type
-template <typename T> using underlying_type = conditional_t<is_enum<T>::value, identity<__underlying_type(T)>, nonesuch>;
+template <typename T> using underlying_type = conditional_t<is_enum<T>::value, type_identity<__underlying_type(T)>, nonesuch>;
 
 // ====================================================
 // Type properties (bool values)

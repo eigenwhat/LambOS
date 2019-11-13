@@ -12,9 +12,9 @@
 namespace _ns_LIBSYS {
 
 template <typename T>
-concept ReferenceCountable = requires(T a) {
-    { a.retain() };
-    { a.release() };
+concept ReferenceCountable = requires(T &a) {
+    a.retain();
+    a.release();
 };
 
 
@@ -286,10 +286,10 @@ template <typename T> class ArcPtr<T, false>
     template <typename U> ArcPtr &operator=(U *ptr) noexcept { if (*this != ptr) { reset(ptr); } return *this; }
 
     ArcPtr(const ArcPtr &rhs) noexcept : ArcPtr(rhs, Nothing) {}
-    template <typename U> ArcPtr(const ArcPtr<U> &rhs) noexcept : ArcPtr(rhs, Nothing) {}
+    template <typename U> ArcPtr(const ArcPtr<U, false> &rhs) noexcept : ArcPtr(rhs, Nothing) {}
 
     ArcPtr(ArcPtr &&rhs) noexcept : ArcPtr(rhs, Nothing) {}
-    template <typename U> ArcPtr(ArcPtr<U> &&rhs) noexcept : ArcPtr(std::move(rhs), Nothing) {}
+    template <typename U> ArcPtr(ArcPtr<U, false> &&rhs) noexcept : ArcPtr(std::move(rhs), Nothing) {}
 
     ~ArcPtr() { reset(nullptr); }
 
@@ -306,13 +306,13 @@ template <typename T> class ArcPtr<T, false>
     constexpr operator T*() const noexcept { return get(); }
 
     ArcPtr &operator=(ArcPtr const &r) noexcept { return Assign(r); }
-    template <typename U> ArcPtr &operator=(ArcPtr<U> const &r) noexcept { return Assign(r); }
+    template <typename U> ArcPtr &operator=(ArcPtr<U, false> const &r) noexcept { return Assign(r); }
 
     ArcPtr &operator=(ArcPtr &&r) noexcept { return Assign(std::move(r)); }
-    template <typename U> ArcPtr &operator=(ArcPtr<U> &&r) noexcept { return Assign(std::move(r)); }
+    template <typename U> ArcPtr &operator=(ArcPtr<U, false> &&r) noexcept { return Assign(std::move(r)); }
 
-    template <typename U> constexpr bool operator==(const ArcPtr<U> &r) const noexcept { return _data == r._data; }
-    template <typename U> constexpr bool operator!=(const ArcPtr<U> &r) const noexcept { return !operator==(r); }
+    template <typename U> constexpr bool operator==(const ArcPtr<U, false> &r) const noexcept { return _data == r._data; }
+    template <typename U> constexpr bool operator!=(const ArcPtr<U, false> &r) const noexcept { return !operator==(r); }
 
     template <typename U> constexpr bool operator==(U *r) const noexcept { return get() == r; }
     template <typename U> constexpr bool operator!=(U *r) const noexcept { return !operator==(r); }
@@ -324,18 +324,18 @@ template <typename T> class ArcPtr<T, false>
     /**  @{ */
     template <typename U>
     [[gnu::always_inline]]
-    ArcPtr(const ArcPtr<U> &rhs, Void) noexcept : _data{rhs._data} { if (_data) { _data->retain(); } }
+    ArcPtr(const ArcPtr<U, false> &rhs, Void) noexcept : _data{rhs._data} { if (_data) { _data->retain(); } }
 
     template <typename U>
     [[gnu::always_inline]]
-    ArcPtr(ArcPtr<U> &&rhs, Void) noexcept : _data{rhs._data} { rhs._ptr = nullptr; }
+    ArcPtr(ArcPtr<U, false> &&rhs, Void) noexcept : _data{rhs._data} { rhs._ptr = nullptr; }
     /**  @} */
 
     /** Private delegating assignment. */
     /**  @{ */
     template <typename U>
     [[gnu::always_inline]]
-    ArcPtr &Assign(ArcPtr<U> const &r) noexcept
+    ArcPtr &Assign(ArcPtr<U, false> const &r) noexcept
     {
         if (*this != r) {
             if (_data) { _data->release(); }
@@ -347,7 +347,7 @@ template <typename T> class ArcPtr<T, false>
 
     template <typename U>
     [[gnu::always_inline]]
-    ArcPtr &Assign(ArcPtr<U> &&r) noexcept
+    ArcPtr &Assign(ArcPtr<U, false> &&r) noexcept
     {
         if (*this != r) {
             if (_data) { _data->release(); }
@@ -361,7 +361,7 @@ template <typename T> class ArcPtr<T, false>
     ArcWrapper<T> *_data;
 };
 
-template <typename T, typename ... Args> requires !ReferenceCountable<T>
+template <typename T, typename ... Args> requires (!ReferenceCountable<T>)
 inline ArcPtr<T> make_arc(Args && ...args) { return ArcPtr<T>{new T(std::forward<Args>(args)...)}; }
 
 template <typename T, typename... Args>

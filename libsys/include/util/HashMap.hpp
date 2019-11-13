@@ -14,7 +14,7 @@ class HashMap : public virtual Map<K, V>
   public:
     using KeyType = K const;
     using MappedType = V;
-    using ValueType = Pair<K const, V>;
+    using value_type = Pair<K const, V>;
 
     /**
      * Returns whether or not the HashMap is empty.
@@ -33,7 +33,7 @@ class HashMap : public virtual Map<K, V>
      * @param object The key/value pair to add.
      * @return `true` if the insertion occurred. `false` otherwise.
      */
-    bool insert(ValueType const &object) override
+    bool insert(value_type const &object) override
     {
         if (shouldResize()) {
             resize();
@@ -60,7 +60,7 @@ class HashMap : public virtual Map<K, V>
      */
     bool insert(KeyType &key, MappedType const &value) override
     {
-        return insert(ValueType(key, value));
+        return insert(value_type(key, value));
     }
 
     /**
@@ -69,7 +69,7 @@ class HashMap : public virtual Map<K, V>
      * @param object The key/value pair to remove.
      * @return `true` if the Collection changed. `false` otherwise.
      */
-    virtual bool remove(ValueType const &object)
+    virtual bool remove(value_type const &object)
     {
         auto keyHash = hash(object.first);
         return _values[keyHash].remove(object);
@@ -132,8 +132,8 @@ class HashMap : public virtual Map<K, V>
         }
 
         // doesn't exist, create defaultp
-        insert(ValueType(key, MappedType{}));
-        ValueType *foundValue = nullptr;
+        insert(value_type(key, MappedType{}));
+        value_type *foundValue = nullptr;
         for (auto &v : list)
         {
             if (_keyEqual(v.first, key)) {
@@ -152,10 +152,10 @@ class HashMap : public virtual Map<K, V>
     class ArrayResizer
     {
       public:
-        static LinkedList<ValueType> *
-        resize(LinkedList<ValueType> *oldData, size_t oldSize, size_t newSize, size_t)
+        static LinkedList<value_type> *
+        resize(LinkedList<value_type> *oldData, size_t oldSize, size_t newSize, size_t)
         {
-            LinkedList<ValueType> *newData = new LinkedList<ValueType>[newSize];
+            LinkedList<value_type> *newData = new LinkedList<value_type>[newSize];
             KeyHasher hasher;
 
             for (size_t i = 0; i < oldSize; ++i) { // for each array index
@@ -172,7 +172,7 @@ class HashMap : public virtual Map<K, V>
 
     size_t hash(KeyType const &k) const { return _hasher(k) % _values.capacity(); }
 
-    DynamicArray<LinkedList<ValueType>, ArrayResizer> _values;
+    DynamicArray<LinkedList<value_type>, ArrayResizer> _values;
     size_t _size = 0;
     KeyHasher _hasher;
     KeyEqual _keyEqual;

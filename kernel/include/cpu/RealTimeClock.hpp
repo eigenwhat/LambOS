@@ -4,8 +4,9 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 
 struct DateTime
 {
@@ -24,7 +25,7 @@ namespace concepts {
 
 template <typename T>
 concept RealTimeClock = requires(T a) {
-    {a.currentTime()} -> DateTime;
+    {a.currentTime()} -> std::same_as<DateTime>;
 };
 
 } // namespace concepts

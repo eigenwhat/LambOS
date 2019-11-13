@@ -15,10 +15,10 @@ namespace _ns_LIBSYS::concepts {
  * @tparam T The type of object the Collection contains.
  */
 template <typename T>
-concept Collection = Sized<T> && requires(T a) { typename T::ValueType; };
+concept Collection = Sized<T> && requires(T a) { typename T::value_type; };
 
 template <typename T>
-concept InsertableCollection = Collection<T> && Insertable<T, typename T::ValueType>;
+concept InsertableCollection = Collection<T> && Insertable<T, typename T::value_type>;
 
 template <typename T>
 concept DynamicCollection = InsertableCollection<T> && Clearable<T> && requires(T a)
@@ -29,7 +29,7 @@ concept DynamicCollection = InsertableCollection<T> && Clearable<T> && requires(
     * @param object The object to remove.
     * @return `true` if the Collection changed. `false` otherwise.
     */
-    { a.remove(std::declval<typename T::ValueType>()) } -> std::same_as<bool>;
+    { a.remove(std::declval<typename T::value_type>()) } -> std::same_as<bool>;
 };
 
 } // namespace concepts

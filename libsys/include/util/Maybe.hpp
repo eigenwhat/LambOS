@@ -10,6 +10,7 @@
 #include <cstdint>
 #include <new>
 #include <functional>
+#include <iterator>
 
 namespace _ns_LIBSYS {
 
@@ -20,25 +21,18 @@ class Maybe
     // our custom types
     using RegularType = regular_t<T>;
     template <bool Const> struct BasicIterator;
-    using Iterator = BasicIterator<false>;
-    using ConstIterator = BasicIterator<true>;
     using RawType = typename std::decay<RegularType>::type;
-    using ValueType = typename std::remove_reference<RegularType>::type;
     using MutableType = typename std::remove_const<RegularType>::type;
-    using RValueReference = ValueType &&;
-    using Reference = ValueType &;
-    using ConstReference = const RegularType &;
-    using Pointer = ValueType *;
-    using ConstPointer = const ValueType *;
 
     // std container member types
-    using iterator = Iterator;
-    using const_iterator = ConstIterator;
-    using value_type = ValueType;
-    using reference = Reference;
-    using const_reference = ConstReference;
-    using pointer = Pointer;
-    using const_pointer = ConstPointer;
+    using iterator = BasicIterator<false>;
+    using const_iterator = BasicIterator<true>;
+    using value_type = std::remove_reference_t<RegularType>;
+    using reference = lvref_t<value_type>;
+    using const_reference = cref_t<value_type>;
+    using rvalue_reference = rvref_t<value_type>;
+    using pointer = value_type *;
+    using const_pointer = value_type const *;
     using difference_type = int64_t;
     using size_type = size_t;
 
@@ -178,10 +172,10 @@ class Maybe
     union Storage<Ts &>
     {
         constexpr Storage()  noexcept : _nothing() {}
-        constexpr Storage(Reference aValue) noexcept : _value(&aValue) {}
+        constexpr Storage(reference aValue) noexcept : _value(&aValue) {}
 
         constexpr void destroy(bool) noexcept {}
-        constexpr void init(Reference val) noexcept { _value = val; }
+        constexpr void init(reference val) noexcept { _value = val; }
         constexpr auto rvRef() noexcept { return _value.get(); }
         constexpr value_type& ref() const noexcept { return _value.get(); }
 
@@ -198,7 +192,7 @@ class Maybe
     {
         static constexpr const bool kValueIterator = false;
         static constexpr const bool kEndIterator = true;
-//        using iterator_category = std::bidirectional_iterator_tag;
+        using iterator_category = std::bidirectional_iterator_tag;
         using value_type = RegularType;
         using difference_type = Maybe::difference_type;
         using reference = const_t<RegularType, Const>;

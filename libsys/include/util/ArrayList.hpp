@@ -37,7 +37,7 @@ class ArrayList
 {
     class ALIteratorImpl;
   public:
-    using ValueType = T;
+    using value_type = T;
     using iterator = Iterator<ALIteratorImpl>;
     using const_iterator = ConstIterator<ALIteratorImpl>;
 
@@ -141,7 +141,7 @@ class ArrayList
      *       the ordering of your data, or use a different List implementation.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    ValueType pop()
+    value_type pop()
     {
         T ret = std::move(_data[0]);
         _data.shift(1, true);
@@ -153,19 +153,19 @@ class ArrayList
      * Removes an element from the back of the ArrayList.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    ValueType popBack() { --_size; return std::move(_data[_size]); }
+    value_type popBack() { --_size; return std::move(_data[_size]); }
 
     /**
      * Returns the element at the top of the ArrayList without removing it.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    const ValueType &peek() const { return _data[0]; }
+    const value_type &peek() const { return _data[0]; }
 
     /**
      * Returns the element at the back of the ArrayList without removing it.
      * @return The object. If the ArrayList is empty, the return value is undefined.
      */
-    const ValueType &peekBack() const { return _data[_size-1]; }
+    const value_type &peekBack() const { return _data[_size-1]; }
 
     /**
      * Returns whether or not the ArrayList is empty.
@@ -333,7 +333,10 @@ class ArrayList
     {
         friend class ArrayList;
       public:
-        using ValueType = ArrayList::ValueType;
+        using value_type = ArrayList::value_type;
+
+        ALIteratorImpl(size_t index, ArrayList const *parent) : _index(index), _parent(parent) {}
+
         void increment()
         {
             ++_index;
@@ -346,7 +349,7 @@ class ArrayList
             } else { --_index; }
         }
 
-        T& get_value() const { return (*_parent)[_index]; }
+        T & get_value() const { return (*_parent)[_index]; }
         T * get_ptr() const { return &(*_parent)[_index]; }
 
         /**
@@ -362,10 +365,6 @@ class ArrayList
         constexpr bool operator!=(ALIteratorImpl const &rhs) const { return !(rhs == *this); }
 
       private:
-        ALIteratorImpl(size_t index, ArrayList const *parent)
-                : _index(index), _parent(parent)
-        {}
-
         size_t _index;
         ArrayList const *_parent;
     };
@@ -374,9 +373,6 @@ class ArrayList
     size_t _size = 0;
 };
 
-namespace concept_check {
-template <typename T> requires concepts::List<ArrayList<T>> using ArrayListCheck = ArrayList<T>;
-static_assert(std::default_constructible<ArrayListCheck<int>>, "ArrayList does not meet the requirements of List.");
-}
+static_assert(concepts::List<ArrayList<int>>);
 
 } // libsys namespace

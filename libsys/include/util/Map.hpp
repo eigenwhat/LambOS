@@ -11,7 +11,7 @@ class Map : public virtual Object
   public:
     using KeyType = K;
     using MappedType = V;
-    using ValueType = Pair<K const, V>;
+    using value_type = Pair<K const, V>;
 
     /**
      * Returns whether or not the Map is empty.
@@ -36,7 +36,7 @@ class Map : public virtual Object
      * @param object The object to add.
      * @return `true` if the Map changed. `false` otherwise.
      */
-    virtual bool insert(ValueType const &object) = 0;
+    virtual bool insert(value_type const &object) = 0;
 
     /**
      * Removes the object from the Map, reducing its size.
@@ -50,7 +50,7 @@ class Map : public virtual Object
      * @param object The object to remove.
      * @return `true` if the Map changed. `false` otherwise.
      */
-    virtual bool remove(ValueType const &object) = 0;
+    virtual bool remove(value_type const &object) = 0;
 
     /**
      * Removes all objects from the Map.

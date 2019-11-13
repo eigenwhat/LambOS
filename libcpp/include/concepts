@@ -14,7 +14,11 @@ template <typename T, typename U> concept same_as = __weakly_same<T, U> && __wea
 template <typename T> concept swappable = is_swappable_v<T>;
 template <typename A, typename B> concept swappable_with = is_swappable_with_v<A, B>;
 template <class From, class To>
-concept convertible_to = is_convertible_v<From, To> && requires(From (&f)()) { static_cast<To>(f()); };
+concept convertible_to = is_convertible_v<From, To>
+                      && requires(add_rvalue_reference_t<From> (&f)()) { static_cast<To>(f()); };
+
+template<typename Derived, typename Base>
+concept derived_from = is_base_of_v<Base, Derived> && is_convertible_v<Derived const volatile *, Base const volatile *>;
 
 template <typename T, typename...Args> concept constructible = is_constructible<T, Args...>::value;
 template <typename T, typename U> concept assignable = is_assignable<T, U>::value;
