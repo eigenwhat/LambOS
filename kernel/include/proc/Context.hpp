@@ -11,7 +11,7 @@
 
 class Context
 {
-public:
+  public:
     Context() : _console(nullptr), _out(nullptr) { }
 
     /**

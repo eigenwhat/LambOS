@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 9/1/2013.
+//
+
 #pragma once
 
 #include <util/Maybe.hpp>

@@ -125,7 +125,6 @@ template <typename T> class ArcPtr<T, true>
 
   private:
     /** Private delegating constructors. */
-    /**  @{ */
     template <typename U>
     [[gnu::always_inline]]
     ArcPtr(const ArcPtr<U> &rhs, Void) noexcept : ArcPtr(rhs.get(), true) {}
@@ -133,10 +132,8 @@ template <typename T> class ArcPtr<T, true>
     template <typename U>
     [[gnu::always_inline]]
     ArcPtr(ArcPtr<U> &&rhs, Void) noexcept : ArcPtr{rhs.get(), false} { rhs._ptr = nullptr; }
-    /**  @} */
 
     /** Private delegating assignment. */
-    /**  @{ */
     template <typename U>
     [[gnu::always_inline]]
     ArcPtr &Assign(ArcPtr<U> const &r) noexcept { if (*this != r) { reset(r.get()); } return *this; }
@@ -152,7 +149,6 @@ template <typename T> class ArcPtr<T, true>
         }
         return *this;
     }
-    /** @} */
 
     template <typename, bool> friend class ArcPtr;
     T *_ptr;
@@ -321,7 +317,6 @@ template <typename T> class ArcPtr<T, false>
 
   private:
     /** Private delegating constructors. */
-    /**  @{ */
     template <typename U>
     [[gnu::always_inline]]
     ArcPtr(const ArcPtr<U, false> &rhs, Void) noexcept : _data{rhs._data} { if (_data) { _data->retain(); } }
@@ -329,10 +324,8 @@ template <typename T> class ArcPtr<T, false>
     template <typename U>
     [[gnu::always_inline]]
     ArcPtr(ArcPtr<U, false> &&rhs, Void) noexcept : _data{rhs._data} { rhs._ptr = nullptr; }
-    /**  @} */
 
     /** Private delegating assignment. */
-    /**  @{ */
     template <typename U>
     [[gnu::always_inline]]
     ArcPtr &Assign(ArcPtr<U, false> const &r) noexcept
@@ -356,7 +349,6 @@ template <typename T> class ArcPtr<T, false>
         }
         return *this;
     }
-    /** @} */
 
     ArcWrapper<T> *_data;
 };

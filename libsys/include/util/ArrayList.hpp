@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 4/29/2018.
+//
+
 #pragma once
 
 #include <util/DynamicArray.hpp>
@@ -273,10 +277,8 @@ class ArrayList
     T& operator[](size_t idx) const { return _data[idx]; }
 
     /** An iterator pointing to the first element in the list. */
-    /** @{ */
     const_iterator begin() const { return const_iterator{ALIteratorImpl{0, this}}; }
     iterator begin() { return iterator{ALIteratorImpl{0, this}}; }
-    /** @} */
 
     /**
      * An Iterator "past the end" of the list. When encountered, it means there
@@ -284,10 +286,8 @@ class ArrayList
      *
      * @return An iterator signifying the end of this ArrayList.
      */
-    /** @{ */
     const_iterator end() const { return const_iterator{ALIteratorImpl{npos, this}}; }
     iterator end() { return iterator{ALIteratorImpl{npos, this}}; }
-    /** @} */
 
     /**
      * The maximum capacity of the currently allocated block.

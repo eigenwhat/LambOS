@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 4/27/2018.
+//
+
 #pragma once
 
 #include <util/List.hpp>
@@ -253,10 +257,8 @@ template <typename T> class LinkedList
     bool operator!=(const LinkedList &rhs) const { return !operator==(rhs); }
 
     /** An iterator pointing to the first element in the list. */
-    /** @{ */
     const_iterator begin() const { return const_iterator{LLIteratorImpl{_first.get(), this}}; }
     iterator begin() { return iterator{LLIteratorImpl{_first.get(), this}}; }
-    /** @} */
 
     /**
      * An Iterator "past the end" of the list. When encountered, it means there
@@ -264,10 +266,8 @@ template <typename T> class LinkedList
      *
      * @return An iterator signifying the end of this LinkedList.
      */
-     /** @{ */
     const_iterator end() const { return const_iterator{LLIteratorImpl{nullptr, this}}; }
     iterator end() { return iterator{LLIteratorImpl{nullptr, this}}; }
-    /** @} */
 
   private:
     struct Node

@@ -51,10 +51,8 @@ class Executable
      * @note VERY TEMPORARY AND VERY SUBJECT TO CHANGE.
      * @return The exit status of the program.
      */
-     /** @{ */
     int exec() { return loadSegments() ? _entry(0, nullptr) : -1; }
     int operator()() { return exec(); }
-    /** @} */
 
     /**
      * Unloads the program segments from memory.
