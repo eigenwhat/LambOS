@@ -1,0 +1,9 @@
+//
+// Created by Martin Miralles-Cordal on 12/22/2019.
+//
+
+#pragma once
+
+#include <bits/ranges/algorithms.hpp>
+#include <bits/ranges/concepts.hpp>
+#include <bits/range_access.hpp>

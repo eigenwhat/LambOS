@@ -11,6 +11,8 @@ namespace std {
 template <typename T, typename U> concept __weakly_same = is_same_v<T, U>;
 template <typename T, typename U> concept same_as = __weakly_same<T, U> && __weakly_same<U, T>;
 
+template <typename T, typename... Ts> concept __one_of = (same_as<T, Ts> || ...);
+
 template <typename T> concept swappable = is_swappable_v<T>;
 template <typename A, typename B> concept swappable_with = is_swappable_with_v<A, B>;
 template <class From, class To>
@@ -69,6 +71,7 @@ template <typename T> concept semiregular = copyable<T> && default_constructible
 template <typename T> concept integral = is_integral<T>::value;
 template <typename T> concept signed_integral = integral<T> && is_signed<T>::value;
 template <typename T> concept unsigned_integral = integral<T> && !signed_integral<T>;
+template <typename T> concept floating_point = is_floating_point_v<T>;
 
 template<typename B>
 concept boolean = same_as<B, bool> || (movable<remove_cvref_t<B>> &&

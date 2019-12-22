@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <bits/algo_support.hpp>
 #include <type_traits>
 
 namespace std {

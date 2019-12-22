@@ -1,0 +1,42 @@
+//
+// Created by Martin Miralles-Cordal on 12/22/2019.
+//
+
+#pragma once
+
+#include <cstddef>
+
+namespace std {
+
+template<class _E>
+class initializer_list
+{
+  public:
+    using value_type = _E;
+    using reference = _E const &;
+    using const_reference = _E const &;
+    using size_type = size_t;
+    using iterator = _E const *;
+    using const_iterator = _E const *;
+
+  public:
+    constexpr initializer_list() noexcept : __array_{nullptr}, __length_{0} { }
+
+    [[nodiscard]] constexpr size_type size() const noexcept { return __length_; }
+    [[nodiscard]] constexpr const_iterator begin() const noexcept { return __array_; }
+    [[nodiscard]] constexpr const_iterator end() const noexcept { return begin() + size(); }
+
+  private:
+    constexpr initializer_list(value_type const *__array, size_type __len) : __array_{__array}, __length_{__len} {}
+
+    value_type const *__array_;
+    size_type __length_;
+};
+
+template<class _T>
+[[nodiscard]] constexpr const _T* begin(initializer_list<_T> const &__list) noexcept { return __list.begin(); }
+
+template<class _T>
+[[nodiscard]] constexpr const _T* end(initializer_list<_T> const &__list) noexcept { return __list.end(); }
+
+} // namespace std
