@@ -4,8 +4,9 @@
 
 #pragma once
 
+#include <concepts>
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
 #include "RegisterTable.h"
 #include "InterruptNumber.hpp"
 
@@ -27,6 +28,8 @@ class IDTEntry
     IDTEntry(uint16_t selector, uint32_t offset, uint8_t type_attr)
             : _offset(offset), _selector(selector), _typeAttr(type_attr) {}
 
+    IDTEntry(uint16_t selector, void(*isrFn)(), uint8_t type_attr) : IDTEntry(selector, uint32_t(isrFn), type_attr) {}
+
     friend class InterruptDescriptorTable;
 
   private:
@@ -38,6 +41,8 @@ class IDTEntry
 class InterruptDescriptorTable
 {
   public:
+    static std::uint64_t EncodeEntry(IDTEntry source);
+
     void encodeEntry(uint8_t entryNumber, IDTEntry source);
     void encodeISRs();
     void install() { set_idt(this->idt, sizeof(uint64_t) * IDT_SIZE); }
