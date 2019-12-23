@@ -4,11 +4,13 @@
 
 #pragma once
 
+#include <arch/i386/cpu/RegisterTable.h>
+#include <arch/i386/cpu/InterruptNumber.hpp>
+#include <arch/i386/sys/asm.h>
+
 #include <concepts>
 #include <cstddef>
 #include <cstdint>
-#include "RegisterTable.h"
-#include "InterruptNumber.hpp"
 
 extern "C" void set_idt(void *idt, size_t size);
 
@@ -16,6 +18,7 @@ extern "C" void set_idt(void *idt, size_t size);
 
 struct InterruptServiceRoutine
 {
+    static inline void endOfInterrupt() { outb(0x20, 0x20); }
     virtual ~InterruptServiceRoutine() {}
     virtual void operator()(RegisterTable &) = 0;
 };

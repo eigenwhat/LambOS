@@ -4,12 +4,12 @@
 
 #pragma once
 
+#include <arch/i386/cpu/GlobalDescriptorTable.hpp>
+#include <arch/i386/cpu/InterruptDescriptorTable.hpp>
+#include <cpu/CPU.hpp>
+
 #include <cstddef>
 #include <cstdint>
-
-#include <cpu/CPU.hpp>
-#include "GlobalDescriptorTable.hpp"
-#include "InterruptDescriptorTable.hpp"
 
 class X86
 {
@@ -17,14 +17,17 @@ class X86
     X86();
 
     void install();
+
     InterruptDescriptorTable *idt() { return &_idt; }
+
     void enableInterrupts();
     void disableInterrupts() { asm volatile ("cli"); }
+
     void maskIRQ(unsigned int IRQ);
     void unmaskIRQ(unsigned int IRQ);
 
   private:
-    GlobalDescriptorTable _gdt;
-    InterruptDescriptorTable _idt;
-    TaskStateSegment _tss;
+    GlobalDescriptorTable _gdt{};
+    InterruptDescriptorTable _idt{};
+    TaskStateSegment _tss{};
 };

@@ -32,7 +32,7 @@ class PS2KeyboardISR : public InterruptServiceRoutine
         uint8_t scancode = inb(KBD_DEVICE);
 
         _keyboard->pushScanCode(scancode);
-        outb(0x20, 0x20);
+        endOfInterrupt();
     }
 
   private:

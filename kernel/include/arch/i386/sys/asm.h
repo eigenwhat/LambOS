@@ -7,10 +7,9 @@
 
 __BEGIN_DECLS
 
-static inline void halt()
-{
-    asm volatile("hlt");
-}
+static inline void halt() { asm volatile("hlt"); }
+static inline void cli() { asm volatile ("cli"); }
+static inline void sti() { asm volatile ("sti"); }
 
 static inline void outb(int intPort, uint8_t val)
 {

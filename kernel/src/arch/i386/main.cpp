@@ -7,6 +7,7 @@
 #include <arch/i386/cpu/X86.hpp>
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
 #include <arch/i386/device/input/PS2KeyboardISR.hpp>
+#include <arch/i386/device/pit/PITIRQ.hpp>
 #include <arch/i386/device/storage/X86AtaDevice.hpp>
 #include <arch/i386/X86Kernel.hpp>
 #include <device/input/KeyboardInputStream.hpp>
@@ -88,6 +89,7 @@ void init_system()
     // prepare stdin
     auto kb = New<PS2Keyboard>();
     PS2KeyboardISR::install(x86Kernel->cpu(), kb);
+    PITIRQ::install(x86Kernel->cpu());
     kernel->setIn(New<KeyboardInputStream>(kb));
     auto cd = read_ata();
 

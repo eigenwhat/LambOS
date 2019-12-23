@@ -27,6 +27,7 @@ enum class InterruptNumber : uint8_t
     kMachineCheck,
     kSIMDFloatingPointException,
     kIRQ0 = 32,
+    kPITIRQ = kIRQ0,
     kKeyboardIRQ,
     kIRQ2,
     kIRQ3,
