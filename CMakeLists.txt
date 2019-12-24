@@ -44,6 +44,8 @@ add_subdirectory(programs/kvshell)
 add_subdirectory(programs/proc_test)
 
 set(ALL_PROGRAMS
+        kvshell
+        proc-test
         elf-test)
 
 # create bootable ISO
@@ -63,6 +65,7 @@ else ()
     add_custom_target(${ISO_TARGET}
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:${KERNEL_TARGET}> ${CMAKE_BINARY_DIR}/iso/boot/
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:kvshell> ${CMAKE_BINARY_DIR}/iso/bin
+            COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:proc-test> ${CMAKE_BINARY_DIR}/iso/bin
             COMMAND ${CMAKE_COMMAND} -E copy $<TARGET_FILE:elf-test> ${CMAKE_BINARY_DIR}/iso/bin
             COMMAND ${GRUB_MKRESCUE} --output=${ISO_PATH} ${CMAKE_BINARY_DIR}/iso)
 

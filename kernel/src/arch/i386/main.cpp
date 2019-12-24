@@ -120,6 +120,19 @@ void init_system()
     }
     puts("\n* * *");
 
+
+    auto proctestEntry = cd->find("/bin/proc-test");
+    if (proctestEntry) {
+        auto proctest = elf::Executable(*proctestEntry);
+        printf("Running `proc-test A`...\n");
+        kernel->console()->setCursorVisible(true);
+        proctest("A");
+        printf("Running `proc-test B`...\n");
+        kernel->console()->setCursorVisible(true);
+        proctest("B");
+    } else {
+        puts("Unable to find proc-test! You might want to look into that.");
+    }
     // run shell
     kernel->console()->setForegroundColor(defaultTextColor);
     puts("");

@@ -16,7 +16,7 @@ class Executable
 {
   public:
     /** The function signature for the program's entry point. */
-    using EntryType = int (*)(int, char **);
+    using EntryType = int (*)(int, char const *[]);
 
     struct Section;
 
@@ -51,8 +51,16 @@ class Executable
      * @note VERY TEMPORARY AND VERY SUBJECT TO CHANGE.
      * @return The exit status of the program.
      */
-    int exec() { return loadSegments() ? _entry(0, nullptr) : -1; }
-    int operator()() { return exec(); }
+    template <std::same_as<char const *>... Args>
+    int exec(Args...args)
+    {
+        constexpr auto argc = sizeof...(Args);
+        char const *argv[argc] = {args...};
+        return loadSegments() ? _entry(argc, argv) : -1;
+    }
+
+    template <std::same_as<char const *>... Args>
+    int operator()(Args...args) { return exec(args...); }
 
     /**
      * Unloads the program segments from memory.

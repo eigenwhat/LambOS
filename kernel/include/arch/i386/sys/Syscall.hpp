@@ -82,7 +82,7 @@ inline std::uint32_t read(X86Kernel &k, RegisterTable const &registers)
 
 inline std::uint32_t exit(X86Kernel &k, RegisterTable const &registers)
 {
-    constexpr char const *msg = "Process exit with code 0x";
+    constexpr char const *msg = "\nProcess exit with code 0x";
     constexpr size_t len = std::strlen(msg);
     k.out()->write(msg, len);
     char buf[16];
