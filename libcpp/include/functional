@@ -100,12 +100,57 @@ template<typename T>
 inline reference_wrapper<T> ref(T& t) noexcept { return reference_wrapper<T>(t); }
 
 template<typename T>
-inline reference_wrapper<const T> cref(const T& t) noexcept { return reference_wrapper<const T>(t); }
+inline reference_wrapper<const T> cref(T const &t) noexcept { return reference_wrapper<const T>(t); }
 
 template<typename T> void ref(const T&&) = delete;
 template<typename T> void cref(const T&&) = delete;
 
 template<typename T> inline reference_wrapper<T> ref(reference_wrapper<T> t) noexcept { return t; }
 template<typename T> inline reference_wrapper<const T> cref(reference_wrapper<T> t) noexcept { return {t.get()}; }
+
+template<class T = void> struct equal_to { constexpr bool operator()(T const &x, T const &y) const { return x == y; } };
+template<> struct equal_to<void>
+{
+    template<class T, class U> constexpr auto operator()(T&& t, U&& u) const { return t == u; }
+    using is_transparent = std::true_type;
+};
+
+template<class T = void>
+struct not_equal_to { constexpr bool operator()(T const &x, T const &y) const { return x != y; } };
+template<> struct not_equal_to<void>
+{
+    template<class T, class U> constexpr auto operator()(T&& t, U&& u) const { return t != u; }
+    using is_transparent = std::true_type;
+};
+
+template<class T = void> struct greater { constexpr bool operator()(T const &x, T const &y) const { return x > y; } };
+template<> struct greater<void>
+{
+    template<class T, class U> constexpr auto operator()(T&& t, U&& u) const { return t > u; }
+    using is_transparent = std::true_type;
+};
+
+template<class T = void> struct less { constexpr bool operator()(T const &x, T const &y) const { return x < y; } };
+template<> struct less<void>
+{
+    template<class T, class U> constexpr auto operator()(T&& t, U&& u) const { return t < u; }
+    using is_transparent = std::true_type;
+};
+
+template<class T = void>
+struct greater_equal { constexpr bool operator()(T const &x, T const &y) const { return x >= y; } };
+template<> struct greater_equal<void>
+{
+    template<class T, class U> constexpr auto operator()(T&& t, U&& u) const { return t >= u; }
+    using is_transparent = std::true_type;
+};
+
+template<class T = void>
+struct less_equal { constexpr bool operator()(T const &x, T const &y) const { return x <= y; } };
+template<> struct less_equal<void>
+{
+    template<class T, class U> constexpr auto operator()(T&& t, U&& u) const { return t <= u; }
+    using is_transparent = std::true_type;
+};
 
 } // end namespace std

@@ -6,4 +6,5 @@
 
 #include "algorithms/fill.hpp"
 #include "algorithms/fill_n.hpp"
+#include "algorithms/find.hpp"
 #include "algorithms/generate_n.hpp"

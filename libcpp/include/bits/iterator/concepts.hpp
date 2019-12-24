@@ -17,11 +17,11 @@ template<class In>
 concept readable = requires {
     typename iter_value_t<In>;
     typename iter_reference_t<In>;
-//                       typename iter_rvalue_reference_t<In>;
+    typename iter_rvalue_reference_t<In>;
 }
-                   && common_reference_with<iter_reference_t<In>&&, iter_value_t<In>&>;
-//              && common_reference_with<iter_reference_t<In>&&, iter_rvalue_reference_t<In>&&>
-//              && common_reference_with<iter_rvalue_reference_t<In>&&, const iter_value_t<In>&>
+              && common_reference_with<iter_reference_t<In>&&, iter_value_t<In>&>
+              && common_reference_with<iter_reference_t<In>&&, iter_rvalue_reference_t<In>&&>
+              && common_reference_with<iter_rvalue_reference_t<In>&&, const iter_value_t<In>&>;
 
 template<readable T>
 using iter_common_reference_t = common_reference_t<iter_reference_t<T>, iter_value_t<T>&>;
@@ -71,9 +71,10 @@ concept sized_sentinel_for = sentinel_for<S, I> && !disable_sized_sentinel<remov
 };
 
 // concept input_iterator
-//template<class I>
-//concept input_iterator = input_or_output_iterator<I> && readable<I> && requires { typename /*ITER_CONCEPT*/(I); }
-//                      && derived_from</*ITER_CONCEPT*/(I), input_iterator_tag>;
+template<class I>
+concept input_iterator = input_or_output_iterator<I> && readable<I>
+                         && requires { typename iterator_traits<I>::iterator_category; }
+                         && derived_from<typename iterator_traits<I>::iterator_category, input_iterator_tag>;
 
 // concept output_iterator
 template<class I, class T>
@@ -82,40 +83,45 @@ concept output_iterator = input_or_output_iterator<I> && writable<I, T> && requi
 };
 
 // concept forward_iterator
-//template<class I>
-//concept forward_iterator = input_iterator<I> && derived_from</*ITER_CONCEPT*/(I), forward_iterator_tag>
-//                        && incrementable<I> && sentinel_for<I, I>;
+template<class I>
+concept forward_iterator = input_iterator<I>
+                           && derived_from<typename iterator_traits<I>::iterator_category, forward_iterator_tag>
+                           && incrementable<I> && sentinel_for<I, I>;
 
 // concept bidirectional_iterator
-//template<class I>
-//concept bidirectional_iterator = forward_iterator<I> && derived_from</*ITER_CONCEPT*/(I), bidirectional_iterator_tag>
-//                              && requires(I i) {
-//                                  { --i } -> same_as<I&>;
-//                                  { i-- } -> same_as<I>;
-//                              };
+template<class I>
+concept bidirectional_iterator = forward_iterator<I>
+                                 && derived_from<typename iterator_traits<I>::iterator_category,
+                                                 bidirectional_iterator_tag>
+                                 && requires(I i) {
+                                     { --i } -> same_as<I&>;
+                                     { i-- } -> same_as<I>;
+                                 };
 
 // concept random_access_iterator
-//template<class I>
-//concept random_access_iterator = bidirectional_iterator<I>
-//                              && derived_from</*ITER_CONCEPT*/(I), random_access_iterator_tag>
-//                              && totally_ordered<I> && sized_sentinel_for<I, I>
-//                              && requires(I i, const I j, const iter_difference_t<I> n) {
-//                                  { i += n } -> same_as<I&>;
-//                                  { j +  n } -> same_as<I>;
-//                                  { n +  j } -> same_as<I>;
-//                                  { i -= n } -> same_as<I&>;
-//                                  { j -  n } -> same_as<I>;
-//                                  {  j[n]  } -> same_as<iter_reference_t<I>>;
-//                              };
+template<class I>
+concept random_access_iterator = bidirectional_iterator<I>
+                                 && derived_from<typename iterator_traits<I>::iterator_category,
+                                                 random_access_iterator_tag>
+                                 && totally_ordered<I>// && sized_sentinel_for<I, I>
+                                 && requires(I i, const I j, const iter_difference_t<I> n) {
+//                                     { i += n } -> same_as<I&>;
+                                     { j +  n } -> same_as<I>;
+//                                     { n +  j } -> same_as<I>;
+//                                     { i -= n } -> same_as<I&>;
+//                                     { j -  n } -> same_as<I>;
+//                                     {  j[n]  } -> same_as<iter_reference_t<I>>;
+                                 };
 
 // concept contiguous_iterator
-//template<class I>
-//concept contiguous_iterator = random_access_iterator<I> && derived_from</*ITER_CONCEPT*/(I), contiguous_iterator_tag>
-//                           && is_lvalue_reference_v<iter_reference_t<I>>
-//                           && same_as<iter_value_t<I>, remove_cvref_t<iter_reference_t<I>>>
-//                           && requires(const I& i) {
-//                               { to_address(i) } -> same_as<add_pointer_t<iter_reference_t<I>>>;
-//                           };
+template<class I>
+concept contiguous_iterator = random_access_iterator<I>
+                              && derived_from<typename iterator_traits<I>::iterator_category, contiguous_iterator_tag>
+                              && is_lvalue_reference_v<iter_reference_t<I>>
+                              && same_as<iter_value_t<I>, remove_cvref_t<iter_reference_t<I>>>
+                              && requires(const I& i) {
+                                  { to_address(i) } -> same_as<add_pointer_t<iter_reference_t<I>>>;
+                              };
 
 // indirect callable requirements
 // indirect callables

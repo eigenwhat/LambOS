@@ -6,6 +6,8 @@
 
 #include <type_traits>
 
+#include <bits/invoke.hpp>
+
 namespace std {
 
 template <typename T, typename U> concept __weakly_same = is_same_v<T, U>;
@@ -111,5 +113,31 @@ concept equality_comparable_with = equality_comparable<T> && equality_comparable
         && __weakly_equality_comparable_with<T, U>;
 
 template <typename T> concept regular = semiregular<T> && equality_comparable<T>;
+
+template <class T>
+concept totally_ordered = equality_comparable<T>
+                          && requires(const remove_reference_t<T>& a, const remove_reference_t<T>& b) {
+                              { a < b } -> boolean;
+                              { a > b } -> boolean;
+                              { a <= b } -> boolean;
+                              { a >= b } -> boolean;
+                          };
+
+template <class T, class U>
+concept totally_ordered_with = totally_ordered<T> && totally_ordered<U>
+                               && common_reference_with<const remove_reference_t<T>&, const remove_reference_t<U>&>
+                               && totally_ordered<common_reference_t<const remove_reference_t<T>&,
+                                                                     const remove_reference_t<U>&>>
+                               && equality_comparable_with<T, U>
+                               && requires(const remove_reference_t<T>& t, const remove_reference_t<U>& u) {
+                                   { t < u } -> boolean;
+                                   { t > u } -> boolean;
+                                   { t <= u } -> boolean;
+                                   { t >= u } -> boolean;
+                                   { u < t } -> boolean;
+                                   { u > t } -> boolean;
+                                   { u <= t } -> boolean;
+                                   { u >= t } -> boolean;
+                               };
 
 } // namespace std
