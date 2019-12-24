@@ -24,7 +24,7 @@ concept convertible_to = is_convertible_v<From, To>
 template<typename Derived, typename Base>
 concept derived_from = is_base_of_v<Base, Derived> && is_convertible_v<Derived const volatile *, Base const volatile *>;
 
-template <typename T, typename...Args> concept constructible = is_constructible<T, Args...>::value;
+template <typename T, typename...Args> concept constructible_from = is_constructible<T, Args...>::value;
 template <typename T, typename U> concept assignable = is_assignable<T, U>::value;
 template <typename T> concept default_constructible = is_default_constructible_v<T>;
 template <typename T> concept copy_constructible = is_copy_constructible_v<T>;

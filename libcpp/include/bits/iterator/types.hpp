@@ -18,6 +18,9 @@ struct iterator
     using reference         = _RefT;
 };
 
+struct default_sentinel_t {};
+inline constexpr default_sentinel_t default_sentinel{};
+
 struct input_iterator_tag {};
 struct output_iterator_tag {};
 struct forward_iterator_tag : input_iterator_tag {};

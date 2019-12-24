@@ -46,11 +46,14 @@ using range_reference_t = iter_reference_t<ranges::iterator_t<T>>;
 template <range T>
 using range_rvalue_reference_t = iter_rvalue_reference_t<ranges::iterator_t<T>>;
 
-template<typename T>
-concept input_range = range<T> && input_iterator<iterator_t<T>>;
+template<class R, class T> concept output_range = range<R> && output_iterator<iterator_t<R>, T>;
+template<typename T> concept input_range = range<T> && input_iterator<iterator_t<T>>;
+template<typename T> concept forward_range = input_range<T> && forward_iterator<iterator_t<T>>;
+template<typename T> concept bidirectional_range = forward_range<T> && bidirectional_iterator<iterator_t<T>>;
+template<typename T> concept random_access_range = bidirectional_range<T> && random_access_iterator<iterator_t<T>>;
 
-template<class R, class T>
-concept output_range = range<R> && output_iterator<iterator_t<R>, T>;
+template<typename T>
+concept common_range = range<T> && same_as<iterator_t<T>, sentinel_t<T>>;
 
 template<range R> inline constexpr bool enable_safe_range = false;
 
@@ -103,6 +106,9 @@ concept indirect_relation = readable<I1> && readable<I2> && copy_constructible<F
                             && relation<F&, iter_reference_t<I1>, iter_value_t<I2>&>
                             && relation<F&, iter_reference_t<I1>, iter_reference_t<I2>>
                             && relation<F&, iter_common_reference_t<I1>, iter_common_reference_t<I2>>;
+
+template <typename I, typename O>
+concept indirectly_copyable = readable<I> && writable<O, range_reference_t<I>>;
 
 template <typename I, typename Proj>
 struct __projected_helper;

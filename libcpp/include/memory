@@ -1,0 +1,12 @@
+//
+// Created by Martin Miralles-Cordal on 12/24/2019.
+//
+
+#pragma once
+
+#include <bits/memory/destroy.hpp>
+#include <bits/memory/uninitialized_copy.hpp>
+#include <bits/memory/uninitialized_default_construct.hpp>
+#include <bits/memory/uninitialized_fill.hpp>
+#include <bits/memory/uninitialized_move.hpp>
+#include <bits/memory/uninitialized_value_construct.hpp>
