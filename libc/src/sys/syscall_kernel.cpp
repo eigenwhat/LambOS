@@ -39,6 +39,14 @@ int sys_exit(int status)
     return (int)Syscall::exit((X86Kernel&)*kernel, registers);
 }
 
+int sys_sleep(int status)
+{
+    auto registers = fake_syscall((uint32_t)status);
+    return (int)Syscall::sleep((X86Kernel&)*kernel, registers);
+}
+
+int sys_yield() { return 0; }
+
 } // extern "C"
 
 #endif

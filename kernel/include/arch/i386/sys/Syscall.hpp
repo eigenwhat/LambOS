@@ -8,6 +8,8 @@ namespace Syscall {
     inline std::uint32_t write(X86Kernel &k, RegisterTable const &registers);
     inline std::uint32_t read(X86Kernel &k, RegisterTable const &registers);
     inline std::uint32_t exit(X86Kernel &, RegisterTable const &registers);
+    inline std::uint32_t sleep(X86Kernel &, RegisterTable const &registers);
+    inline std::uint32_t yield(X86Kernel &, RegisterTable const &registers);
 } // namespace Syscall
 
 struct SyscallHandler : public InterruptServiceRoutine
@@ -22,9 +24,9 @@ struct SyscallHandler : public InterruptServiceRoutine
             case SyscallId::kRead: {
                 // ISR clears IF, but keyboard input is interrupt driven so we
                 // need to set IF again.
-                asm volatile ("sti");
+                sti();
                 registers.eax = Syscall::read(_kernel, registers);
-                asm volatile ("cli");
+                cli();
                 break;
             }
             case SyscallId::kWrite:
@@ -33,6 +35,10 @@ struct SyscallHandler : public InterruptServiceRoutine
             case SyscallId::kClose:
             case SyscallId::kExit:
                 registers.eax = Syscall::exit(_kernel, registers); break;
+            case SyscallId::kSleep:
+                registers.eax = Syscall::sleep(_kernel, registers); break;
+            case SyscallId::kYield:
+                registers.eax = Syscall::yield(_kernel, registers); break;
             default:
                 reportUnknownSyscall(registers);
         }
@@ -85,5 +91,8 @@ inline std::uint32_t exit(X86Kernel &k, RegisterTable const &registers)
     k.out()->write('\n');
     return registers.ebx;
 }
+
+inline std::uint32_t sleep(X86Kernel &, RegisterTable const &) { return 0; }
+inline std::uint32_t yield(X86Kernel &, RegisterTable const &) { return 0; }
 
 } // namespace Syscall

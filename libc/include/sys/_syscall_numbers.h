@@ -5,14 +5,9 @@
 
 __BEGIN_DECLS
 
-typedef struct {
-    enum {
-        kOpen,
-        kRead,
-        kWrite,
-        kClose,
-        kExit,
-    };
+typedef struct syscall_identifiers
+{
+    enum { kOpen, kRead, kWrite, kClose, kExit, kSleep, kYield };
 } SyscallId;
 
 __END_DECLS
