@@ -4,15 +4,10 @@
 #include <util/Collection.hpp>
 #include <util/Hasher.hpp>
 
+#include <compare>
+
 namespace _ns_LIBSYS {
 namespace detail {
-
-template <typename T>
-constexpr int strcmp(T const *str1, T const *str2)
-{
-    while (*str1 && *str2 && (*str1++ == *str2++));
-    return *(const unsigned char *)str1 - *(const unsigned char *)str2;
-}
 
 template <typename T>
 constexpr size_t strlen(T const *str)
@@ -325,10 +320,19 @@ template <typename T> class BasicString
      */
     constexpr bool operator==(BasicString const &rhs) const
     {
-        return !detail::strcmp(cstr(), rhs.cstr());
+        return _size == rhs._size && (*this <=> rhs == 0);
     }
 
-    constexpr bool operator!=(BasicString const &rhs) const { return !operator==(rhs); }
+    constexpr auto operator<=>(BasicString const &rhs) const
+    {
+        auto str1 = cstr();
+        auto str2 = rhs.cstr();
+        while (*str1 && *str2 && (*str1++ == *str2++));
+        const auto diff = *(const unsigned char *)str1 - *(const unsigned char *)str2;
+        if      (diff < 0)  { return std::strong_ordering::less; }
+        else if (diff == 0) { return std::strong_ordering::equal; }
+        else                { return std::strong_ordering::greater; }
+    }
 
   private:
     DynamicArray<T> _data;

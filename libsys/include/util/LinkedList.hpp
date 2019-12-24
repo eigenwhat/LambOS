@@ -365,7 +365,7 @@ template <typename T> class LinkedList
         void decrement() { _obj = _obj->prev; }
         T& get_value() const { return _obj->value; }
         T* get_ptr() const { return &_obj->value; }
-        bool operator==(LLIteratorImpl const &rhs) const { return _obj == rhs._obj && _parent == rhs._parent; }
+        constexpr bool operator==(LLIteratorImpl const &rhs) const { return _obj == rhs._obj && _parent == rhs._parent; }
         constexpr bool operator!=(LLIteratorImpl const &rhs) const { return !(rhs == *this); }
 
       private:

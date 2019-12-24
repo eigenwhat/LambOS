@@ -42,7 +42,7 @@ class Maybe
     template <typename U = T, typename = IfCopyConstructible<U>>
     constexpr Maybe(T const &v) : _store(v), _set(true) {}
 
-    template <typename U = T, typename = IfMoveConstructible<U>>
+    template <std::move_constructible U = T>
     constexpr Maybe(T &&v) : _store(std::move(v)), _set(true) {}
 
     constexpr Maybe(Maybe const &other) : _store{}, _set(other._set) { if (_set) { _store.init(other.ref_()); } }
@@ -68,44 +68,44 @@ class Maybe
      * Accesses the contained value.
      * @return A const pointer to the value if set, nullptr otherwise.
      */
-    constexpr T const * operator->() const { return _set ? &ref_() : nullptr; }
+    constexpr value_type const * operator->() const { return _set ? &ref_() : nullptr; }
 
     /**
      * Accesses the contained value.
      * @return A pointer to the value if set, nullptr otherwise.
      */
-    constexpr T * operator->() { return _set ? &ref_() : nullptr; }
+    constexpr value_type * operator->() { return _set ? &ref_() : nullptr; }
 
     /**
      * Accesses the contained value.
      * @return A const ref to the value. Return value is undefined if not set.
      */
-    constexpr T const & operator*() const { return ref_(); }
+    constexpr value_type const & operator*() const { return ref_(); }
 
     /**
      * Accesses the contained value.
      * @return A reference to the value. Return value is undefined if not set.
      */
-    constexpr T & operator*() { return ref_(); }
+    constexpr value_type & operator*() { return ref_(); }
 
     /**
      * Returns the contained value.
      * @return A const ref to the value. Return value is undefined if not set.
      */
-    constexpr T const & get() const { return ref_(); }
+    constexpr value_type const & get() const { return ref_(); }
 
     /**
      * Returns the contained value.
      * @return A reference to the value. Return value is undefined if not set.
      */
-    constexpr T & get() { return ref_(); }
+    constexpr value_type & get() { return ref_(); }
 
     /**
      * Returns a copy of the contained value, or a default value if not set.
      * @param other The value to default to.
      * @return A copy of the value, or the default value if this is not set.
      */
-    constexpr T getOr(T &&other) const &
+    constexpr value_type getOr(T &&other) const &
     {
         return _set ? ref_() : std::forward<T>(other);
     }
@@ -115,7 +115,7 @@ class Maybe
      * @param other The value to default to.
      * @return A copy of the value, or the default value if this is not set.
      */
-    constexpr T getOr(T &&other) &&
+    constexpr value_type getOr(T &&other) &&
     {
         return _set ? std::move(takeValue_()) : std::forward<T>(other);
     }

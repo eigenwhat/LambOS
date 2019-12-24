@@ -334,16 +334,16 @@ class ArrayList
         friend class ArrayList;
       public:
         using value_type = ArrayList::value_type;
+        constexpr ALIteratorImpl() = default;
+        constexpr ALIteratorImpl(size_t index, ArrayList const *parent) : _index(index), _parent(parent) {}
 
-        ALIteratorImpl(size_t index, ArrayList const *parent) : _index(index), _parent(parent) {}
-
-        void increment()
+        constexpr void increment()
         {
             ++_index;
             if (_index == _parent->size()) { _index = npos; }
         }
 
-        void decrement()
+        constexpr void decrement()
         {
             if (_index == npos) { _index = _parent->size() - 1;
             } else { --_index; }
@@ -351,6 +351,10 @@ class ArrayList
 
         T & get_value() const { return (*_parent)[_index]; }
         T * get_ptr() const { return &(*_parent)[_index]; }
+
+        T & get_value_at_offset(std::ptrdiff_t offset) const { return (*_parent)[_index + offset]; }
+        void jump(std::ptrdiff_t offset) { _index += offset; }
+        std::ptrdiff_t distance(ALIteratorImpl const &rhs) const { return _index - rhs._index; }
 
         /**
          * Equality operator.
@@ -361,14 +365,20 @@ class ArrayList
         {
             return _index == rhs._index && _parent == rhs._parent;
         }
-
-        constexpr bool operator!=(ALIteratorImpl const &rhs) const { return !(rhs == *this); }
+        constexpr std::partial_ordering operator<=>(ALIteratorImpl const &rhs) const
+        {
+            if (_parent != rhs._parent) { return std::partial_ordering::unordered; }
+            else { return _index <=> rhs._index; }
+        }
 
       private:
-        size_t _index;
-        ArrayList const *_parent;
+        size_t _index{0};
+        ArrayList const *_parent{nullptr};
     };
 
+    static_assert(concepts::IteratorImpl<ALIteratorImpl, T>);
+    static_assert(std::totally_ordered<ALIteratorImpl>);
+    static_assert(concepts::RandomAccessIteratorImpl<ALIteratorImpl, T>);
     DynamicArray<T> _data;
     size_t _size = 0;
 };
