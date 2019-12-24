@@ -1,112 +1,9 @@
 #pragma once
 
-
-#include <type_traits>
-#include <utility>
+#include <bits/functional/function.hpp>
+#include <bits/functional/reference_wrapper.hpp>
 
 namespace std {
-
-inline namespace thor_os {
-
-//=======================================================================
-// Copyright Baptiste Wicht 2013-2018.
-// Distributed under the terms of the MIT License.
-// (See accompanying file LICENSE or copy at
-//  http://www.opensource.org/licenses/MIT)
-//=======================================================================
-
-template<typename> struct function;
-
-template<typename R, typename... Args>
-struct function<R(Args...)> {
-  public:
-    template<typename T>
-    function(T&& t) {
-        using impl = model<typename decay<T>::type>;
-
-        static_assert(sizeof(impl) <= sizeof(storage), "Limited size in function");
-        static_assert(is_trivially_destructible<T>::value, "Limited support of function");
-
-        auto* s = static_cast<void*>(&storage[0]);
-        new (s) impl(forward<T>(t));
-    }
-
-    function(const function& rhs) = delete;
-    function& operator=(const function& rhs) = delete;
-
-    function(function&& rhs) = delete;
-    function& operator=(function&& rhs) = delete;
-
-    R operator()(Args... args) const {
-        auto* s = static_cast<const void*>(&storage[0]);
-        auto* c = static_cast<const concept_t*>(s);
-        return (*c)(forward<Args>(args)...);
-    }
-
-  private:
-    size_t storage[2];
-
-    struct concept_t {
-        virtual R operator()(Args...) const = 0;
-    };
-
-    template<typename T>
-    struct model : concept_t {
-        template<typename U> model(U&& u) : t(forward<U>(u)) {}
-
-        R operator()(Args... args) const override {
-            return t(forward<Args>(args)...);
-        }
-
-        T t;
-    };
-};
-
-} // end namespace thor_os
-
-template<typename T>
-class reference_wrapper
-{
-    static T *_lvalue_ptr(T &r) noexcept { return std::addressof(r); }
-    static void _lvalue_ptr(T&&) = delete;
-  public:
-    using type = T;
-
-    template<typename U, typename = enable_if_t<!is_same_v<reference_wrapper, remove_cvref_t<U>>>,
-            typename = decltype(reference_wrapper::_lvalue_ptr(std::declval<U>()))>
-    reference_wrapper(U&& u) noexcept(noexcept(reference_wrapper::_lvalue_ptr(std::declval<U>())))
-            : _data(reference_wrapper::_lvalue_ptr(std::forward<U>(u))) {}
-
-    reference_wrapper(const reference_wrapper&) = default;
-    reference_wrapper& operator=(const reference_wrapper&) = default;
-
-    operator T&() const noexcept { return get(); }
-    T& get() const noexcept { return *_data; }
-
-//    template<typename... Args>
-//    typename result_of<T&(Args&&...)>::type operator()(Args&&... args) const
-//    {
-//        return std::invoke(get(), std::forward<Args>(args)...);
-//    }
-
-  private:
-    T *_data;
-};
-
-template<typename T>
-reference_wrapper(T&) -> reference_wrapper<T>;
-
-template<typename T>
-inline reference_wrapper<T> ref(T& t) noexcept { return reference_wrapper<T>(t); }
-
-template<typename T>
-inline reference_wrapper<const T> cref(T const &t) noexcept { return reference_wrapper<const T>(t); }
-
-template<typename T> void ref(const T&&) = delete;
-template<typename T> void cref(const T&&) = delete;
-
-template<typename T> inline reference_wrapper<T> ref(reference_wrapper<T> t) noexcept { return t; }
-template<typename T> inline reference_wrapper<const T> cref(reference_wrapper<T> t) noexcept { return {t.get()}; }
 
 template<class T = void> struct equal_to { constexpr bool operator()(T const &x, T const &y) const { return x == y; } };
 template<> struct equal_to<void>
@@ -154,3 +51,5 @@ template<> struct less_equal<void>
 };
 
 } // end namespace std
+
+#include <bits/invoke.hpp>

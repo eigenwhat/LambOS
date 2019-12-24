@@ -10,8 +10,10 @@
 
 #pragma once
 
+#include <utility>
+
 #include <bits/algo_support.hpp>
-#include <functional>
+#include <bits/functional/reference_wrapper.hpp>
 
 namespace std {
 
