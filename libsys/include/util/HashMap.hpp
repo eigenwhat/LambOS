@@ -152,21 +152,21 @@ class HashMap : public virtual Map<K, V>
     class ArrayResizer
     {
       public:
-        static LinkedList<value_type> *
-        resize(LinkedList<value_type> *oldData, size_t oldSize, size_t newSize, size_t)
+        static std::byte * resize(std::byte *oldData, size_t oldSize, size_t newSize, size_t)
         {
-            LinkedList<value_type> *newData = new LinkedList<value_type>[newSize];
+            auto * const src = reinterpret_cast<LinkedList<value_type> *>(oldData);
+            auto * newData = new LinkedList<value_type>[newSize];
             KeyHasher hasher;
 
             for (size_t i = 0; i < oldSize; ++i) { // for each array index
-                for (auto& value : oldData[i]) { // for each element in linkedlist
+                for (auto& value : src[i]) { // for each element in linkedlist
                     KeyType &key = value.first;
                     auto newHash = hasher(key) % newSize; // rehash
                     newData[newHash].enqueue(value); // insert
                 }
             }
 
-            return newData;
+            return reinterpret_cast<std::byte*>(newData);
         }
     };
 

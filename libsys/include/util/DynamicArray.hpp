@@ -2,44 +2,51 @@
 
 #include <Object.hpp>
 
-#include <utility>
 #include <cstddef>
 #include <cstdint>
+#include <memory>
+#include <utility>
 
 namespace _ns_LIBSYS {
 
-template <typename T>
 class DefaultResizer
 {
   public:
     /**
      * Creates a new memory block, copying over the data from the old block.
-     * The old block is *not* deallocated or otherwise modified, outside of any
-     * side effects caused by the element type's assignment operator.
+     * The old block is *not* deallocated, but objects contained in the block are moved out.
      * @param oldData The data to resize.
-     * @param oldSize The size of the old data.
-     * @param newSize The size to resize to.
+     * @param oldSize The size of the old data. (as multiple of sizeof(T))
+     * @param newSize The size to resize to. (as multiple of sizeof(T))
      * @param offset The offset from the beginning where the old data should go.
      * @return The new memory block.
      */
-    static T *resize(T *oldData, size_t oldSize, size_t newSize, size_t offset = 0)
+    template <typename T>
+    static std::byte *resize(std::byte *oldData, size_t oldSize, size_t newSize, size_t offset = 0)
     {
-        T *newData = new T[newSize];
-        for (size_t i = 0; i < oldSize; ++i) {
-            newData[i+offset] = std::move(oldData[i]);
-        }
+        std::byte *newData = new std::byte[newSize * sizeof(T)];
+        T * const newArray = reinterpret_cast<T*>(newData);
+        T * const src = reinterpret_cast<T*>(oldData);
+        T * const dest = newArray + offset;
+        std::uninitialized_default_construct(newArray, dest);
+        std::uninitialized_move(src, src + oldSize, dest, dest + oldSize);
+        std::uninitialized_default_construct(dest + oldSize, newArray + newSize);
         return newData;
     }
 };
 
-template <typename T, typename Resizer = DefaultResizer<T>>
+template <typename T, typename Resizer = DefaultResizer>
 class DynamicArray : public Object
 {
   public:
     static constexpr size_t kDefaultSize = 8;
 
     DynamicArray() : DynamicArray(kDefaultSize) {}
-    DynamicArray(size_t reserve) : _capacity(reserve), _data(new T[_capacity]) {}
+    DynamicArray(size_t reserve) : _capacity{reserve}, _data{_alloc(_capacity)} { _construct(data(), _capacity); }
+    DynamicArray(std::initializer_list<T> il) : _capacity(il.size()), _data{_alloc(_capacity)}
+    {
+        std::uninitialized_move(il.begin(), il.end(), data(), data() + _capacity);
+    }
 
     ~DynamicArray() { delete[] _data; }
 
@@ -59,7 +66,8 @@ class DynamicArray : public Object
     void resize(size_t newSize = 0, size_t offset = 0)
     {
         if (newSize == 0) newSize = nextCapacity();
-        T *newData = Resizer::resize(_data, _capacity, newSize, offset);
+        auto newData = Resizer::template resize<T>(_data, _capacity, newSize, offset);
+        std::destroy(data(), data() + _capacity);
         delete[] _data;
         _data = newData;
         _capacity = newSize;
@@ -73,8 +81,8 @@ class DynamicArray : public Object
      */
     void shift(size_t offset, bool shiftLeft = false)
     {
-        if (shiftLeft) _moveLeft(_data, _data, _capacity, offset);
-        else _moveRight(_data, _data, _capacity, offset);
+        if (shiftLeft) { _moveLeft(data(), data(), _capacity, offset); }
+        else           { _moveRight(data(), data(), _capacity, offset); }
     }
 
     /**
@@ -84,7 +92,7 @@ class DynamicArray : public Object
     void clear(size_t newSize = kDefaultSize)
     {
         delete[] _data;
-        _data = new T[newSize];
+        _data = _alloc(newSize);
         _capacity = newSize;
     }
 
@@ -92,7 +100,7 @@ class DynamicArray : public Object
      * Returns the backing C style array.
      * @return A T * pointing to the front of the array.
      */
-    T const *get() const { return _data; }
+    T const *get() const { return data(); }
 
     /**
      * Allows streamlined conversion to the backing T[].
@@ -106,9 +114,17 @@ class DynamicArray : public Object
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    T& operator[](size_t idx) const { return _data[idx]; }
+    T& operator[](size_t idx) const { return data()[idx]; }
+
+    T *data() const { return reinterpret_cast<T*>(_data); }
+
+    T *begin() const { return data(); }
+    T *end() const { return data() + _capacity; }
 
   private:
+    static std::byte * _alloc(size_t newSize) { return new std::byte[newSize * sizeof(T)]; }
+    static void _construct(T *data, size_t qty) { std::uninitialized_default_construct(data, data + qty); }
+
     /**
      * Moves `_size` elements from one array to another.
      * @param from Array to copy from
@@ -128,16 +144,13 @@ class DynamicArray : public Object
 
     void _moveLeft(T *from, T *to, size_t amount, size_t offset)
     {
-        for (size_t i = offset; i < amount; ++i)
-        {
-            to[i-offset] = std::move(from[i]);
-        }
+        for (size_t i = offset; i < amount; ++i) { to[i-offset] = std::move(from[i]); }
     }
 
     size_t nextCapacity() const { return _capacity * 2; }
 
     size_t _capacity = 0;
-    T *_data = nullptr;
+    alignas(T) std::byte *_data = nullptr;
 };
 
 } // libsys namespace

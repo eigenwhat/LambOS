@@ -56,6 +56,12 @@ class ArrayList
     ArrayList(size_t reserve) : _data(reserve) {}
 
     /**
+     * Constructs an ArrayList, pre-allocating space for all the provided elements.
+     * @param il The elements to pre-allocate space for and insert.
+     */
+    ArrayList(std::initializer_list<T> il) : _data{il}, _size{il.size()} {}
+
+    /**
      * Reserves enough room to hold the given amount.
      * This function can only grow the ArrayList. If reserve <= capacity, no
      * action is performed.
@@ -323,7 +329,7 @@ class ArrayList
             auto doubleCapacity = capacity() * 2;
             auto newSize = minCapacity < doubleCapacity ? doubleCapacity
                                                         : minCapacity;
-            _data.resize(offset, newSize);
+            _data.resize(newSize, offset);
         } else {
             _data.shift(offset);
         }
