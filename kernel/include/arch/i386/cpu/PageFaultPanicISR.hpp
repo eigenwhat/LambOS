@@ -14,7 +14,7 @@ class PageFaultISR : public InterruptServiceRoutine
   public:
     virtual void operator()(RegisterTable &registers) override
     {
-        magicBreakpoint();
+        DEBUG_BREAK();
         char message[128];
         uint32_t cr2;
         asm volatile ("\t movl %%cr2, %0" : "=rm"(cr2));

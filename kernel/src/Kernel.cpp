@@ -4,12 +4,13 @@
 
 #include <Kernel.hpp>
 #include <cstring>
-
+#include <io/debug.h>
 //======================================================
 // Kernel
 //======================================================
 void Kernel::panic(char const *string)
 {
+    DEBUG_BREAK();
     size_t length = strlen(string);
     console()->setBackgroundColor(COLOR_RED);
     console()->setForegroundColor(COLOR_WHITE);
