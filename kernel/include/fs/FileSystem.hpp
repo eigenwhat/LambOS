@@ -20,7 +20,7 @@ class FileSystem
      * @param device The device to build a Volume object around.
      * @return The volume object, or nullptr if the device is invalid.
      */
-    virtual Volume *createVolume(AtaDevice &device) = 0;
+    virtual Volume *createVolume(sys::ArcPtr<AtaDevice> device) = 0;
 
   protected:
     FileSystem(char const *name) : _name(name) {}

@@ -4,7 +4,7 @@
 
 #include <io/FileReader.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 InputStream::Byte FileReader::read(size_t offset)
 {

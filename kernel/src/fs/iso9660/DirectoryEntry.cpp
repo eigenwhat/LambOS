@@ -216,14 +216,14 @@ sys::Maybe<sys::LinkedList<sys::String>> DirectoryEntry::readdir() const
     return contents;
 }
 
-sys::InputStream *DirectoryEntry::fileStream() const
+sys::UniquePtr<sys::InputStream> DirectoryEntry::fileStream() const
 {
     if (isDir()) return nullptr;
 
     // build an input stream and some junk
     const auto sectorSize = volume().parentDevice()->sectorSize();
     const auto sectorCount = sectorsToRead(_extentLength, sectorSize);
-    auto *fstream = new IsoFileStream(_extentLength, sectorSize*sectorCount);
+    auto fstream = sys::make_unique<IsoFileStream>(_extentLength, sectorSize*sectorCount);
     volume().parentDevice()->read(_extentLba, (uint16_t *)fstream->buffer(),
                                   sectorCount);
 

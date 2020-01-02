@@ -21,9 +21,9 @@ bool Iso9660::hasFileSystem(AtaDevice &device)
     return !strcmp(cd001, "CD001");
 }
 
-Volume *Iso9660::createVolume(AtaDevice &device)
+Volume *Iso9660::createVolume(sys::ArcPtr<AtaDevice> device)
 {
-    if (hasFileSystem(device)) {
+    if (hasFileSystem(*device)) {
         auto vol = new iso9660::Volume(device);
         vol->init();
         return vol;

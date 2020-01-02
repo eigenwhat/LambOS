@@ -7,7 +7,7 @@
 #include <util/Collection.hpp>
 #include <util/Iterator.hpp>
 
-namespace _ns_LIBSYS::concepts {
+namespace sys::concepts {
 /**
  * An Iterable Collection is a Collection that supports traversal via special
  * pointer objects called {@ref Iterator}s.

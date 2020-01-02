@@ -3,14 +3,14 @@
 #include <util/ArrayList.hpp>
 #include <util/String.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /**
  * A Path represents a possible path on a filesystem. No checks are made as to
  * whether or not the path exists on a filesystem; it handles only the
  * syntactical aspects of a path.
  */
-class Path : public Object
+class Path
 {
   public:
     /**

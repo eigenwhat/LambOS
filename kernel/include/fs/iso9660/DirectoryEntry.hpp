@@ -32,7 +32,7 @@ class DirectoryEntry : public ::DirectoryEntry
      * Prepares an InputStream for reading the contents of the file.
      * @return The InputStream, or `nullptr` if this is a directory.
      */
-    sys::InputStream *fileStream() const override;
+    sys::UniquePtr<sys::InputStream> fileStream() const override;
 
     /**
      * Does nothing. Read-only file system.

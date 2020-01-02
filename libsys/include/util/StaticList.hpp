@@ -6,7 +6,7 @@
 
 #include <util/Collection.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /**
  * C++ container for a simple fixed-width array.

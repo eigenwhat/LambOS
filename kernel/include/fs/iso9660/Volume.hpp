@@ -14,7 +14,7 @@ class Volume : public ::Volume
      * method.
      * @param device The device containing the Volume.
      */
-    Volume(AtaDevice &device);
+    Volume(sys::ArcPtr<AtaDevice> device);
 
     /**
      * Reads from the device, initializing the in-memory representation of this

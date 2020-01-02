@@ -4,16 +4,17 @@
 
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 
 #include <cstddef>
 #include <cstdint>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
-class OutputStream : public Object
+class OutputStream
 {
   public:
+    virtual ~OutputStream() = default;
     virtual void close() {}
     virtual void flush() {}
     void write(std::byte const *bytes, size_t bytesToWrite) { for (; bytesToWrite--; write(*bytes++)); }

@@ -7,12 +7,12 @@
 #include <util/TypeTraits.hpp>
 #include <util/Void.hpp>
 
+#include <concepts>
 #include <cstdint>
-#include <new>
 #include <functional>
 #include <iterator>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 template <typename T>
 class Maybe
@@ -39,7 +39,7 @@ class Maybe
     constexpr Maybe() = default;
     constexpr Maybe(Void) : Maybe() {}
 
-    template <typename U = T, typename = IfCopyConstructible<U>>
+    template <std::copy_constructible U = T>
     constexpr Maybe(T const &v) : _store(v), _set(true) {}
 
     template <std::move_constructible U = T>

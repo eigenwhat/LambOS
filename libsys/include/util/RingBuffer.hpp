@@ -9,7 +9,7 @@
 #include <cstdint>
 #include <utility>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /**
  * A RingBuffer is a Queue of fixed size. If an object is enqueued while the

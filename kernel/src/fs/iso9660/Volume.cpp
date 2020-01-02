@@ -38,7 +38,7 @@ VolumeDescriptorType getDescriptorType(uint8_t *buf)
 
 }
 
-Volume::Volume(AtaDevice &device) : ::Volume(device) {}
+Volume::Volume(sys::ArcPtr<AtaDevice> device) : ::Volume(device) {}
 
 void Volume::init()
 {
@@ -68,7 +68,7 @@ void Volume::init()
 
     // set root directory entry
     auto *rootEntry = reinterpret_cast<DirectoryInfo *>(&(descriptor->root));
-    _root = make_arc<iso9660::DirectoryEntry>(*rootEntry, *this);
+    _root = sys::make_arc<iso9660::DirectoryEntry>(*rootEntry, *this);
 
     // get volume label
     size_t volumeIdLength = 0;

@@ -66,6 +66,18 @@ constexpr bool lexicographical_compare(InputIt1 first1, InputIt1 last1, InputIt2
     return (first1 == last1) && (first2 != last2);
 }
 
+template <typename T>
+constexpr inline const T& min(const T& a, const T& b) { return b < a ? b : a; }
+
+template<typename T>
+constexpr inline const T& max(const T& a, const T& b) { return  a < b ? b : a; }
+
+template<typename T, typename Compare>
+constexpr inline const T& min(const T& a, const T& b, Compare cmp) { return cmp(b, a) ? b : a; }
+
+template<typename T, typename Compare>
+constexpr inline const T& max(const T& a, const T& b, Compare cmp) { return cmp(a, b) ? b : a; }
+
 template<typename ForwardIt1, typename ForwardIt2>
 constexpr ForwardIt2 swap_ranges(ForwardIt1 first1, ForwardIt1 last1, ForwardIt2 first2)
 {

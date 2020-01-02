@@ -1,11 +1,11 @@
 #pragma once
 
 #include <util/String.hpp>
-#include <Object.hpp>
+#include <Memory.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
-class StringTokenizer : public Object
+class StringTokenizer
 {
   public:
     /**

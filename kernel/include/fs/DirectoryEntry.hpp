@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 #include <cstdint>
 #include <util/Maybe.hpp>
 #include <util/LinkedList.hpp>
@@ -10,7 +10,7 @@
 class Volume;
 
 // not sure if this or "Dirent" is more identifiable
-class DirectoryEntry : public sys::Object
+class DirectoryEntry
 {
   public:
     enum class Type {
@@ -23,6 +23,8 @@ class DirectoryEntry : public sys::Object
 
     DirectoryEntry(Volume &volume, Type type, sys::String const &name)
             : _volume(volume), _type(type), _name(name) {}
+
+    virtual ~DirectoryEntry() = default;
 
     /**
      * Returns the volume this directory entry belongs to.
@@ -67,7 +69,7 @@ class DirectoryEntry : public sys::Object
      * Prepares an InputStream for reading the contents of the file.
      * @return The InputStream, or `nullptr` if this is a directory.
      */
-    virtual sys::InputStream *fileStream() const = 0;
+    virtual sys::UniquePtr<sys::InputStream> fileStream() const = 0;
 
     /**
      * Creates a new file in the directory of this DirectoryEntry.

@@ -1,11 +1,13 @@
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 
 /** Abstract interface for a device on the machine. */
-class Device : public sys::Object
+class Device
 {
   public:
+    virtual ~Device() = default;
+
     /**
      * The name of the device as reported by the device.
      * @return A C string with the device's name.

@@ -9,7 +9,7 @@
 #include <concepts>
 #include <cstring>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 template <typename Cmp, typename T>
 concept Comparator = requires (Cmp const &cmp, T const &a, T const &b) {

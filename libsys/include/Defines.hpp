@@ -3,5 +3,3 @@
 //
 
 #pragma once
-
-#define _ns_LIBSYS sys

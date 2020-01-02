@@ -35,5 +35,26 @@ constexpr void swap(T2 (&a)[N], T2 (&b)[N]) noexcept(is_nothrow_swappable<T2>::v
     for (size_t n = 0; n < N; ++n) { swap(a[n], b[n]); }
 }
 
+template<typename T, T... _Idx>
+struct integer_sequence
+{
+    typedef T value_type;
+    static constexpr size_t size() noexcept { return sizeof...(_Idx); }
+};
+
+/// Alias template make_integer_sequence
+template<typename T, T I>
+using make_integer_sequence = integer_sequence<T, __integer_pack(I)...>;
+
+/// Alias template index_sequence
+template<size_t... _Idx> using index_sequence = integer_sequence<size_t, _Idx...>;
+
+/// Alias template make_index_sequence
+template<size_t I>
+using make_index_sequence = make_integer_sequence<size_t, I>;
+
+/// Alias template index_sequence_for
+template<typename... _Types>
+using index_sequence_for = make_index_sequence<sizeof...(_Types)>;
 
 } // namespace std

@@ -1,13 +1,13 @@
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 
 #include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <utility>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 class DefaultResizer
 {
@@ -36,7 +36,7 @@ class DefaultResizer
 };
 
 template <typename T, typename Resizer = DefaultResizer>
-class DynamicArray : public Object
+class DynamicArray
 {
   public:
     static constexpr size_t kDefaultSize = 8;

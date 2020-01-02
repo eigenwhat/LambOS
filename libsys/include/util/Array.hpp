@@ -9,7 +9,7 @@
 #include <algorithm>
 #include <utility>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /** Fixed-length array object where the size is known at compile time. Basically std::array. */
 template<typename T, std::size_t Size>

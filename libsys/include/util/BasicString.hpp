@@ -6,7 +6,7 @@
 
 #include <compare>
 
-namespace _ns_LIBSYS {
+namespace sys {
 namespace detail {
 
 template <typename T>
@@ -165,7 +165,7 @@ template <typename T> class BasicString
      * Returns an immutable null-terminated C string.
      * @return A C string.
      */
-    constexpr T const *cstr() const { return &_data[0]; }
+    constexpr T const *cstr() const { return _data.data(); }
 
     /**
      * The maximum capacity of the currently allocated block.

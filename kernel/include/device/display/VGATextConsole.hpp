@@ -30,36 +30,36 @@ class VGATextConsole : public Console
      * advancing the cursor.
      * @param c The character to write.
      */
-    void putChar(char c);
+    void putChar(char c) override;
 
     /**
      * Moves the cursor to the given position.
      * @param row The row to move to.
      * @param col The column to move to.
      */
-    void moveTo(std::size_t row, std::size_t col);
+    void moveTo(std::size_t row, std::size_t col) override;
 
     /**
      * Writes a string at the cursor's position, advancing the cursor that many
      * spaces.
      * @param data The string of characters to write.
      */
-    void writeString(char const *data);
+    void writeString(char const *data) override;
 
     /** Clears the console. */
-    void clear();
+    void clear() override;
 
     /** The width of the console. */
-    size_t width();
+    size_t width() override;
 
     /** The height of the console. */
-    size_t height();
+    size_t height() override;
 
     /**
      * Sets the visibility of the cursor.
      * @param isVisible Whether or not it should be visible.
      */
-    void setCursorVisible(bool isVisible);
+    void setCursorVisible(bool isVisible) override;
 
     /** The column at which the cursor is. */
     size_t column() override { return _consoleColumn; }

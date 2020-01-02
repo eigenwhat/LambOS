@@ -206,7 +206,7 @@ Volume *read_ata()
                 puts(isIso9660 ? "yes!" : "no");
                 if (isIso9660) {
                     auto heapDevice = New<X86AtaDevice>(device);
-                    cdVolume = Iso9660::instance().createVolume(*heapDevice);
+                    cdVolume = Iso9660::instance().createVolume(heapDevice);
                     auto entry = cdVolume->find("/bin/elf-test");
                     printf("    Found '/bin/elf-test'? %s\n", entry ? "yes!" : "no");
                     if (!entry) break;

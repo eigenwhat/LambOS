@@ -80,14 +80,6 @@ char *strtok(char * restrict str, char const * restrict delim)
     return tok;
 }
 
-void *memset(void *ptr, int value, size_t num)
-{
-    uint8_t *dst = (uint8_t *)ptr;
-    for(; num--; *dst++ = (uint8_t)value);
-
-    return ptr;
-}
-
 void *memcpy(void *dst, void const *src, size_t num)
 {
     return memmove(dst, src, num);

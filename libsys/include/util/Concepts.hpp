@@ -9,7 +9,7 @@
 #include <concepts>
 #include <utility>
 
-namespace _ns_LIBSYS::concepts {
+namespace sys::concepts {
 
 template <typename T> concept CopyMutable = std::copy_constructible<T> && std::copy_assignable<T>;
 template <typename T> concept MoveMutable = std::move_constructible<T> && std::move_assignable<T>;

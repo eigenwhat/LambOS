@@ -2,7 +2,7 @@
 
 #include <util/Collection.hpp>
 
-namespace _ns_LIBSYS::concepts {
+namespace sys::concepts {
 
 /**
  * A Queue is a FIFO container.

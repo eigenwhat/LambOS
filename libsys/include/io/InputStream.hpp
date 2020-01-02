@@ -5,19 +5,22 @@
 #pragma once
 
 #include <util/Maybe.hpp>
-#include <Object.hpp>
+#include <Memory.hpp>
 
 #include <cstdint>
 #include <cstddef>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /** A stream of bytes that can be read from. */
-class InputStream : public Object
+class InputStream
 {
   public:
     using Byte = Maybe<std::byte>;
     static inline const Byte kEndOfStream = Nothing;
+
+    virtual ~InputStream() = default;
+
     /**
      * Returns an estimate of the number of bytes available for reading without
      * blocking for more data.
@@ -98,7 +101,5 @@ class InputStream : public Object
      */
     virtual void reset() {}
 };
-
-static_assert(ReferenceCountable<InputStream>);
 
 } // libsys namespace

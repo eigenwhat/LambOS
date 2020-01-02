@@ -26,6 +26,7 @@ set (SOURCES
     ${STDLIB_SOURCES}
     src/ctype.c
     src/string.c
+    src/string/memset.cpp
     src/sys/syscall.cpp
     src/sys/syscall_kernel.cpp
     src/lang_support.cpp)

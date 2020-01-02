@@ -4,12 +4,13 @@
 
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 #include <sys/keys.h>
 
-class Keyboard : public sys::Object
+class Keyboard
 {
   public:
+    virtual ~Keyboard() = default;
     virtual KeyEvent read() = 0;
     virtual bool keyIsPressed(KeyCode key) const = 0;
 };

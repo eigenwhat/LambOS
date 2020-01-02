@@ -8,7 +8,7 @@
 #include <util/List.hpp>
 #include <util/Iterator.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /**
  * An ArrayList is an ordered list where the elements are stored in a contiguous

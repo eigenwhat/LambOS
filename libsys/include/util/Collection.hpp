@@ -8,7 +8,7 @@
 
 #include <cstddef>
 
-namespace _ns_LIBSYS::concepts {
+namespace sys::concepts {
 /**
  * The root template interface in the collections class hierarchy. Collections,
  * simply put, are groups of objects. Collections may vary by their internal
@@ -39,5 +39,5 @@ concept DynamicCollection = InsertableCollection<T> && Clearable<T> && requires(
 } // namespace concepts
 
 #define STR(x) #x
-#define ASSERT_IS_2(TYPE, MSG) static_assert(sys::concepts::Collection<TYPE<sys::Object>>, MSG)
+#define ASSERT_IS_2(TYPE, MSG) static_assert(sys::concepts::Collection<TYPE<int>>, MSG)
 #define ASSERT_IS_COLLECTION(TYPE) ASSERT_IS_2(TYPE, "'" #TYPE "' is not a Collection.");

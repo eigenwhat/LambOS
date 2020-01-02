@@ -10,7 +10,6 @@ set (SOURCES
         ${GLOB_INCLUDES} # ok with globbing since they're not translation units
         src/fs/Path.cpp
         src/io/FileReader.cpp
-        src/io/PrintStream.cpp
         src/util/StringTokenizer.cpp)
 
 add_library(${LIBSYS_TARGET} STATIC ${SOURCES})

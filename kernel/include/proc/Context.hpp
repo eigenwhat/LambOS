@@ -4,7 +4,7 @@
 
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 #include <device/display/Console.hpp>
 #include <io/PrintStream.hpp>
 #include <io/InputStream.hpp>
@@ -30,7 +30,7 @@ class Context
      * Returns stdout for this Context.
      * @return A PrintStream connected to stdout.
      */
-    sys::PrintStream *out() const { return _out.get(); }
+    sys::PrintStream *out() const { return _out; }
 
     /**
      * Sets the PrintStream for the stdout of this Context.
@@ -42,7 +42,7 @@ class Context
      * Returns stdin for this Context.
      * @return An InputStream connected to stdin.
      */
-    sys::InputStream *in() const { return _in.get(); }
+    sys::InputStream *in() const { return _in; }
 
     /**
      * Sets the InputStream for the stdin of this Context.
@@ -52,6 +52,6 @@ class Context
 
   private:
     Console *_console;
-    sys::ArcPtr<sys::PrintStream> _out;
+    sys::PrintStream *_out;
     sys::ArcPtr<sys::InputStream> _in;
 };

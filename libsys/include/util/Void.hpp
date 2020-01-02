@@ -6,7 +6,7 @@
 
 #include <Defines.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 struct Void
 {

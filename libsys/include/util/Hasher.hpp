@@ -3,7 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 template <typename T> struct Hasher;
 

@@ -11,7 +11,7 @@ class Iso9660 : public FileSystem
 
     bool hasFileSystem(AtaDevice &device) override;
 
-    Volume *createVolume(AtaDevice &device) override;
+    Volume *createVolume(sys::ArcPtr<AtaDevice> device) override;
 
   private:
     Iso9660() : FileSystem("ISO9660") {}

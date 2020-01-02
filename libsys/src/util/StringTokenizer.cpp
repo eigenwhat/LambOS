@@ -4,7 +4,7 @@
 
 #include <util/StringTokenizer.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 StringTokenizer::StringTokenizer(String const &str, String const &delimiters)
         : _string(str), _delimiters(delimiters)

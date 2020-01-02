@@ -7,7 +7,7 @@
 #include <util/List.hpp>
 #include <cstdio>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /**
  * A LinkedList is an ordered list where each element is contained in a node,

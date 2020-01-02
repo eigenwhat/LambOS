@@ -6,7 +6,7 @@
 #include <util/LinkedList.hpp>
 #include <util/Map.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 template <typename K, typename V, typename KeyHasher = Hasher<K>, typename KeyEqual = decltype(EqualTo<K>)>
 class HashMap : public virtual Map<K, V>

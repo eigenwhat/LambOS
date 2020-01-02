@@ -4,12 +4,12 @@
 
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 /** A Pair is a pairing of two objects of possibly differing types. */
-template <typename A, typename B> class Pair : public virtual Object
+template <typename A, typename B> class Pair
 {
   public:
     using FirstType = A;

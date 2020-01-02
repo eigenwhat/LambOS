@@ -3,10 +3,10 @@
 #include <util/Collection.hpp>
 #include <util/Pair.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 template <typename K, typename V>
-class Map : public virtual Object
+class Map
 {
   public:
     using KeyType = K;

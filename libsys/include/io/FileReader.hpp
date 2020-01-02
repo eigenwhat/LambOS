@@ -2,14 +2,14 @@
 
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 #include <io/InputStream.hpp>
 #include <util/DynamicArray.hpp>
 #include <cstdio>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
-class FileReader : public Object
+class FileReader
 {
   public:
     static inline const auto kEOF = InputStream::kEndOfStream;
@@ -19,8 +19,7 @@ class FileReader : public Object
      * @param fileStream The InputStream to read the file from. The file is
      * considered to start from the first byte read.
      */
-    FileReader(InputStream *fileStream) : _fileStream(fileStream)
-            , _eofReached(fileStream == nullptr)
+    FileReader(ArcPtr<InputStream> fileStream) : _fileStream{std::move(fileStream)}, _eofReached(_fileStream == nullptr)
     {}
 
     /**

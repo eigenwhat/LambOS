@@ -1,9 +1,9 @@
 #pragma once
 
-#include <Object.hpp>
+#include <Memory.hpp>
 #include <cstdint>
 
-class AtaDeviceDescriptor : public sys::Object
+class AtaDeviceDescriptor
 {
   public:
     /**

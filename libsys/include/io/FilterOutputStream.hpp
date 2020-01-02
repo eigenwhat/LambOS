@@ -6,7 +6,7 @@
 
 #include <io/OutputStream.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 class FilterOutputStream : public OutputStream
 {

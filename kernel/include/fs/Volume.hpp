@@ -2,13 +2,13 @@
 
 #include <device/storage/AtaDevice.hpp>
 #include <fs/DirectoryEntry.hpp>
-#include <Object.hpp>
+#include <Memory.hpp>
 
-class Volume : public virtual sys::Object
+class Volume
 {
   public:
     Volume() : _parentDevice(nullptr) {}
-    Volume(AtaDevice &device) : _parentDevice(&device) {}
+    Volume(sys::ArcPtr<AtaDevice> device) : _parentDevice(std::move(device)) {}
 
     /**
      * The label of the volume.

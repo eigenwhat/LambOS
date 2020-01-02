@@ -1,0 +1,95 @@
+//
+// Created by Martin Miralles-Cordal on 01/02/2020.
+//
+
+#pragma once
+
+#include <concepts>
+
+namespace std {
+
+// Actual implementation for a type
+template <std::size_t Index, typename T>
+class __tuple_impl
+{
+  public:
+    __tuple_impl(T const &v) { val_ = v; }
+    __tuple_impl(T &&v) { val_ = std::move(v); }
+    T &get() & { return val_; }
+    T const &get() const & { return val_; }
+    T &&get() && { return std::move(val_); }
+    T const &&get() const && { return std::move(val_); }
+
+  private:
+    T val_;
+};
+
+template <std::size_t Index, typename... Ts> class __tuple_base {};
+
+template <std::size_t Index, typename L, typename... Types>
+class __tuple_base<Index, L, Types...> : public __tuple_impl<Index, L>, public __tuple_base<Index + 1, Types...>
+{
+  public:
+    template <typename CT, typename... CTs>
+    __tuple_base(CT &&first, CTs &&... rest) : __tuple_impl<Index, L>(std::forward<CT>(first))
+                                             , __tuple_base<Index + 1, Types...>(std::forward<CTs>(rest)...) {}
+};
+
+template <typename L, typename... Types>
+class tuple : public __tuple_base<0, L, Types...>
+{
+  public:
+    template <typename... Ts>
+    tuple(Ts &&... args) : __tuple_base<0, L, Types...>(std::forward<Ts>(args)...) {}
+
+    template <typename... Args>
+    friend bool operator==(tuple<Args...> &t1, tuple<Args...> &t2);
+};
+
+template <typename... Ts> tuple(Ts... args) -> tuple<Ts...>;
+
+/** nth type in a template parameter pack. */
+template <std::size_t N, typename T, typename... Ts> struct __nth_type;
+template <std::size_t N, typename... Types> using __nth_type_t = typename __nth_type<N, Types...>::type;
+template <std::size_t N, typename T, typename... Ts> struct __nth_type { using type = __nth_type_t<N-1, Ts...>; };
+template <typename T, typename... Ts> struct __nth_type<0, T, Ts...> { using type = T; };
+
+template <size_t I, typename T> struct tuple_element;
+template<size_t I, typename H, typename... Tail>
+struct tuple_element<I, tuple<H, Tail...>> { using type = __nth_type_t<I, H, Tail...>; };
+
+template <size_t I, typename T> using tuple_element_t = typename tuple_element<I, T>::type;
+
+template <std::size_t I, typename... Args>
+decltype(auto) get(tuple<Args...> &t) { return static_cast<__tuple_impl<I, __nth_type_t<I, Args...>> &>(t).get(); }
+template <std::size_t I, typename... Args>
+decltype(auto) get(tuple<Args...> &&t) { return static_cast<__tuple_impl<I, __nth_type_t<I, Args...>> &&>(t).get(); }
+template <std::size_t I, typename... Args>
+decltype(auto) get(tuple<Args...> const &t)
+{
+    return static_cast<__tuple_impl<I, __nth_type_t<I, Args...>> const &>(t).get();
+}
+template <std::size_t I, typename... Args>
+decltype(auto) get(tuple<Args...> const &&t)
+{
+    return static_cast<__tuple_impl<I, __nth_type_t<I, Args...>> const &&>(t).get();
+}
+
+template <std::size_t I, typename... Args>
+bool compare_tuple(tuple<Args...> &t1, tuple<Args...> &t2)
+{
+    if constexpr (I == 0) { return get<0>(t1) == get<0>(t2); }
+    else { return get<I>(t1) == get<I>(t2) && compare_tuple<I - 1>(t1, t2); }
+}
+
+template <typename... Args>
+bool operator==(tuple<Args...> &t1, tuple<Args...> &t2) { return compare_tuple<sizeof...(Args) - 1>(t1, t2); }
+
+template <typename T> struct __unwrap_refwrapper { using type = T; };
+template <typename T> struct __unwrap_refwrapper<reference_wrapper<T>> { using type = T&; };
+template <typename T> using __special_decay_t = typename __unwrap_refwrapper<decay_t<T>>::type;
+
+template <typename... Types>
+auto make_tuple(Types&&... args) { return tuple<__special_decay_t<Types>...>(std::forward<Types>(args)...); }
+
+} // namespace std

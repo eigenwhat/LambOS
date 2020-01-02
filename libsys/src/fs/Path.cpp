@@ -6,7 +6,7 @@
 #include <util/StaticList.hpp>
 #include <util/StringTokenizer.hpp>
 
-namespace _ns_LIBSYS {
+namespace sys {
 
 namespace {
 

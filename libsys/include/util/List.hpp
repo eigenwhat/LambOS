@@ -4,7 +4,7 @@
 #include <util/Deque.hpp>
 #include <util/Iterable.hpp>
 
-namespace _ns_LIBSYS::concepts {
+namespace sys::concepts {
 /**
  * A List is, well, a list of things. Like Queues and Stacks, List elements are
  * ordered. Unlike them, elements are indexed and thus supports random access.
