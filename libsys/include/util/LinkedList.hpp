@@ -229,14 +229,52 @@ template <typename T> class LinkedList
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    T& operator[](size_t idx) const
+    T const & operator[](size_t idx) const &
     {
-        Node *it = _first.get();
-        for (; idx > 0; --idx) {
-            it = it->next.get();
-        }
-
+        Node *it = nodeAt(idx);
         return it->value;
+    }
+
+    /**
+     * Returns the element at the given index. No bounds checking is performed.
+     *
+     * @note This is a linked list, so this operation is O(n)!
+     * @param idx The index of the object.
+     * @return The object at that index. If the index is out of bounds, the
+     *         return value is undefined.
+     */
+    T & operator[](size_t idx) &
+    {
+        Node *it = nodeAt(idx);
+        return it->value;
+    }
+
+    /**
+     * Returns the element at the given index. No bounds checking is performed.
+     *
+     * @note This is a linked list, so this operation is O(n)!
+     * @param idx The index of the object.
+     * @return The object at that index. If the index is out of bounds, the
+     *         return value is undefined.
+     */
+    T const && operator[](size_t idx) const &&
+    {
+        Node *it = nodeAt(idx);
+        return std::move(it->value);
+    }
+
+    /**
+     * Returns the element at the given index. No bounds checking is performed.
+     *
+     * @note This is a linked list, so this operation is O(n)!
+     * @param idx The index of the object.
+     * @return The object at that index. If the index is out of bounds, the
+     *         return value is undefined.
+     */
+    T && operator[](size_t idx) &&
+    {
+        Node *it = nodeAt(idx);
+        return std::move(it->value);
     }
 
     /**
@@ -359,6 +397,7 @@ template <typename T> class LinkedList
       public:
         using value_type = LinkedList::value_type;
 
+        LLIteratorImpl() = default;
         LLIteratorImpl(Node *node, LinkedList const *parent) : _obj(node), _parent(parent) {}
 
         void increment() { _obj = _obj->next.get(); }
@@ -373,11 +412,20 @@ template <typename T> class LinkedList
         LinkedList const *_parent;
     };
 
+    Node * nodeAt(size_t idx) const
+    {
+        Node *it = _first.get();
+        for (; idx > 0; --idx) { it = it->next.get(); }
+        return it;
+    }
+
     ArcPtr<Node> _first = nullptr;
     ArcPtr<Node> _last = nullptr;
     size_t _size = 0;
 };
 
-static_assert(concepts::List<LinkedList<int>>);
+static_assert(Deque<LinkedList<int>>);
+static_assert(Iterable<LinkedList<int>>);
+static_assert(List<LinkedList<int>>);
 
 } // libsys namespace

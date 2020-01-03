@@ -15,13 +15,13 @@ namespace std {
 // concept readable
 template<class In>
 concept readable = requires {
-    typename iter_value_t<In>;
-    typename iter_reference_t<In>;
-    typename iter_rvalue_reference_t<In>;
-}
-              && common_reference_with<iter_reference_t<In>&&, iter_value_t<In>&>
-              && common_reference_with<iter_reference_t<In>&&, iter_rvalue_reference_t<In>&&>
-              && common_reference_with<iter_rvalue_reference_t<In>&&, const iter_value_t<In>&>;
+                       typename iter_value_t<In>;
+                       typename iter_reference_t<In>;
+                       typename iter_rvalue_reference_t<In>;
+                   }
+                   && common_reference_with<iter_reference_t<In>&&, iter_value_t<In>&>
+                   && common_reference_with<iter_reference_t<In>&&, iter_rvalue_reference_t<In>&&>
+                   && common_reference_with<iter_rvalue_reference_t<In>&&, const iter_value_t<In>&>;
 
 template<readable T>
 using iter_common_reference_t = common_reference_t<iter_reference_t<T>, iter_value_t<T>&>;
@@ -51,7 +51,7 @@ concept incrementable = regular<I> && weakly_incrementable<I> && requires(I i) {
 };
 
 // concept input_or_output_iterator
-template <typename T> concept __referenceable = _is_referenceable<T>::value;
+template <typename T> concept __referenceable = __is_referenceable<T>::value;
 template<class I>
 concept input_or_output_iterator = requires(I i) { { *i } -> __referenceable; } && weakly_incrementable<I>;
 

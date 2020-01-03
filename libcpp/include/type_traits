@@ -367,13 +367,13 @@ template<typename T>
 struct _is_array_known_bounds : public bool_constant<(extent<T>::value > 0)> {};
 
 template<typename T>
-struct _is_referenceable : public disjunction<is_object<T>, is_reference<T>>::type {};
+struct __is_referenceable : public disjunction<is_object<T>, is_reference<T>>::type {};
 
 template<typename _Res, typename... Args NOEXCEPT_TPARAM>
-struct _is_referenceable<_Res(Args...) NOEXCEPT_QUALIFIER> : public true_type {};
+struct __is_referenceable<_Res(Args...) NOEXCEPT_QUALIFIER> : public true_type {};
 
 template<typename _Res, typename... Args NOEXCEPT_TPARAM>
-struct _is_referenceable<_Res(Args......) NOEXCEPT_QUALIFIER> : public true_type {};
+struct __is_referenceable<_Res(Args......) NOEXCEPT_QUALIFIER> : public true_type {};
 
 // is_constructible
 namespace internal {
@@ -422,13 +422,13 @@ template<typename T, typename...Args>
 using is_nothrow_constructible = conjunction<is_constructible<T, Args...>, _is_nt_ctorible_impl<T, Args...>>;
 
 // is_nothrow_move_constructible
-template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_move_ctorible_impl;
+template<typename T, bool = __is_referenceable<T>::value> struct _is_nt_move_ctorible_impl;
 template<typename T> struct _is_nt_move_ctorible_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_move_ctorible_impl<T, true> : public is_nothrow_constructible<T, T&&> {};
 template<typename T> using is_nothrow_move_constructible = _is_nt_move_ctorible_impl<T>;
 
 // is_nothrow_copy_constructible
-template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_copy_ctorible_impl;
+template<typename T, bool = __is_referenceable<T>::value> struct _is_nt_copy_ctorible_impl;
 template<typename T> struct _is_nt_copy_ctorible_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_copy_ctorible_impl<T, true> : public is_nothrow_constructible<T, T const&> {};
 template<typename T> using is_nothrow_copy_constructible = _is_nt_copy_ctorible_impl<T>;
@@ -482,13 +482,13 @@ template<typename T, typename U>
 using is_assignable = bool_constant<__is_assignable(T, U)>;
 
 // is_copy_assignable
-template<typename T, bool = _is_referenceable<T>::value> struct __is_copy_assignable_impl;
+template<typename T, bool = __is_referenceable<T>::value> struct __is_copy_assignable_impl;
 template<typename T> struct __is_copy_assignable_impl<T, false> : public false_type {};
 template<typename T> struct __is_copy_assignable_impl<T, true> : public is_assignable<T&, const T&> {};
 template<typename T> using is_copy_assignable = __is_copy_assignable_impl<T>;
 
 // is_move_assignable
-template<typename T, bool = _is_referenceable<T>::value> struct __is_move_assignable_impl;
+template<typename T, bool = __is_referenceable<T>::value> struct __is_move_assignable_impl;
 template<typename T> struct __is_move_assignable_impl<T, false> : public false_type {};
 template<typename T> struct __is_move_assignable_impl<T, true> : public is_assignable<T&, T&&> {};
 template<typename T> using is_move_assignable = __is_move_assignable_impl<T>;
@@ -500,13 +500,13 @@ template<typename T, typename U>
 using is_nothrow_assignable = conjunction<is_assignable<T, U>, _is_nt_assignable_impl<T, U>>;
 
 // is_nothrow_copy_assignable
-template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_copy_assignable_impl;
+template<typename T, bool = __is_referenceable<T>::value> struct _is_nt_copy_assignable_impl;
 template<typename T> struct _is_nt_copy_assignable_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_copy_assignable_impl<T, true> : public is_nothrow_assignable<T&, const T&> {};
 template<typename T> using is_nothrow_copy_assignable = _is_nt_copy_assignable_impl<T>;
 
 // is_nothrow_move_assignable
-template<typename T, bool = _is_referenceable<T>::value> struct _is_nt_move_assignable_impl;
+template<typename T, bool = __is_referenceable<T>::value> struct _is_nt_move_assignable_impl;
 template<typename T> struct _is_nt_move_assignable_impl<T, false> : public false_type {};
 template<typename T> struct _is_nt_move_assignable_impl<T, true> : public is_nothrow_assignable<T&, T&&> {};
 template<typename T> using is_nothrow_move_assignable = _is_nt_move_assignable_impl<T>;

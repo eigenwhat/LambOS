@@ -5,6 +5,7 @@
 #pragma once
 
 #include <io/OutputStream.hpp>
+#include <util/String.hpp>
 #include <util/TypeTraits.hpp>
 
 #include <concepts>
@@ -13,43 +14,24 @@
 
 namespace sys {
 
-namespace printstream_detail {
-inline void xtoa(bool num, char *intstr, int base)               { itoa(num, intstr, base); }
-inline void xtoa(std::int8_t num, char *intstr, int base)        { itoa(num, intstr, base); }
-inline void xtoa(std::int16_t num, char *intstr, int base)       { itoa(num, intstr, base); }
-inline void xtoa(int num, char *intstr, int base)                { itoa(num, intstr, base); }
-inline void xtoa(long int num, char *intstr, int base)           { ltoa(num, intstr, base); }
-inline void xtoa(long long int num, char *intstr, int base)      { lltoa(num, intstr, base); }
-inline void xtoa(std::uint8_t num, char *intstr, int base)       { itoa(num, intstr, base); }
-inline void xtoa(std::uint16_t num, char *intstr, int base)      { itoa(num, intstr, base); }
-inline void xtoa(unsigned int num, char *intstr, int base)       { uitoa(num, intstr, base); }
-inline void xtoa(unsigned long num, char *intstr, int base)      { ultoa(num, intstr, base); }
-inline void xtoa(unsigned long long num, char *intstr, int base) { ulltoa(num, intstr, base); }
-}
-
-
 template <typename T>
 void print(OutputStream &out, T &&data)
 {
-    if constexpr (is_any_of_v<std::decay_t<T>, char, std::byte>) {
+    if constexpr (is_any_of_v<std::decay_t<T>, char, unsigned char, signed char, std::byte>) {
         out.write(data);
     }
     else if constexpr (std::convertible_to<std::decay_t<T>, char const *>) {
         char const *it = data;
         while (char currLetter = *it++) { print(out, currLetter); }
     }
+    else if constexpr (std::same_as<std::decay_t<T>, String>) {
+        print(out, data.cstr());
+    }
     else if constexpr (std::same_as<std::decay_t<T>, bool>) {
         print(out, data ? "true" : "false");
     }
-    else if constexpr (std::integral<std::decay_t<T>>) {
-        char intstr[33];
-        printstream_detail::xtoa(data, intstr, 10);
-        print(out, intstr);
-    }
-    else if constexpr (std::convertible_to<std::decay_t<T>, void *>) {
-        char intstr[33];
-        printstream_detail::xtoa(reinterpret_cast<std::uintptr_t>(data), intstr, 16);
-        print(out, intstr);
+    else if constexpr (std::integral<std::decay_t<T>> || std::convertible_to<std::decay_t<T>, void *>) {
+        print(out, to_string(data));
     }
     else {
         static_assert(!std::is_same_v<T, T>);
@@ -77,6 +59,13 @@ void print(OutputStream &out, char const *format, H &&first, Ts &&...rest)
             ++currentInput;
         }
     }
+}
+
+template <typename H, typename ...Ts>
+void println(OutputStream &out, char const *format, H &&first, Ts &&...rest)
+{
+    print(out, format, std::forward<H>(first), std::forward<Ts>(rest)...);
+    out.write('\n');
 }
 
 } // libsys namespace

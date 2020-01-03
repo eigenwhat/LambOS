@@ -65,7 +65,7 @@ class DynamicArray
      */
     void resize(size_t newSize = 0, size_t offset = 0)
     {
-        if (newSize == 0) newSize = nextCapacity();
+        if (newSize == 0) { newSize = nextCapacity(); }
         auto newData = Resizer::template resize<T>(_data, _capacity, newSize, offset);
         std::destroy(data(), data() + _capacity);
         delete[] _data;
@@ -116,10 +116,17 @@ class DynamicArray
      */
     T& operator[](size_t idx) const { return data()[idx]; }
 
-    T *data() const { return reinterpret_cast<T*>(_data); }
+    T *data() const { return reinterpret_cast<T *>(_data); }
 
-    T *begin() const { return data(); }
-    T *end() const { return data() + _capacity; }
+    T const *begin() const { return data(); }
+    T const *end() const { return data() + _capacity; }
+    auto rbegin() const { return std::make_reverse_iterator(end()); }
+    auto rend() const { return std::make_reverse_iterator(begin()); }
+
+    T *begin() { return data(); }
+    T *end() { return data() + _capacity; }
+    auto rbegin() { return std::make_reverse_iterator(end()); }
+    auto rend() { return std::make_reverse_iterator(begin()); }
 
   private:
     static std::byte * _alloc(size_t newSize) { return new std::byte[newSize * sizeof(T)]; }

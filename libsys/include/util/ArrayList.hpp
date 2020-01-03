@@ -280,7 +280,31 @@ class ArrayList
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    T& operator[](size_t idx) const { return _data[idx]; }
+    T const & operator[](size_t idx) const & { return _data[idx]; }
+
+    /**
+     * Returns the element at the given index.  No bounds checking is performed.
+     * @param idx The index of the object.
+     * @return The object at that index. If the index is out of bounds, the
+     *         return value is undefined.
+     */
+    T& operator[](size_t idx) & { return _data[idx]; }
+
+    /**
+     * Returns the element at the given index.  No bounds checking is performed.
+     * @param idx The index of the object.
+     * @return The object at that index. If the index is out of bounds, the
+     *         return value is undefined.
+     */
+    T const && operator[](size_t idx) const && { return _data[idx]; }
+
+    /**
+     * Returns the element at the given index.  No bounds checking is performed.
+     * @param idx The index of the object.
+     * @return The object at that index. If the index is out of bounds, the
+     *         return value is undefined.
+     */
+    T&& operator[](size_t idx) && { return _data[idx]; }
 
     /** An iterator pointing to the first element in the list. */
     const_iterator begin() const { return const_iterator{ALIteratorImpl{0, this}}; }
@@ -355,8 +379,8 @@ class ArrayList
             } else { --_index; }
         }
 
-        T & get_value() const { return (*_parent)[_index]; }
-        T * get_ptr() const { return &(*_parent)[_index]; }
+        T & get_value() const { return _parent->_data[_index]; }
+        T * get_ptr() const { return &(_parent->_data[_index]); }
 
         T & get_value_at_offset(std::ptrdiff_t offset) const { return (*_parent)[_index + offset]; }
         void jump(std::ptrdiff_t offset) { _index += offset; }
@@ -382,13 +406,13 @@ class ArrayList
         ArrayList const *_parent{nullptr};
     };
 
-    static_assert(concepts::IteratorImpl<ALIteratorImpl, T>);
+    static_assert(IteratorImpl<ALIteratorImpl, T>);
     static_assert(std::totally_ordered<ALIteratorImpl>);
-    static_assert(concepts::RandomAccessIteratorImpl<ALIteratorImpl, T>);
+    static_assert(RandomAccessIteratorImpl<ALIteratorImpl, T>);
     DynamicArray<T> _data;
     size_t _size = 0;
 };
 
-static_assert(concepts::List<ArrayList<int>>);
+static_assert(List<ArrayList<int>>);
 
 } // libsys namespace

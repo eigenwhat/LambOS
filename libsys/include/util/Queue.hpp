@@ -2,7 +2,7 @@
 
 #include <util/Collection.hpp>
 
-namespace sys::concepts {
+namespace sys {
 
 /**
  * A Queue is a FIFO container.

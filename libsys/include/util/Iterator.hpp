@@ -11,27 +11,9 @@
 #include <utility>
 
 namespace sys {
-namespace concepts {
 
 template <typename T>
-concept Iterator = std::copy_constructible<T>
-                   && std::copy_assignable<T>
-                   && std::destructible<T>
-                   && std::swappable<T>
-                   && Dereferencable<T>
-                   && requires(T a) { a++; ++a; };
-
-template <typename T>
-concept InputIterator = Pointer<T>
-                        || (std::equality_comparable<T> && Iterator<T> && requires(T a)
-                           {
-                               typename T::value_type;
-                               typename T::reference;
-                               typename T::pointer;
-                               requires requires { { *a } -> std::same_as<typename T::value_type>; }
-                                     || requires { { *a } -> std::same_as<typename T::reference>; };
-                               { a.operator->() } -> std::same_as<typename T::pointer>;
-                           });
+concept iterator = std::weakly_incrementable<T> && dereferenceable<T>;
 
 template <typename T, typename ValueType>
 concept IteratorImpl = std::equality_comparable<T> && requires(T &a)
@@ -52,11 +34,9 @@ concept RandomAccessIteratorImpl = IteratorImpl<T, ValueType> && std::totally_or
     { b.distance(a) } -> std::same_as<std::ptrdiff_t>;
 };
 
-} // namespace concepts
-
 namespace iterator_impl {
 
-template <typename Impl, bool Const> requires concepts::IteratorImpl<Impl, typename Impl::value_type>
+template <typename Impl, bool Const> requires IteratorImpl<Impl, typename Impl::value_type>
 struct Bidirectional
 {
     using value_type = typename Impl::value_type;
@@ -107,7 +87,7 @@ struct Bidirectional
 
 }
 
-template <typename Impl, bool Const> requires concepts::IteratorImpl<Impl, typename Impl::value_type>
+template <typename Impl, bool Const> requires IteratorImpl<Impl, typename Impl::value_type>
 struct BasicIterator : iterator_impl::Bidirectional<Impl, Const>
 {
   private:
@@ -122,7 +102,7 @@ struct BasicIterator : iterator_impl::Bidirectional<Impl, Const>
     using super::operator=;
 };
 
-template <typename Impl, bool Const> requires concepts::RandomAccessIteratorImpl<Impl, typename Impl::value_type>
+template <typename Impl, bool Const> requires RandomAccessIteratorImpl<Impl, typename Impl::value_type>
 struct BasicIterator<Impl, Const> : iterator_impl::Bidirectional<Impl, Const>
 {
   private:

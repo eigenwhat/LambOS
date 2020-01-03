@@ -5,6 +5,8 @@
 #include <util/Hasher.hpp>
 
 #include <compare>
+#include <cstring>
+#include <ranges>
 
 namespace sys {
 namespace detail {
@@ -48,6 +50,7 @@ template <typename T> class BasicString
     {
         for (size_t i = 0; i < _data.capacity(); ++i) { _data[i] = 0; }
     }
+//    constexpr BasicString(size_t reserve) : _data(reserve + 1) { std::ranges::fill(_data, T{0}); }
 
     /**
      * Constructs a BasicString, allocating and filling space for the provided
@@ -55,27 +58,25 @@ template <typename T> class BasicString
      * @param str The string to initialize as.
      */
     constexpr BasicString(T const *str) : BasicString(str, detail::strlen(str)) {}
+    constexpr BasicString &operator=(T const *str) { _size = 0; return append(str); }
 
     /**
      * Constructs a BasicString, allocating and filling space for the first
      * X characters in the null-terminated string.
      * @param str The string to initialize as.
-     * @param strlen The number of characters to read.
+     * @param len The number of characters to read.
      */
-    constexpr BasicString(T const *str, size_t strlen) : _data(strlen + 1), _size(strlen)
+    constexpr BasicString(T const *str, size_t len) : _data(len + 1), _size(len)
     {
-        if (strlen == 0) {
-            _data[0] = 0;
-        } else {
-            for (size_t i = 0; i < strlen; ++i) {
-                _data[i] = str[i];
-            }
-            _data[_size] = 0; // null terminate
-        }
+        if (len > 0) { std::strncpy(_data.data(), str, len); }
+        _data[_size] = 0; // null terminate
     }
 
-    constexpr BasicString(BasicString const &other) : BasicString(other.cstr()) {}
+    constexpr BasicString(BasicString const &other) : BasicString(other.cstr(), other.size()) {}
+    constexpr BasicString &operator=(BasicString const &rhs) { _size = 0; return append(rhs); }
 
+    constexpr BasicString(BasicString &&other) noexcept = default;
+    constexpr BasicString &operator=(BasicString &&rhs) noexcept = default;
     /**
      * Returns whether or not the Collection is empty.
      * @return `true` if empty, `false` otherwise.
@@ -185,6 +186,24 @@ template <typename T> class BasicString
     }
 
     /**
+     * Appends the provided range.
+     *
+     * @param str The BasicString to append.
+     * @return A reference to this.
+     */
+    template <std::input_iterator It>
+    constexpr BasicString &append(It begin, It end)
+    {
+        for (auto i = begin; i != end; ++i) {
+            if (_size == capacity()) { _data.resize(); }
+            _data[_size++] = *i;
+        }
+
+        _data[_size] = 0; // null terminate
+        return *this;
+    }
+
+    /**
      * Appends the provided null-terminated string.
      *
      * @param str The null-terminated string to append.
@@ -254,7 +273,15 @@ template <typename T> class BasicString
      * @return The object at that index. If the index is out of bounds, the
      *         return value is undefined.
      */
-    constexpr T& operator[](size_t idx) const { return _data[idx]; }
+    constexpr T const & operator[](size_t idx) const { return _data[idx]; }
+
+    /**
+     * Returns the element at the given index.  No bounds checking is performed.
+     * @param idx The index of the object.
+     * @return The object at that index. If the index is out of bounds, the
+     *         return value is undefined.
+     */
+    constexpr T & operator[](size_t idx) { return _data[idx]; }
 
     /**
      * Returns a BasicString containing this appended by the given BasicString.
@@ -276,18 +303,6 @@ template <typename T> class BasicString
         BasicString ret(*this);
         ret.insert(rhs);
         return ret;
-    }
-
-    constexpr BasicString &operator=(BasicString const &rhs)
-    {
-        _size = 0;
-        return append(rhs);
-    }
-
-    constexpr BasicString &operator=(T const *str)
-    {
-        _size = 0;
-        return append(str);
     }
 
     /**
@@ -333,6 +348,18 @@ template <typename T> class BasicString
         else if (diff == 0) { return std::strong_ordering::equal; }
         else                { return std::strong_ordering::greater; }
     }
+
+    T *begin() { return _data.begin(); }
+    T *end() { return _data.begin() + _size; }
+
+    T const *begin() const { return _data.begin(); }
+    T const *end() const { return _data.begin() + _size; }
+
+    auto rbegin() { return std::make_reverse_iterator(end()); }
+    auto rend() { return _data.rend(); }
+
+    auto rbegin() const { return std::make_reverse_iterator(end()); }
+    auto rend() const { return _data.rend(); }
 
   private:
     DynamicArray<T> _data;

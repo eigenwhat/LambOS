@@ -8,7 +8,8 @@
 
 #include <cstddef>
 
-namespace sys::concepts {
+namespace sys {
+
 /**
  * The root template interface in the collections class hierarchy. Collections,
  * simply put, are groups of objects. Collections may vary by their internal
@@ -19,13 +20,13 @@ namespace sys::concepts {
  * @tparam T The type of object the Collection contains.
  */
 template <typename T>
-concept Collection = Sized<T> && requires(T a) { typename T::value_type; };
+concept Collection = sized<T> && requires(T a) { typename T::value_type; };
 
 template <typename T>
-concept InsertableCollection = Collection<T> && Insertable<T, typename T::value_type>;
+concept InsertableCollection = Collection<T> && insertable<T, typename T::value_type>;
 
 template <typename T>
-concept DynamicCollection = InsertableCollection<T> && Clearable<T> && requires(T a)
+concept DynamicCollection = InsertableCollection<T> && clearable<T> && requires(T a)
 {
     /**
     * Removes the object from the Collection, reducing its size.
@@ -38,6 +39,5 @@ concept DynamicCollection = InsertableCollection<T> && Clearable<T> && requires(
 
 } // namespace concepts
 
-#define STR(x) #x
-#define ASSERT_IS_2(TYPE, MSG) static_assert(sys::concepts::Collection<TYPE<int>>, MSG)
+#define ASSERT_IS_2(TYPE, MSG) static_assert(sys::Collection<TYPE<int>>, MSG)
 #define ASSERT_IS_COLLECTION(TYPE) ASSERT_IS_2(TYPE, "'" #TYPE "' is not a Collection.");

@@ -7,7 +7,7 @@
 #include <util/Collection.hpp>
 #include <util/Iterator.hpp>
 
-namespace sys::concepts {
+namespace sys {
 /**
  * An Iterable Collection is a Collection that supports traversal via special
  * pointer objects called {@ref Iterator}s.
@@ -16,10 +16,10 @@ template <typename T>
 concept Iterable = Collection<T> && requires(T a)
 {
     typename T::iterator;
-    requires Iterator<typename T::iterator>;
+    requires iterator<typename T::iterator>;
 
     typename T::const_iterator;
-    requires Iterator<typename T::const_iterator>;
+    requires iterator<typename T::const_iterator>;
 
     /**
      * Retrieves an Iterator set to the frontmost element of the Collection. If

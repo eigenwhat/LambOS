@@ -21,12 +21,17 @@ set (STDLIB_SOURCES
         src/stdlib/liballoc_hook.cpp
         )
 
+set (STRING_SOURCES
+        src/string/memset.cpp
+        src/string/string.c
+        src/string/strtok.c
+        )
+
 set (SOURCES
     ${STDIO_SOURCES}
     ${STDLIB_SOURCES}
+    ${STRING_SOURCES}
     src/ctype.c
-    src/string.c
-    src/string/memset.cpp
     src/sys/syscall.cpp
     src/sys/syscall_kernel.cpp
     src/lang_support.cpp)

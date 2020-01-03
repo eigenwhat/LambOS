@@ -2,7 +2,7 @@
 
 #include <util/Collection.hpp>
 
-namespace sys::concepts {
+namespace sys {
 
 template <typename T>
 concept Stack = DynamicCollection<T> && requires(T a)

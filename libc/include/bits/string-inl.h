@@ -1,7 +1,4 @@
-#include <stddef.h>
-#include <stdint.h>
-#include <string.h>
-
+__LIBC_CONSTEXPR
 size_t strlen(char const* str)
 {
     size_t ret = 0;
@@ -10,6 +7,7 @@ size_t strlen(char const* str)
     return ret;
 }
 
+__LIBC_CONSTEXPR
 char *strcpy(char *dst, char const *src)
 {
     char *retval = dst;
@@ -17,6 +15,7 @@ char *strcpy(char *dst, char const *src)
     return retval;
 }
 
+__LIBC_CONSTEXPR
 char *strncpy(char *dst, char const *src, size_t num)
 {
     char *retval = dst;
@@ -24,72 +23,32 @@ char *strncpy(char *dst, char const *src, size_t num)
     return retval;
 }
 
+__LIBC_CONSTEXPR
 int strcmp(char const *str1, char const *str2)
 {
     while (*str1 && *str2 && (*str1 == *str2)) { ++str1; ++str2; }
     return *(const unsigned char *)str1 - *(const unsigned char *)str2;
 }
 
+__LIBC_CONSTEXPR
 int strncmp(char const *str1, char const *str2, size_t num)
 {
     while ((num--) && *str1 && *str2 && (*str1++ == *str2++));
     return *(const unsigned char *)str1 - *(const unsigned char *)str2;
 }
 
-char *strtok(char * restrict str, char const * restrict delim)
-{
-    static char *s = NULL;
-    if (str != NULL) {
-        s = str;
-    }
-
-    while (*s) {
-        int isDelim = 0;
-        for (int i = 0; delim[i] != 0; ++i) {
-            if (*s == delim[i]) {
-                isDelim = 1;
-                break;
-            }
-        }
-
-        if (!isDelim) {
-            break;
-        }
-
-        ++s;
-    }
-
-    if (*s == 0) {
-        return NULL;
-    }
-
-    char *tok = s;
-
-    while (*s) {
-        for (int i = 0; delim[i] != 0; ++i) {
-            if (*s == delim[i]) {
-                *s = 0;
-                ++s;
-                return tok;
-            }
-        }
-
-        ++s;
-    }
-
-    return tok;
-}
-
+__LIBC_CONSTEXPR
 void *memcpy(void *dst, void const *src, size_t num)
 {
     return memmove(dst, src, num);
 }
 
+__LIBC_CONSTEXPR
 void *memmove(void *dst, void const *src, size_t num)
 {
     uint8_t *c_dst = (uint8_t *)dst;
     uint8_t const *c_src = (uint8_t const *)src;
-    if(dst > src && dst < src + num) {
+    if(c_dst > c_src && c_dst < c_src + num) {
         c_src += num;
         c_dst += num;
         for(; num--; *--c_dst = *--c_src);
