@@ -15,7 +15,7 @@
 #include <proc/elf/Executable.hpp>
 
 #include <io/BochsDebugOutputStream.hpp>
-#include <io/debug.h>
+#include <system/Debug.hpp>
 
 #include <util/StaticList.hpp>
 

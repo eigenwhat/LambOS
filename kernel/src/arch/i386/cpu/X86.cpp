@@ -8,7 +8,7 @@
 #include <cstring>
 #include <cstdlib>
 
-#include <io/debug.h>
+#include <system/Debug.hpp>
 
 void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2);
 

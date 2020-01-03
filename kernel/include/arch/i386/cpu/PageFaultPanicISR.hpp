@@ -6,7 +6,7 @@
 
 #include <arch/i386/cpu/InterruptDescriptorTable.hpp>
 #include <Kernel.hpp>
-#include <io/debug.h>
+#include <system/Debug.hpp>
 #include <cstdio>
 
 class PageFaultISR : public InterruptServiceRoutine

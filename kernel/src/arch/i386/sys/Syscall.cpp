@@ -3,7 +3,7 @@
 //
 
 #include <arch/i386/sys/Syscall.hpp>
-#include <io/debug.h>
+#include <system/Debug.hpp>
 
 void SyscallHandler::reportUnknownSyscall(RegisterTable &registers)
 {

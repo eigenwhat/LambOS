@@ -4,7 +4,7 @@
 
 #include <Kernel.hpp>
 #include <cstring>
-#include <io/debug.h>
+#include <system/Debug.hpp>
 //======================================================
 // Kernel
 //======================================================

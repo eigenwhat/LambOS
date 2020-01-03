@@ -7,7 +7,7 @@
 #include <arch/i386/sys/asm.h>
 #include <arch/i386/X86Kernel.hpp>
 
-#include <io/debug.h>
+#include <system/Debug.hpp>
 
 #include <ranges>
 #include <cstdio>
