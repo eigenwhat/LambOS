@@ -1,3 +1,7 @@
+//
+// Created by Martin Miralles-Cordal on 8/17/2013.
+//
+
 #pragma once
 
 #include <cstddef>
@@ -44,6 +48,7 @@ class PageTable
      *                     is enabled, physical otherwise.
      */
     PageTable(std::uint32_t *tableAddress) : _tableAddress(tableAddress) {}
+    PageTable(void *tableAddress) : PageTable{static_cast<std::uint32_t *>(tableAddress)} {}
 
     /**
      * Clears all entries in the table.
@@ -59,18 +64,28 @@ class PageTable
      * @param index The index of the entry.
      * @return The entry.
      */
-    PageEntry entryAtIndex(uint16_t index) const;
+    PageEntry entryAtIndex(uint16_t index) const
+    {
+        PageEntry entry(_tableAddress[index]);
+        entry.setFlags(_tableAddress[index]);
+        return entry;
+    }
 
     /**
      * Sets the PageEntry at the given index.
      * @param index The index to set/replace.
      * @param entry The entry to set.
      */
-    void setEntry(uint16_t index, PageEntry entry);
+    void setEntry(uint16_t index, PageEntry entry)
+    {
+        _tableAddress[index] = entry._entry;
+        invalidatePage(entry.address());
+    }
 
     /** Installs the PageTable as the active page directory. */
     void install();
 
   private:
+    static void invalidatePage(uint32_t m);
     std::uint32_t *_tableAddress;
 };

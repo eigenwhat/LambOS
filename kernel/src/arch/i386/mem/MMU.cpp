@@ -3,9 +3,9 @@
 //
 
 #include <mem/MMU.hpp>
+#include <system/asm.h>
 #include <mem/PageFrameAllocator.hpp>
 #include <mem/PageTable.hpp>
-#include <arch/i386/sys/asm.h>
 #include <Kernel.hpp>
 
 #include <cstdio>

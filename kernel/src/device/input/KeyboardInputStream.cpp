@@ -1,5 +1,11 @@
+//
+// Created by Martin Miralles-Cordal on 9/12/2013.
+//
+
 #include <device/input/KeyboardInputStream.hpp>
 #include <Kernel.hpp>
+
+#include <io/Print.hpp>
 
 namespace {
 #define NUL 0
@@ -53,6 +59,6 @@ auto KeyboardInputStream::read() -> Byte
     } while (event.type != kKeyEventPressed || kKeyToChar[event.keyCode] == 0);
 
     auto c = charWithModKeys(*_keyboard, event.keyCode);
-    kernel->out()->print(c);
+    sys::print(*kernel->out(), c);
     return std::byte(c);
 }

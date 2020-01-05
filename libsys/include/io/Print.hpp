@@ -5,6 +5,7 @@
 #pragma once
 
 #include <io/OutputStream.hpp>
+#include <io/StandardOutput.hpp>
 #include <util/String.hpp>
 #include <util/TypeTraits.hpp>
 
@@ -30,7 +31,7 @@ void print(OutputStream &out, T &&data)
     else if constexpr (std::same_as<std::decay_t<T>, bool>) {
         print(out, data ? "true" : "false");
     }
-    else if constexpr (std::integral<std::decay_t<T>> || std::convertible_to<std::decay_t<T>, void *>) {
+    else if constexpr (std::integral<std::decay_t<T>> || pointer<std::decay_t<T>>) {
         print(out, to_string(data));
     }
     else {
@@ -41,18 +42,28 @@ void print(OutputStream &out, T &&data)
 template <typename H, typename ...Ts>
 void print(OutputStream &out, char const *format, H &&first, Ts &&...rest)
 {
+    static constexpr auto is_format_spec = [](char c) { return c == '@' || c == 'x' || c == 'p'; };
     auto const inputs = std::make_tuple(std::forward<H>(first), std::forward<Ts>(rest)...);
     size_t currentInput = 0;
 
     while (format[0] != '\0') {
-        if (!(format[0] == '%' && format[1] == '@')) {
+        if (!(format[0] == '%' && is_format_spec(format[1]))) {
             out.write(*format++);
         }
         else {
+            char const formatSpecifier = format[1];
             format += 2;
             template_for<0, type_count<H, Ts...>>([&](auto idx_constant) {
                 constexpr auto index = decltype(idx_constant)::value;
+                using type = nth_type_t<index, H, Ts...>;
                 if (currentInput == index) {
+                    if constexpr (std::integral<type> || pointer<type>) {
+                        if (formatSpecifier == 'x' || formatSpecifier == 'p') {
+                            print(out, reinterpret_cast<void const *>(std::get<index>(inputs)));
+                            return;
+                        }
+                    }
+
                     print(out, std::get<index>(inputs));
                 }
             });
@@ -61,11 +72,19 @@ void print(OutputStream &out, char const *format, H &&first, Ts &&...rest)
     }
 }
 
-template <typename H, typename ...Ts>
-void println(OutputStream &out, char const *format, H &&first, Ts &&...rest)
+template <typename ...Ts>
+void println(OutputStream &out, char const *format, Ts &&...rest)
 {
-    print(out, format, std::forward<H>(first), std::forward<Ts>(rest)...);
+    print(out, format, std::forward<Ts>(rest)...);
     out.write('\n');
 }
+
+template <typename T> void print(T &&data) { print(StandardOutput::Get(), std::forward<T>(data)); }
+
+template <typename H, typename ...Ts>
+void print(char const *format, Ts &&...rest) { print(StandardOutput::Get(), format, std::forward<Ts>(rest)...); }
+
+template <typename ...Ts>
+void println(char const *format, Ts &&...rest) { println(StandardOutput::Get(), format, std::forward<Ts>(rest)...); }
 
 } // libsys namespace

@@ -14,7 +14,6 @@
 #include <fs/iso9660/Iso9660.hpp>
 #include <proc/elf/Executable.hpp>
 
-#include <io/BochsDebugOutputStream.hpp>
 #include <system/Debug.hpp>
 
 #include <util/StaticList.hpp>
@@ -37,10 +36,6 @@ Kernel *kernel = nullptr;
 X86Kernel *x86Kernel = nullptr;
 STATIC_ALLOC(X86Kernel, kern_mem);
 
-STATIC_ALLOC(sys::PrintStream, dbgout_mem);
-STATIC_ALLOC(BochsDebugOutputStream, bochsout_mem);
-sys::PrintStream *debugOut;
-
 extern "C" {
 
 // ====================================================
@@ -62,17 +57,13 @@ int log_test(char const *printstr, int success);
 // ====================================================
 void perform_task(char const *desc, auto &&task)
 {
-    debugOut->print(desc);
+    sys::debug_print(desc);
     task();
-    debugOut->println("DONE.");
+    sys::debug_println("DONE.");
 }
 
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
-    // Set up output to bochs as a debug output stream
-    sys::OutputStream *stream = new(bochsout_mem) BochsDebugOutputStream();
-    debugOut = new(dbgout_mem) sys::PrintStream(*stream);
-
     perform_task("Constructing kernel...", [] {
         // Get this party started
         x86Kernel = new(kern_mem) X86Kernel;
@@ -120,7 +111,7 @@ void init_system()
     }
     puts("\n* * *");
 
-
+    sys::debug_println("Finding /bin/proc-test...");
     auto proctestEntry = cd->find("/bin/proc-test");
     if (proctestEntry) {
         auto proctest = elf::Executable(*proctestEntry);
@@ -256,7 +247,7 @@ void read_multiboot(multiboot_info_t *info)
 
 size_t log_task_begin(char const *printstr)
 {
-    debugOut->print(printstr);
+    sys::debug_print(printstr);
     kernel->console()->moveTo(kernel->console()->row(), 0);
     for (uint32_t i = 0; i < kernel->console()->width(); ++i) {
         kernel->console()->putChar(' ');
@@ -278,13 +269,13 @@ size_t log_task_begin(char const *printstr)
 int log_result(int success, char const *ackstr, char const *nakstr)
 {
     if (success) {
-        debugOut->println(ackstr);
+        sys::debug_println(ackstr);
         kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(ackstr) + 3));
         kernel->console()->writeString("[");
         kernel->console()->setForegroundColor(COLOR_GREEN);
         kernel->console()->writeString(ackstr);
     } else {
-        debugOut->println(nakstr);
+        sys::debug_println(nakstr);
         kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(nakstr) + 3));
         kernel->console()->writeString("[");
         kernel->console()->setForegroundColor(COLOR_RED);

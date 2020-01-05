@@ -46,11 +46,7 @@ template <typename T> class BasicString
      * characters.
      * @param reserve The number of characters to pre-allocate space for.
      */
-    constexpr BasicString(size_t reserve) : _data(reserve + 1)
-    {
-        for (size_t i = 0; i < _data.capacity(); ++i) { _data[i] = 0; }
-    }
-//    constexpr BasicString(size_t reserve) : _data(reserve + 1) { std::ranges::fill(_data, T{0}); }
+    constexpr BasicString(size_t reserve) : _data(reserve + 1) { std::ranges::fill(_data, T{0}); }
 
     /**
      * Constructs a BasicString, allocating and filling space for the provided

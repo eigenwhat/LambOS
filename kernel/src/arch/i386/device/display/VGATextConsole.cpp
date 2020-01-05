@@ -1,4 +1,4 @@
-#include <arch/i386/sys/asm.h>
+#include <system/asm.h>
 #include <device/display/VGATextConsole.hpp>
 
 #include <cstdint>

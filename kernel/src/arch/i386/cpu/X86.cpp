@@ -3,12 +3,14 @@
 //
 
 #include <arch/i386/cpu/X86.hpp>
-#include <arch/i386/sys/asm.h>
+
+#include <io/Print.hpp>
+#include <system/asm.h>
+#include <system/Debug.hpp>
 
 #include <cstring>
 #include <cstdlib>
 
-#include <system/Debug.hpp>
 
 void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2);
 
@@ -31,6 +33,8 @@ void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2);
 #define ICW4_BUF_SLAVE  0x08        /* Buffered mode/slave */
 #define ICW4_BUF_MASTER 0x0C        /* Buffered mode/master */
 #define ICW4_SFNM   0x10        /* Special fully nested (not) */
+
+sys::BochsDebugOutputStream debugOut;
 
 X86::X86()
 {
@@ -115,14 +119,7 @@ public:
 
     virtual void operator()(RegisterTable &registers)
     {
-        char hexval[33];
-        _out.write((std::byte *) "(IRQ) int 0x", 12);
-        uitoa(registers.int_no, hexval, 16);
-        _out.write((std::byte *) hexval, 2);
-        _out.write((std::byte *) ", err 0x", 8);
-        uitoa(registers.err_code, hexval, 16);
-        _out.write((std::byte *) hexval, 2);
-        _out.write((std::byte)'\n');
+        sys::println(_out, "(IRQ) int 0x%x, err 0x%x", uint32_t{registers.int_no}, uint32_t{registers.err_code});
         outb(0x20, 0x20);
     }
 
@@ -139,10 +136,10 @@ offset2 - same for slave PIC: offset2..offset2+7
 void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2)
 {
     for (int i = pic1; i < pic1 + 8; ++i) {
-        idt.setISR(static_cast<InterruptNumber>(i), new IRQHandler(*debugOut));
+        idt.setISR(static_cast<InterruptNumber>(i), new IRQHandler(debugOut));
     }
     for (int i = pic2; i < pic2 + 8; ++i) {
-        idt.setISR(static_cast<InterruptNumber>(i), new IRQHandler(*debugOut));
+        idt.setISR(static_cast<InterruptNumber>(i), new IRQHandler(debugOut));
     }
 
     outb(PIC1_COMMAND, ICW1_INIT + ICW1_ICW4);    // starts the initialization sequence (in cascade mode)

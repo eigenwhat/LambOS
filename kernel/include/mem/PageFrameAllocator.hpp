@@ -14,17 +14,15 @@ typedef uint32_t PageFrame;
 
 class PageFrameAllocator;
 
-namespace concepts {
 template <typename Hook>
 concept PageFrameInitializationHook = requires(Hook hook, PageFrameAllocator *allocator) { hook(allocator); };
-} // namespace concepts
 
 class PageFrameAllocator
 {
 public:
     PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length);
 
-    template <concepts::PageFrameInitializationHook Func>
+    template <PageFrameInitializationHook Func>
     PageFrameAllocator(uint32_t mmap_addr, uint32_t mmap_length, Func &&hook)
         : PageFrameAllocator{mmap_addr, mmap_length} { hook(this); }
 

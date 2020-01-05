@@ -1,6 +1,6 @@
 #include <arch/i386/cpu/X86RealTimeClock.hpp>
 
-#include <arch/i386/sys/asm.h>
+#include <system/asm.h>
 
 
 namespace {

@@ -6,7 +6,7 @@
 
 #include <device/input/PS2Keyboard.hpp>
 #include <arch/i386/cpu/X86.hpp>
-#include <arch/i386/sys/asm.h>
+#include <system/asm.h>
 
 #define KBD_DEVICE    0x60
 #define KEY_PENDING   0x64

@@ -8,12 +8,8 @@
 void SyscallHandler::reportUnknownSyscall(RegisterTable &registers)
 {
     auto const callId = registers.eax;
-    debugOut->print("Received unidentified syscall: ");
-    debugOut->println(callId);
-    debugOut->print("registers.ebx = ");
-    debugOut->println(registers.ebx);
-    debugOut->print("registers.ecx = ");
-    debugOut->println(registers.ecx);
-    debugOut->print("registers.edx = ");
-    debugOut->println(registers.edx);
+    sys::debug_println("Received unidentified syscall: %@", callId);
+    sys::debug_println("registers.ebx = 0x%x", std::uint32_t{registers.ebx});
+    sys::debug_println("registers.ecx = 0x%x", std::uint32_t{registers.ecx});
+    sys::debug_println("registers.edx = 0x%x", std::uint32_t{registers.edx});
 }

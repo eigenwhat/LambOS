@@ -6,8 +6,8 @@
 
 #include <Memory.hpp>
 #include <device/display/Console.hpp>
-#include <io/PrintStream.hpp>
 #include <io/InputStream.hpp>
+#include <io/OutputStream.hpp>
 
 class Context
 {
@@ -28,15 +28,15 @@ class Context
 
     /**
      * Returns stdout for this Context.
-     * @return A PrintStream connected to stdout.
+     * @return An OutputStream connected to stdout.
      */
-    sys::PrintStream *out() const { return _out; }
+    sys::OutputStream *out() const { return _out; }
 
     /**
-     * Sets the PrintStream for the stdout of this Context.
-     * @param out The PrintStream to set.
+     * Sets the OutputStream for the stdout of this Context.
+     * @param out The OutputStream to set.
      */
-    void setOut(sys::PrintStream *out) { _out = out; }
+    void setOut(sys::OutputStream *out) { _out = out; }
 
     /**
      * Returns stdin for this Context.
@@ -52,6 +52,6 @@ class Context
 
   private:
     Console *_console;
-    sys::PrintStream *_out;
+    sys::OutputStream *_out;
     sys::ArcPtr<sys::InputStream> _in;
 };

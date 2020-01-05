@@ -8,8 +8,12 @@
 #include <arch/i386/cpu/InterruptDescriptorTable.hpp>
 #include <cpu/CPU.hpp>
 
+#include <system/Debug.hpp>
+
 #include <cstddef>
 #include <cstdint>
+
+extern sys::BochsDebugOutputStream debugOut;
 
 class X86
 {

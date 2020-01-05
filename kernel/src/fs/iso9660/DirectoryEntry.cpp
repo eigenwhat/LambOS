@@ -2,7 +2,7 @@
 #include <fs/iso9660/Volume.hpp>
 #include <util/StaticList.hpp>
 #include <util/LinkedList.hpp>
-#include <arch/i386/sys/asm.h>
+#include <system/asm.h>
 #include <cstring>
 #include <util/StringTokenizer.hpp>
 

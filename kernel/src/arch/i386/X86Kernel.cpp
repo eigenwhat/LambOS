@@ -9,10 +9,10 @@
 
 #include <new>
 
-X86Kernel::X86Kernel() : _x86cpu{}, _vgaConsole(), _consoleOutputStream(_vgaConsole), _stdOut(_consoleOutputStream)
+X86Kernel::X86Kernel() : _x86cpu{}, _vgaConsole(), _consoleOutputStream(_vgaConsole)
 {
     setConsole(&_vgaConsole);
-    setOut(&_stdOut);
+    setOut(&_consoleOutputStream);
 }
 
 void X86Kernel::installMMU(uint32_t mmap_addr, uint32_t mmap_length)

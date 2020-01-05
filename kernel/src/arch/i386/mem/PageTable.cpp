@@ -1,29 +1,20 @@
+//
+// Created by Martin Miralles-Cordal on 8/17/2013.
+//
+
 #include <mem/PageTable.hpp>
-#include <arch/i386/sys/asm.h>
-#include <cstdio>
+
+#include <arch/i386/mem/Paging.hpp>
+#include <system/asm.h>
+
+#include <cstring>
 
 //======================================================
 // PageTable
 //======================================================
-void PageTable::clear()
-{
-    for (int i = 0; i < 1024; i++) {
-        _tableAddress[i] = 0;
-    }
-}
 
-PageEntry PageTable::entryAtIndex(uint16_t index) const
-{
-    PageEntry entry(_tableAddress[index]);
-    entry.setFlags(_tableAddress[index]);
-    return entry;
-}
-
-void PageTable::setEntry(uint16_t index, PageEntry entry)
-{
-    _tableAddress[index] = entry._entry;
-    invlpg(entry.address());
-}
+void PageTable::invalidatePage(uint32_t m) { invlpg(m); }
+void PageTable::clear() { std::memset(_tableAddress, 0, X86::kPageTableSize); }
 
 void PageTable::install()
 {

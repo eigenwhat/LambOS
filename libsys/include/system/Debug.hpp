@@ -4,14 +4,23 @@
 
 #pragma once
 
-#include <io/PrintStream.hpp>
+#include <io/OutputStream.hpp>
+#include <io/Print.hpp>
 
-extern sys::PrintStream *debugOut;
+#include <system/asm.h>
 
 namespace sys {
 
+class BochsDebugOutputStream : public OutputStream
+{
+  public:
+    virtual void write(std::byte byte) { outb(0xe9, (uint8_t)byte); }
+};
+
 template <typename... Ts>
-void debug_print(char const *format, Ts&&...args) { print(*debugOut, format, std::forward<Ts>(args)...); }
+void debug_print(char const *format, Ts&&...args) { BochsDebugOutputStream o{}; print(o, format, std::forward<Ts>(args)...); }
+template <typename... Ts>
+void debug_println(char const *format, Ts&&...args) { BochsDebugOutputStream o{}; println(o, format, std::forward<Ts>(args)...); }
 
 } // namespace sys
 

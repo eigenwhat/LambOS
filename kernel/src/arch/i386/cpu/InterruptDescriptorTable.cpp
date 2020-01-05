@@ -4,9 +4,10 @@
 
 #include <arch/i386/cpu/InterruptDescriptorTable.hpp>
 #include <arch/i386/cpu/X86.hpp>
-#include <arch/i386/sys/asm.h>
 #include <arch/i386/X86Kernel.hpp>
 
+#include <io/Print.hpp>
+#include <system/asm.h>
 #include <system/Debug.hpp>
 
 #include <ranges>
@@ -72,20 +73,18 @@ inline void addISR(InterruptDescriptorTable &idt, std::uint8_t num, InterruptSer
 class StubISR : public InterruptServiceRoutine
 {
   public:
-    StubISR(sys::PrintStream &out) : _out(out) {}
+    StubISR(sys::OutputStream &out) : _out(out) {}
 
     virtual void operator()(RegisterTable &registers)
     {
-        _out.println("==== LAMBOS ISR CALLED ====");
-        _out.print(exception_messages[registers.int_no]);
-        char message[33];
-        sprintf(message, " (%x): err %x", registers.int_no, registers.err_code);
-        _out.println(message);
-        _out.println("==== CARRY ON, CITIZEN ====");
+        sys::println(_out, "==== LAMBOS ISR CALLED ====");
+        sys::println(_out, "%@ (%@): err %@", exception_messages[registers.int_no],
+                                              uint32_t{registers.int_no}, uint32_t{registers.err_code});
+        sys::println(_out, "==== CARRY ON, CITIZEN ====");
     }
 
 private:
-    sys::PrintStream &_out;
+    sys::OutputStream &_out;
 };
 
 class PanicISR : public InterruptServiceRoutine
@@ -142,7 +141,7 @@ uint8_t panic_isr_mem[sizeof(PanicISR)];
 
 void InterruptDescriptorTable::encodeISRs()
 {
-    StubISR *defaultISR = new(stub_isr_mem) StubISR(*debugOut);
+    StubISR *defaultISR = new(stub_isr_mem) StubISR(debugOut);
     PanicISR *panicISR = new(panic_isr_mem) PanicISR;
 
     // assign all the defaults

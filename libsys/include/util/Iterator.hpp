@@ -63,7 +63,8 @@ struct Bidirectional
 
     constexpr Bidirectional(Impl iter) : impl_{std::move(iter)} {}
 
-    constexpr reference operator*() const { return impl_.get_value(); }
+    constexpr cref_t<value_type> operator*() const { return impl_.get_value(); }
+    constexpr reference operator*() { return impl_.get_value(); }
     constexpr pointer operator->() const { return impl_.get_ptr(); }
 
     constexpr Bidirectional& operator++() { impl_.increment(); return *this; }

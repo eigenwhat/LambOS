@@ -6,7 +6,7 @@
 
 #include <arch/i386/cpu/RegisterTable.h>
 #include <arch/i386/cpu/InterruptNumber.hpp>
-#include <arch/i386/sys/asm.h>
+#include <system/asm.h>
 
 #include <concepts>
 #include <cstddef>

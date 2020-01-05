@@ -5,7 +5,7 @@
 #pragma once
 
 #include <arch/i386/cpu/X86.hpp>
-#include <arch/i386/sys/asm.h>
+#include <system/asm.h>
 #include <arch/i386/X86Kernel.hpp>
 
 #define KBD_DEVICE    0x60
