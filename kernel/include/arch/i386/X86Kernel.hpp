@@ -21,6 +21,8 @@ public:
 
     void installSyscalls();
 
+    void schedule();
+
 private:
     X86::CPU _x86cpu;
     VGATextConsole _vgaConsole;
