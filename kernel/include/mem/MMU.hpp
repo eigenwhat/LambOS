@@ -4,8 +4,8 @@
 
 #pragma once
 
+#include "AddressSpace.hpp"
 #include "PageFrameAllocator.hpp"
-#include "PageTable.hpp"
 
 /** Abstraction for the X86 memory management unit. Implements paging. */
 class MMU
@@ -18,15 +18,15 @@ class MMU
      * @param numberOfPages The number of pages to allocate.
      * @return the start of the contiguous allocated memory.
      */
-    void *palloc(size_t numberOfPages);
+    void *palloc(AddressSpace addressSpace, size_t numberOfPages);
 
     /**
      * Attempts to allocate a number of pages at the given address.
      * @param virtualAddress
-     * @param numberOfPages
-     * @return
+     * @param numberOfPages The number of pages to allocate.
+     * @return the start of the contiguous allocated memory.
      */
-    void *palloc(void *virtualAddress, size_t numberOfPages);
+    void *palloc(AddressSpace addressSpace, void *virtualAddress, size_t numberOfPages);
 
     /**
      * Frees a page-aligned block of memory.
@@ -34,19 +34,21 @@ class MMU
      * @param numberOfPages The length of the memory block in pages. Defaults to 1.
      * @return -1 if an error occurred, 0 otherwise.
      */
-    int pfree(void *startOfMemoryRange, size_t numberOfPages = 1);
+    int pfree(AddressSpace addressSpace, void *startOfMemoryRange, size_t numberOfPages = 1);
 
-    /** Installs the managed page table. */
-    void install();
+//    PageTable cloneDirectory(PageFrame const &directory);
+
+    AddressSpace create() { return AddressSpace{(uint32_t *)(_pageFrameAllocator.alloc())}; }
+
+    /** Prepares and installs a page directory. */
+    void install(AddressSpace addressSpace);
 
   private:
-    PageTable getOrCreateTable(uint16_t directoryIndex);
-    PageTable tableForAddress(void *virtualAddress);
-    PageEntry pageForAddress(void *virtualAddress);
-
-    void allocatePages(void *address, size_t numberOfPages);
+    PageTable getOrCreateTable(AddressSpace addressSpace, uint16_t directoryIndex);
+    PageTable tableForAddress(AddressSpace addressSpace, void *virtualAddress);
+    PageEntry pageForAddress(AddressSpace addressSpace, void *virtualAddress);
+    void allocatePages(AddressSpace addressSpace, void *address, size_t numberOfPages);
     void _flush();
 
     PageFrameAllocator _pageFrameAllocator;
-    PageTable _pageDirectory;
 };

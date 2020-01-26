@@ -18,7 +18,8 @@ X86Kernel::X86Kernel() : _x86cpu{}, _vgaConsole(), _consoleOutputStream(_vgaCons
 void X86Kernel::installMMU(uint32_t mmap_addr, uint32_t mmap_length)
 {
     setMMU(new(_mmuMem) MMU(mmap_addr, mmap_length));
-    mmu()->install();
+    setAddressSpace(mmu()->create());
+    mmu()->install(addressSpace());
 }
 
 void X86Kernel::installSyscalls()

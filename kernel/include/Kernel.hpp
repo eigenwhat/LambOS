@@ -24,6 +24,35 @@ class Kernel : public Context
      */
     void panic(char const *errorMessage);
 
+    /**
+     * Allocates contiguous pages of memory.
+     * @param numberOfPages The number of pages to allocate.
+     * @return the start of the contiguous allocated memory.
+     */
+    void *palloc(size_t numberOfPages) { return mmu()->palloc(addressSpace(), numberOfPages); }
+
+    /**
+     * Attempts to allocate a number of pages at the given address.
+     * @param virtualAddress
+     * @param numberOfPages The number of pages to allocate.
+     * @return the start of the contiguous allocated memory.
+     */
+    void *palloc(void *virtualAddress, size_t numberOfPages)
+    {
+        return mmu()->palloc(addressSpace(), virtualAddress, numberOfPages);
+    }
+
+    /**
+     * Frees a page-aligned block of memory.
+     * @param startOfMemoryRange The start of the memory block to free.
+     * @param numberOfPages The length of the memory block in pages. Defaults to 1.
+     * @return -1 if an error occurred, 0 otherwise.
+     */
+    int pfree(void *startOfMemoryRange, size_t numberOfPages = 1)
+    {
+        return mmu()->pfree(addressSpace(), startOfMemoryRange, numberOfPages);
+    }
+
   protected:
     Kernel() = default;
     void setMMU(MMU *mmu) { _mmu = mmu; }

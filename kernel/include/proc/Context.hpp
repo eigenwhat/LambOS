@@ -8,6 +8,7 @@
 #include <device/display/Console.hpp>
 #include <io/InputStream.hpp>
 #include <io/OutputStream.hpp>
+#include <mem/AddressSpace.hpp>
 
 class Context
 {
@@ -50,8 +51,12 @@ class Context
      */
     void setIn(sys::ArcPtr<sys::InputStream> in) { _in = std::move(in); }
 
+    AddressSpace addressSpace() const { return _addressSpace; }
+    void setAddressSpace(AddressSpace addressSpace) { _addressSpace = addressSpace; }
+
   private:
+    sys::ArcPtr<sys::InputStream> _in;
     Console *_console;
     sys::OutputStream *_out;
-    sys::ArcPtr<sys::InputStream> _in;
+    AddressSpace _addressSpace;
 };

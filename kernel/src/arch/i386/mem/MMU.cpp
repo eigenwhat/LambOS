@@ -3,6 +3,8 @@
 //
 
 #include <mem/MMU.hpp>
+
+#include <arch/i386/mem/Paging.hpp>
 #include <system/asm.h>
 #include <mem/PageFrameAllocator.hpp>
 #include <mem/PageTable.hpp>
@@ -10,19 +12,21 @@
 
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <new>
 
+namespace {
 
-#define kPDESelfMapIndex 1023
-#define kVGAPage (0xB8000/0x1000)
+constexpr std::uint32_t const kVGAPage{0xB8000 / 0x1000};
+constexpr std::uint32_t const kPDESelfMapIndex{1023};
+
+}
 
 //==========================================================
 // Externs
 //==========================================================
 extern uint32_t kernel_end;
 extern uint32_t readonly_end;
-extern "C" int log_task(char const *printstr, int success);
-extern "C" int log_test(char const *printstr, int success);
 
 //==========================================================
 // Utility methods
@@ -61,11 +65,20 @@ void MMUPFAHook(PageFrameAllocator *allocator)
 // MMU Public Methods
 //===========================================================
 
+//PageTable MMU::cloneDirectory(PageFrame const &p)
+//{
+//    void *page = palloc(1);
+//    std::memset(page, 0, X86::kPageTableSize);
+//    return {page};
+//}
+
+
 MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
-        : _pageFrameAllocator(mmap_addr, mmap_length, MMUPFAHook)
-        ,_pageDirectory((uint32_t *) _pageFrameAllocator.alloc())
+        : _pageFrameAllocator(mmap_addr, mmap_length, MMUPFAHook) {}
+
+void MMU::install(AddressSpace addressSpace)
 {
-    _pageDirectory.clear();
+    addressSpace.clear();
     PageTable firstTable((uint32_t * )(_pageFrameAllocator.alloc()));
     firstTable.clear();
 
@@ -93,27 +106,23 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
     PageEntry entry((uint32_t) firstTable.address());
     entry.setFlag(kPresentBit);
     entry.setFlag(kReadWriteBit);
-    _pageDirectory.setEntry(0, entry);
+    addressSpace.setEntry(0, entry);
 
     // Set last PDE to PD itself
-    PageEntry directory((uint32_t) _pageDirectory.address());
+    PageEntry directory((uint32_t) addressSpace.address());
     directory.setFlag(kPresentBit);
     directory.setFlag(kReadWriteBit);
-    _pageDirectory.setEntry(kPDESelfMapIndex, directory);
+    addressSpace.setEntry(kPDESelfMapIndex, directory);
+    addressSpace.install();
 }
 
-void MMU::install()
-{
-    _pageDirectory.install();
-}
-
-void *MMU::palloc(size_t numberOfPages)
+void *MMU::palloc(AddressSpace addressSpace, size_t numberOfPages)
 {
     size_t contiguousFoundPages = 0;
     uintptr_t retpde = 0, retpte = 0;
     void *retval = nullptr;
     for (uint16_t pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
-        PageTable table = getOrCreateTable(pde);
+        PageTable table = getOrCreateTable(addressSpace, pde);
 
         // look through page table
         for (uint16_t pte = 0; pte < 1024; ++pte) {
@@ -137,13 +146,13 @@ void *MMU::palloc(size_t numberOfPages)
     }
 
     if (retval) { // if we succeeded in finding space
-        allocatePages(retval, numberOfPages);
+        allocatePages(addressSpace, retval, numberOfPages);
     }
 
     return retval;
 }
 
-void *MMU::palloc(void *virtualAddress, size_t numberOfPages)
+void *MMU::palloc(AddressSpace addressSpace, void *virtualAddress, size_t numberOfPages)
 {
     uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
     if (address & 0xFFF) {
@@ -151,7 +160,7 @@ void *MMU::palloc(void *virtualAddress, size_t numberOfPages)
     }
 
     for (size_t i = 0; i < numberOfPages; ++i) {
-        auto page = pageForAddress(reinterpret_cast<void*>(address));
+        auto page = pageForAddress(addressSpace, reinterpret_cast<void*>(address));
         if (page.getFlag(kPresentBit)) {
             virtualAddress = nullptr; // can't allocate, not enough space
             break;
@@ -161,13 +170,13 @@ void *MMU::palloc(void *virtualAddress, size_t numberOfPages)
     }
 
     if (virtualAddress) {
-        allocatePages(virtualAddress, numberOfPages);
+        allocatePages(addressSpace, virtualAddress, numberOfPages);
     }
 
     return virtualAddress;
 }
 
-int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
+int MMU::pfree([[maybe_unused]] AddressSpace addressSpace, void *startOfMemoryRange, size_t numberOfPages)
 {
     uint32_t virtualAddress = (uint32_t) startOfMemoryRange;
 
@@ -193,18 +202,18 @@ int MMU::pfree(void *startOfMemoryRange, size_t numberOfPages)
 // MMU Private methods
 //===========================================================
 
-PageTable MMU::getOrCreateTable(uint16_t directoryIndex)
+PageTable MMU::getOrCreateTable(AddressSpace addressSpace, uint16_t directoryIndex)
 {
     if (directoryIndex > 1023) {
         kernel->panic("MMU::getOrCreateTable: invalid directoryIndex");
     }
 
-    PageEntry pde = _pageDirectory.entryAtIndex(directoryIndex);
+    PageEntry pde = addressSpace.entryAtIndex(directoryIndex);
     PageTable table{PageTableForDirectoryIndex(directoryIndex)};
     if (!pde.getFlag(kPresentBit)) { // no page table here, create one
         pde = PageEntry(_pageFrameAllocator.alloc());
         pde.setFlags(kPresentBit | kReadWriteBit);
-        _pageDirectory.setEntry(directoryIndex, pde);
+        addressSpace.setEntry(directoryIndex, pde);
         table.clear();
         _flush();
     }
@@ -212,23 +221,23 @@ PageTable MMU::getOrCreateTable(uint16_t directoryIndex)
     return table;
 }
 
-PageTable MMU::tableForAddress(void *virtualAddress)
+PageTable MMU::tableForAddress(AddressSpace addressSpace, void *virtualAddress)
 {
     auto address = reinterpret_cast<uintptr_t>(virtualAddress);
     auto pdeIndex = uint16_t(address >> 22u);
-    return getOrCreateTable(pdeIndex);
+    return getOrCreateTable(addressSpace, pdeIndex);
 }
 
-PageEntry MMU::pageForAddress(void *virtualAddress)
+PageEntry MMU::pageForAddress(AddressSpace addressSpace, void *virtualAddress)
 {
-    auto table = tableForAddress(virtualAddress);
+    auto table = tableForAddress(addressSpace, virtualAddress);
     uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
     uint16_t pteIndex = address >> 12u & 0x03FFu;
     return table.entryAtIndex(pteIndex);
 }
 
 
-void MMU::allocatePages(void *address, size_t numberOfPages)
+void MMU::allocatePages([[maybe_unused]] AddressSpace addressSpace, void *address, size_t numberOfPages)
 {
     auto virtualAddress = reinterpret_cast<uintptr_t>(address);
     uint32_t currpde = virtualAddress >> 22u;

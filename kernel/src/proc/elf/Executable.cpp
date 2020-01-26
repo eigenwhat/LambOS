@@ -24,7 +24,7 @@ class SegmentRAII
     ~SegmentRAII()
     {
         if (_armed && _addr && _pages) {
-            kernel->mmu()->pfree(_addr, _pages);
+            kernel->pfree(_addr, _pages);
         }
     }
 
@@ -229,7 +229,7 @@ bool Executable::loadSegments()
     for (auto &ps : _segments) {
         if (ps.alignment == 0x1000) {
             size_t pages = ps.memorySize / 0x1000 + ((ps.memorySize % 0x1000) ? 1 : 0);
-            auto mem = kernel->mmu()->palloc((void*)ps.vaddress, pages);
+            auto mem = kernel->palloc((void*)ps.vaddress, pages);
             if (!mem) {
                 return false;
             }
@@ -260,7 +260,7 @@ bool Executable::unloadSegments()
 
     for (auto &ps : _segments) {
         size_t pages = ps.memorySize / 0x1000 + ((ps.memorySize % 0x1000) ? 1 : 0);
-        if (kernel->mmu()->pfree((void*)ps.vaddress, pages) != 0) {
+        if (kernel->pfree((void*)ps.vaddress, pages) != 0) {
             kernel->panic("Error freeing loaded ELF segment memory.");
         }
     }

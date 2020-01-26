@@ -13,7 +13,7 @@
 // PageTable
 //======================================================
 
-void PageTable::invalidatePage(uint32_t m) { invlpg(m); }
+void PageTable::invalidatePage(uintptr_t m) { invlpg(m); }
 void PageTable::clear() { std::memset(_tableAddress, 0, X86::kPageTableSize); }
 
 void PageTable::install()

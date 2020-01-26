@@ -25,30 +25,35 @@ enum PageEntryFlag : std::uint32_t {
 
 class PageTable;
 
-class PageEntry {
-public:
-    PageEntry(std::uint32_t address) : _entry(address & k4KPageAddressMask) {}
+class PageEntry
+{
+  public:
+    PageEntry(std::uintptr_t address) : _entry(address & k4KPageAddressMask) {}
+    PageEntry(std::uintptr_t entry, int) : _entry(entry) {}
+
     void unsetFlag(PageEntryFlag flag) { _entry &= ~flag; }
     void setFlag(PageEntryFlag flag) { _entry |= flag; }
     bool getFlag(PageEntryFlag flag) { return (bool)(_entry & flag); }
-    void setFlags(std::uint32_t flags) { _entry = (_entry & k4KPageAddressMask) | (flags & kPageFlagsMask); }
-    std::uint32_t address() { return _entry & k4KPageAddressMask; }
-    std::uint32_t flags() { return _entry & kPageFlagsMask; }
+    void setFlags(std::uintptr_t flags) { _entry = (_entry & k4KPageAddressMask) | (flags & kPageFlagsMask); }
+    std::uintptr_t address() { return _entry & k4KPageAddressMask; }
+    std::uintptr_t flags() { return _entry & kPageFlagsMask; }
     friend class PageTable;
-private:
-    std::uint32_t _entry;
+  private:
+    std::uintptr_t _entry;
 };
 
 class PageTable
 {
   public:
+    PageTable() : _tableAddress{nullptr} {}
+
     /**
      * Creates a representation of a page table.
      * @param tableAddress The virtual address where the table resides if paging
      *                     is enabled, physical otherwise.
      */
-    PageTable(std::uint32_t *tableAddress) : _tableAddress(tableAddress) {}
-    PageTable(void *tableAddress) : PageTable{static_cast<std::uint32_t *>(tableAddress)} {}
+    PageTable(std::uintptr_t *tableAddress) : _tableAddress(tableAddress) {}
+    PageTable(void *tableAddress) : PageTable{static_cast<std::uintptr_t *>(tableAddress)} {}
 
     /**
      * Clears all entries in the table.
@@ -57,19 +62,14 @@ class PageTable
     void clear();
 
     /** The addressable location of the page table in memory. */
-    std::uint32_t *address() const { return _tableAddress; }
+    std::uintptr_t *address() const { return _tableAddress; }
 
     /**
      * Returns the PageEntry at the given index.
      * @param index The index of the entry.
      * @return The entry.
      */
-    PageEntry entryAtIndex(uint16_t index) const
-    {
-        PageEntry entry(_tableAddress[index]);
-        entry.setFlags(_tableAddress[index]);
-        return entry;
-    }
+    [[nodiscard]] PageEntry entryAtIndex(uint16_t index) const { return {_tableAddress[index], 0}; }
 
     /**
      * Sets the PageEntry at the given index.
@@ -86,6 +86,6 @@ class PageTable
     void install();
 
   private:
-    static void invalidatePage(uint32_t m);
-    std::uint32_t *_tableAddress;
+    static void invalidatePage(uintptr_t m);
+    std::uintptr_t *_tableAddress;
 };
