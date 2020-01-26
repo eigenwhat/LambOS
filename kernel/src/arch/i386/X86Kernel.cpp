@@ -3,6 +3,7 @@
 //
 
 #include <arch/i386/X86Kernel.hpp>
+#include <arch/i386/proc/X86Process.hpp>
 #include <arch/i386/sys/Syscall.hpp>
 #include <device/display/VGATextConsole.hpp>
 #include <device/display/ConsoleOutputStream.hpp>
@@ -27,4 +28,13 @@ void X86Kernel::installMMU(uint32_t mmap_addr, uint32_t mmap_length)
 void X86Kernel::installSyscalls()
 {
     cpu().idt()->setISR(InterruptNumber::kSystemCall, new SyscallHandler{*this});
+}
+
+void X86Kernel::schedule()
+{
+//    auto curr = scheduler().currentProcess()->procState;
+//    auto next = scheduler().nextProcess()->procState;
+//    if (curr != next) {
+//        X86Process::swapActive(curr, next);
+//    }
 }

@@ -8,6 +8,7 @@
 #include <cstdint>
 #include <proc/Context.hpp>
 #include <arch/i386/mem/MMU.hpp>
+#include <proc/Scheduler.hpp>
 #include <cpu/CPU.hpp>
 
 class Kernel : public Context
@@ -20,6 +21,9 @@ class Kernel : public Context
      *                     some words of comfort.
      */
     void panic(char const *errorMessage);
+
+    Scheduler &scheduler() { return lazyInitScheduler(); }
+    Scheduler const &scheduler() const { return lazyInitScheduler(); }
 
     /**
      * Allocates contiguous pages of memory.
@@ -53,7 +57,14 @@ class Kernel : public Context
   protected:
     Kernel() = default;
 
+    Scheduler & lazyInitScheduler() const
+    {
+        if (!_scheduler) { _scheduler = sys::make_unique<Scheduler>(); }
+        return *_scheduler;
+    }
+
     MMU *_mmu = nullptr;
+    mutable sys::UniquePtr<Scheduler> _scheduler{nullptr};
 };
 
 extern Kernel *kernel;

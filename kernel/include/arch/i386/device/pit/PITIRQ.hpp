@@ -27,6 +27,7 @@ class PITIRQ : public InterruptServiceRoutine
 
     virtual void operator()(RegisterTable &)
     {
+        x86Kernel->schedule();
         endOfInterrupt();
     }
 };
