@@ -1,7 +1,11 @@
 #pragma once
 
 #include <arch/i386/X86Kernel.hpp>
+
 #include <sys/_syscall_numbers.h>
+
+#include <io/Print.hpp>
+
 #include <cstring>
 
 namespace Syscall {
@@ -82,7 +86,7 @@ inline std::uint32_t read(X86Kernel &k, RegisterTable const &registers)
 
 inline std::uint32_t exit(X86Kernel &k, RegisterTable const &registers)
 {
-    sys::println(*k.out(), "\nProcess exit with code 0x%x", uint32_t{registers.ebx});
+    sys::println(*k.out(), "\nProcess exit with code %x", uint32_t{registers.ebx});
     return registers.ebx;
 }
 

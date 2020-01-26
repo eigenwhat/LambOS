@@ -119,7 +119,7 @@ public:
 
     virtual void operator()(RegisterTable &registers)
     {
-        sys::println(_out, "(IRQ) int 0x%x, err 0x%x", uint32_t{registers.int_no}, uint32_t{registers.err_code});
+        sys::println(_out, "(IRQ) int %x, err %x", uint32_t{registers.int_no}, uint32_t{registers.err_code});
         outb(0x20, 0x20);
     }
 
