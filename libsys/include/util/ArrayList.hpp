@@ -42,8 +42,8 @@ class ArrayList
     class ALIteratorImpl;
   public:
     using value_type = T;
-    using iterator = Iterator<ALIteratorImpl>;
-    using const_iterator = ConstIterator<ALIteratorImpl>;
+    using iterator = value_type *;
+    using const_iterator = value_type const *;
 
     /** Constructs an ArrayList with the default pre-allocation. */
     ArrayList() : ArrayList(8) {}
@@ -307,8 +307,8 @@ class ArrayList
     T&& operator[](size_t idx) && { return _data[idx]; }
 
     /** An iterator pointing to the first element in the list. */
-    const_iterator begin() const { return const_iterator{ALIteratorImpl{0, this}}; }
-    iterator begin() { return iterator{ALIteratorImpl{0, this}}; }
+    const_iterator begin() const { return _data.begin(); }
+    iterator begin() { return _data.begin(); }
 
     /**
      * An Iterator "past the end" of the list. When encountered, it means there
@@ -316,8 +316,8 @@ class ArrayList
      *
      * @return An iterator signifying the end of this ArrayList.
      */
-    const_iterator end() const { return const_iterator{ALIteratorImpl{npos, this}}; }
-    iterator end() { return iterator{ALIteratorImpl{npos, this}}; }
+    const_iterator end() const { return begin() + _size; }
+    iterator end() { return begin() + _size; }
 
     /**
      * The maximum capacity of the currently allocated block.
@@ -359,56 +359,6 @@ class ArrayList
         }
     }
 
-    class ALIteratorImpl
-    {
-        friend class ArrayList;
-      public:
-        using value_type = ArrayList::value_type;
-        constexpr ALIteratorImpl() = default;
-        constexpr ALIteratorImpl(size_t index, ArrayList const *parent) : _index(index), _parent(parent) {}
-
-        constexpr void increment()
-        {
-            ++_index;
-            if (_index == _parent->size()) { _index = npos; }
-        }
-
-        constexpr void decrement()
-        {
-            if (_index == npos) { _index = _parent->size() - 1;
-            } else { --_index; }
-        }
-
-        T & get_value() const { return _parent->_data[_index]; }
-        T * get_ptr() const { return &(_parent->_data[_index]); }
-
-        T & get_value_at_offset(std::ptrdiff_t offset) const { return (*_parent)[_index + offset]; }
-        void jump(std::ptrdiff_t offset) { _index += offset; }
-        std::ptrdiff_t distance(ALIteratorImpl const &rhs) const { return _index - rhs._index; }
-
-        /**
-         * Equality operator.
-         * @param rhs The iterator to compare to.
-         * @return `true` if they are equal, `false` otherwise.
-         */
-        constexpr bool operator==(ALIteratorImpl const &rhs) const
-        {
-            return _index == rhs._index && _parent == rhs._parent;
-        }
-        constexpr std::partial_ordering operator<=>(ALIteratorImpl const &rhs) const
-        {
-            if (_parent != rhs._parent) { return std::partial_ordering::unordered; }
-            else { return _index <=> rhs._index; }
-        }
-
-      private:
-        size_t _index{0};
-        ArrayList const *_parent{nullptr};
-    };
-
-    static_assert(IteratorImpl<ALIteratorImpl, T>);
-    static_assert(std::totally_ordered<ALIteratorImpl>);
-    static_assert(RandomAccessIteratorImpl<ALIteratorImpl, T>);
     DynamicArray<T> _data;
     size_t _size = 0;
 };
