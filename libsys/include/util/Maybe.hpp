@@ -46,14 +46,28 @@ class Maybe
     constexpr Maybe(T &&v) : _store(std::move(v)), _set(true) {}
 
     constexpr Maybe(Maybe const &other) : _store{}, _set(other._set) { if (_set) { _store.init(other.ref_()); } }
-    constexpr Maybe& operator=(Maybe const &other) = delete;
+
+    /** Copy assignment operator */
+    Maybe& operator=(Maybe const &other)
+    {
+        if (other._set) { set(other.ref_()); }
+        else { clear(); }
+        return *this;
+    }
 
     /** Move constructor. */
     constexpr Maybe(Maybe&& other) : _store{}, _set(other._set)
     {
-        if (_set) { _store.init(std::move(other.takeValue_())); other.clear(); }
+        if (_set) { _store.init(std::move(other).ref_()); other.clear(); }
     }
-    constexpr Maybe& operator=(Maybe &&other) = delete;
+
+    /** Move assignment operator */
+    Maybe& operator=(Maybe &&other)
+    {
+        if (other._set) { set(std::move(other).ref_()); other.clear(); }
+        else { clear(); }
+        return *this;
+    }
 
     /** Clears the stored value. */
     constexpr void clear() { _store.destroy(_set); _set = false; }
@@ -117,7 +131,23 @@ class Maybe
      */
     constexpr value_type getOr(T &&other) &&
     {
-        return _set ? std::move(takeValue_()) : std::forward<T>(other);
+        return _set ? std::move(*this).ref_() : std::forward<T>(other);
+    }
+    
+    /** Sets the Maybe to a copy of the given value. */
+    constexpr void set(const_reference value)
+    {
+        if (_set) { _store.reassign(value); }
+        else { _store.init(value); }
+        _set = true;
+    }
+
+    /** Sets the Maybe by moving the given value into the storage. */
+    constexpr void set(rvalue_reference value)
+    {
+        if (_set) { _store.reassign(std::move(value)); }
+        else { _store.init(std::move(value)); }
+        _set = true;
     }
 
     /** @name STL container interface */
@@ -142,9 +172,10 @@ class Maybe
     /** @} */
 
   private:
-    inline constexpr decltype(auto) takeValue_() noexcept { return _store.rvRef(); }
-    inline constexpr decltype(auto) ref_() noexcept { return _store.ref(); }
-    inline constexpr decltype(auto) ref_() const noexcept { return _store.ref(); }
+    inline constexpr decltype(auto) ref_() && noexcept { return std::move(_store).ref(); }
+    inline constexpr decltype(auto) ref_() const && noexcept { return std::move(_store).ref(); }
+    inline constexpr decltype(auto) ref_() &  noexcept{ return _store.ref(); }
+    inline constexpr decltype(auto) ref_() const & noexcept{ return _store.ref(); }
 
     template<typename Ts>
     union Storage
@@ -158,10 +189,23 @@ class Maybe
         constexpr void init(const Ts &val) { new (&_value) Ts{val}; }
         constexpr void init(Ts &&val) { new (&_value) Ts{std::move(val)}; }
 
-        constexpr value_type&& rvRef() noexcept { return std::move(_value); }
+        template <std::same_as<Ts> Us = Ts> requires std::copy_assignable<Us>
+        constexpr void reassign(const Ts &val) { _value = val; }
 
-        constexpr value_type& ref() noexcept { return _value; }
-        constexpr value_type const & ref() const noexcept { return _value; }
+        template <std::same_as<Ts> Us = Ts> requires (!std::copy_assignable<Us> && std::copy_constructible<Us>)
+        constexpr void reassign(const Ts &val) { destroy(true); init(val); }
+
+        template <std::same_as<Ts> Us = Ts> requires std::move_assignable<Us>
+        constexpr void reassign(Ts &&val) { _value = std::move(val); }
+
+        template <std::same_as<Ts> Us = Ts> requires (std::move_constructible<Us> && !std::move_assignable<Us>)
+        constexpr void reassign(Ts &&val) { destroy(true); init(std::move(val)); }
+
+        constexpr value_type&& ref() && noexcept { return std::move(_value); }
+        constexpr value_type&& ref() const && noexcept { return std::move(_value); }
+
+        constexpr value_type& ref() & noexcept { return _value; }
+        constexpr value_type const & ref() const & noexcept { return _value; }
 
       private:
         Void _nothing;
@@ -176,8 +220,10 @@ class Maybe
 
         constexpr void destroy(bool) noexcept {}
         constexpr void init(reference val) noexcept { _value = val; }
-        constexpr auto rvRef() noexcept { return _value.get(); }
-        constexpr value_type& ref() const noexcept { return _value.get(); }
+        void reassign(reference val) noexcept { _value = val; }
+
+        constexpr value_type& ref() const && noexcept { return _value.get(); }
+        constexpr value_type& ref() const & noexcept { return _value.get(); }
 
       private:
         Void _nothing;
@@ -186,6 +232,7 @@ class Maybe
 
     Storage<MutableType> _store{};
     bool _set{false};
+
   public:
     template <bool Const>
     struct BasicIterator
