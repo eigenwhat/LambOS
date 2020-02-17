@@ -150,6 +150,15 @@ class Maybe
         _set = true;
     }
 
+    /** Sets the Maybe by constructing a new value in-place within the storage. */
+    template <typename... Args>
+    constexpr void emplace(Args &&...args)
+    {
+        _store.destroy(_set);
+        _store.inplace_init(std::forward<Args>(args)...);
+        _set = true;
+    }
+
     /** @name STL container interface */
     /** @{ */
 
@@ -186,6 +195,10 @@ class Maybe
         ~Storage() {}
 
         constexpr void destroy(bool isSet) { if (isSet) { _value.~Ts(); } }
+
+        template <typename... Args>
+        constexpr void inplace_init(Args&&... args) { new (&_value) Ts{std::forward<Args>(args)...}; }
+
         constexpr void init(const Ts &val) { new (&_value) Ts{val}; }
         constexpr void init(Ts &&val) { new (&_value) Ts{std::move(val)}; }
 

@@ -58,25 +58,61 @@ void append_string(String &s, Int num, unsigned int base)
     append_string(s, static_cast<std::make_unsigned_t<Int>>(num), base);
 }
 
+inline int clamp_base(unsigned int base) { return static_cast<int>(std::clamp(base, 2u, 32u)); }
+
 } // namespace string_impl
+
+inline char * to_cstr(int num, char *buf, unsigned int base = 10u)
+{ return itoa(num, buf, string_impl::clamp_base(base)); }
+inline char * to_cstr(long num, char *buf, unsigned int base = 10u)
+{ return ltoa(num, buf, string_impl::clamp_base(base)); }
+inline char * to_cstr(long long num, char *buf, unsigned int base = 10u)
+{ return lltoa(num, buf, string_impl::clamp_base(base)); }
+inline char * to_cstr(unsigned int num, char *buf, unsigned int base = 10u)
+{ return uitoa(num, buf, string_impl::clamp_base(base)); }
+inline char * to_cstr(unsigned long num, char *buf, unsigned int base = 10u)
+{ return ultoa(num, buf, string_impl::clamp_base(base)); }
+inline char * to_cstr(unsigned long long num, char *buf, unsigned int base = 10u)
+{ return ulltoa(num, buf, string_impl::clamp_base(base)); }
+
+template <typename T> char * to_cstr(T *ptr, char *buf) { return to_cstr(reinterpret_cast<std::uintptr_t>(ptr), buf, 16); }
 
 template <std::integral Int> String to_string(Int num, unsigned int base)
 {
-    String s;
+    using string_impl::append_string;
     base = std::clamp(base, 2u, 32u);
 
-    if (base == 2) { s.append("0b"); }
-    else if (base == 8) { s.append("0o"); }
-    else if (base == 10) {}
-    else if (base == 16) { s.append("0x"); }
-    else {
-        s.append('b');
-        string_impl::append_string(s, base, 10);
-        s.append('_');
+    if (base == 2) {
+        String s(2 + sizeof(Int) * 8u);
+        s.append("0b");
+        append_string(s, num, base);
+        return s;
     }
-
-    string_impl::append_string(s, num, base);
-    return s;
+    else if (base == 8) {
+        String s(2 + sizeof(Int) * 3u);
+        s.append("0o");
+        append_string(s, num, base);
+        return s;
+    }
+    else if (base == 10) {
+        String s(sizeof(Int) * 3u);
+        append_string(s, num, base);
+        return s;
+    }
+    else if (base == 16) {
+        String s(2 + (sizeof(Int) * 2u));
+        s.append("0x");
+        append_string(s, num, base);
+        return s;
+    }
+    else {
+        String s(sizeof(Int) * 8u);
+        s.append('b');
+        append_string(s, base, 10);
+        s.append('_');
+        append_string(s, num, base);
+        return s;
+    }
 }
 
 template <std::integral Int> String to_string(Int num) { return to_string(num, 10); }

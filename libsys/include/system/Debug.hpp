@@ -25,3 +25,6 @@ void debug_println(char const *format, Ts&&...args) { BochsDebugOutputStream o{}
 } // namespace sys
 
 #define DEBUG_BREAK() do { sys::debug_print("BREAK @ %@:%@\n", __FILE__, __LINE__); asm volatile ("xchg %bx, %bx"); } while (0)
+
+#undef TRACE_FN
+#define TRACE_FN() sys::debug_print("TRACE: %@ %@:%@\n", __FUNCTION__, __FILE__, __LINE__)

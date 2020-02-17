@@ -7,3 +7,10 @@
 #include <bits/iterator/concepts.hpp>
 #include <bits/iterator/types.hpp>
 #include <bits/range_access.hpp>
+
+namespace std {
+
+template <input_iterator InputIt, typename Distance>
+constexpr inline void advance(InputIt &it, Distance increment) { it = it + increment; }
+
+} // namespace std

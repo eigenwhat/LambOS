@@ -15,6 +15,11 @@
 
 namespace sys {
 
+template <typename... Ts>
+void debug_print(char const *format, Ts&&...args);
+template <typename... Ts>
+void debug_println(char const *format, Ts&&...args);
+
 template <typename T>
 void print(OutputStream &out, T &&data)
 {
@@ -32,7 +37,9 @@ void print(OutputStream &out, T &&data)
         print(out, data ? "true" : "false");
     }
     else if constexpr (std::integral<std::decay_t<T>> || pointer<std::decay_t<T>>) {
-        print(out, to_string(data));
+        char buf[64];
+        char const *str = to_cstr(data, buf);
+        print(out, str);
     }
     else {
         static_assert(!std::is_same_v<T, T>);
@@ -42,7 +49,7 @@ void print(OutputStream &out, T &&data)
 template <typename H, typename ...Ts>
 void print(OutputStream &out, char const *format, H &&first, Ts &&...rest)
 {
-    static constexpr auto is_format_spec = [](char c) { return c == '@' || c == 'x' || c == 'p'; };
+    static constexpr auto is_format_spec = [](char c) -> bool { return c == '@' || c == 'x' || c == 'p'; };
     auto const inputs = std::make_tuple(std::forward<H>(first), std::forward<Ts>(rest)...);
     size_t currentInput = 0;
 
@@ -52,7 +59,7 @@ void print(OutputStream &out, char const *format, H &&first, Ts &&...rest)
         }
         else {
             char const formatSpecifier = format[1];
-            format += 2;
+            std::advance(format, 2);
             template_for<0, type_count<H, Ts...>>([&](auto idx_constant) {
                 constexpr auto index = decltype(idx_constant)::value;
                 using type = nth_type_t<index, H, Ts...>;
