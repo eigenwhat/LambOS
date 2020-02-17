@@ -7,15 +7,12 @@
 #include <cstddef>
 #include <cstdint>
 #include <proc/Context.hpp>
-#include <mem/MMU.hpp>
+#include <arch/i386/mem/MMU.hpp>
 #include <cpu/CPU.hpp>
 
 class Kernel : public Context
 {
   public:
-    /** Returns the kernel's representation of the memory management unit. */
-    MMU *mmu() { return this->_mmu; }
-
     /**
      * Kills the system.
      *
@@ -29,7 +26,7 @@ class Kernel : public Context
      * @param numberOfPages The number of pages to allocate.
      * @return the start of the contiguous allocated memory.
      */
-    void *palloc(size_t numberOfPages) { return mmu()->palloc(addressSpace(), numberOfPages); }
+    void *palloc(size_t numberOfPages) { return _mmu->palloc(addressSpace(), numberOfPages); }
 
     /**
      * Attempts to allocate a number of pages at the given address.
@@ -39,7 +36,7 @@ class Kernel : public Context
      */
     void *palloc(void *virtualAddress, size_t numberOfPages)
     {
-        return mmu()->palloc(addressSpace(), virtualAddress, numberOfPages);
+        return _mmu->palloc(addressSpace(), virtualAddress, numberOfPages);
     }
 
     /**
@@ -50,14 +47,12 @@ class Kernel : public Context
      */
     int pfree(void *startOfMemoryRange, size_t numberOfPages = 1)
     {
-        return mmu()->pfree(addressSpace(), startOfMemoryRange, numberOfPages);
+        return _mmu->pfree(addressSpace(), startOfMemoryRange, numberOfPages);
     }
 
   protected:
     Kernel() = default;
-    void setMMU(MMU *mmu) { _mmu = mmu; }
 
-  private:
     MMU *_mmu = nullptr;
 };
 

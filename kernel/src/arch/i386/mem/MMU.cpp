@@ -2,13 +2,15 @@
 // Created by Martin Miralles-Cordal on 8/28/2013.
 //
 
-#include <mem/MMU.hpp>
+#include <arch/i386/mem/MMU.hpp>
 
 #include <arch/i386/mem/Paging.hpp>
 #include <system/asm.h>
 #include <mem/PageFrameAllocator.hpp>
 #include <mem/PageTable.hpp>
 #include <Kernel.hpp>
+
+#include <system/Debug.hpp>
 
 #include <cstdio>
 #include <cstdlib>
@@ -42,23 +44,6 @@ PageTable PageTableForDirectoryIndex(uint32_t index)
     return PageTable(addr);
 }
 
-// lock frames in low memory, mark kernel frames as used
-void MMUPFAHook(PageFrameAllocator *allocator)
-{
-    uint32_t i = 0;
-    for (; i < 0x100000; i += 0x1000) {
-        allocator->markFrameUsable(i, false);
-    }
-
-    uint32_t kernel_end_addr = (uint32_t) & kernel_end;
-
-    for (; i <= kernel_end_addr; i += 0x1000) {
-        if (!allocator->requestFrame(i)) {
-            kernel->panic("Page allocation error: unable to reserve kernel memory frames.");
-        }
-    }
-}
-
 } // anonymous namespace
 
 //===========================================================
@@ -72,9 +57,23 @@ void MMUPFAHook(PageFrameAllocator *allocator)
 //    return {page};
 //}
 
+MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length) : _pageFrameAllocator{}
+{
+    _pageFrameAllocator.loadMemoryMap(mmap_addr, mmap_length);
 
-MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length)
-        : _pageFrameAllocator(mmap_addr, mmap_length, MMUPFAHook) {}
+    uint32_t i = 0;
+    for (; i < 0x100000; i += 0x1000) {
+        _pageFrameAllocator.markFrameUsable(i, false);
+    }
+
+    uint32_t kernel_end_addr = (uint32_t) & kernel_end;
+
+    for (; i <= kernel_end_addr; i += 0x1000) {
+        if (!_pageFrameAllocator.requestFrame(i)) {
+            kernel->panic("Page allocation error: unable to reserve kernel memory frames.");
+        }
+    }
+}
 
 void MMU::install(AddressSpace addressSpace)
 {

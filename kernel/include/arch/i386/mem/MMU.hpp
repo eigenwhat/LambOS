@@ -4,8 +4,8 @@
 
 #pragma once
 
-#include "AddressSpace.hpp"
-#include "PageFrameAllocator.hpp"
+#include <mem/AddressSpace.hpp>
+#include <mem/PageFrameAllocator.hpp>
 
 /** Abstraction for the X86 memory management unit. Implements paging. */
 class MMU

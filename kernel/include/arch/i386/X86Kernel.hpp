@@ -1,7 +1,5 @@
 #pragma once
 
-#include <new>
-
 #include <Kernel.hpp>
 #include <arch/i386/cpu/X86.hpp>
 #include <device/display/VGATextConsole.hpp>
@@ -27,7 +25,7 @@ private:
     X86 _x86cpu;
     VGATextConsole _vgaConsole;
     ConsoleOutputStream _consoleOutputStream;
-    alignas(MMU) std::byte _mmuMem[sizeof(MMU)];
+    sys::Maybe<MMU> _maybemmu{};
 };
 
 extern X86Kernel *x86Kernel;
