@@ -13,23 +13,24 @@ namespace {
 
 constexpr auto frame_to_index(auto frame) { return (frame & k4KPageAddressMask) / 0x1000; }
 
+multiboot_memory_map_t * next(multiboot_memory_map_t *mmap)
+{
+    return reinterpret_cast<multiboot_memory_map_t *>(uint32_t(mmap) + mmap->size + sizeof(mmap->size));
 }
 
-void PageFrameAllocator::Bitmap::loadMemoryMap(uint32_t mmap_addr, uint32_t mmap_length)
+}
+
+void PageFrameAllocator::Bitmap::loadMemoryMap(uint32_t mmapAddr, uint32_t mmapLength)
 {
-    std::memset(usable, 0xFF, kPagesInBitmap / 8);
-    std::memset(free, 0, kPagesInBitmap / 8);
-    multiboot_memory_map_t *mmap;
-    for (mmap = (multiboot_memory_map_t *) mmap_addr;
-         (uint32_t) mmap < mmap_addr + mmap_length;
-         mmap = (multiboot_memory_map_t * )((uint32_t) mmap + mmap->size + sizeof(mmap->size))) {
+    auto const end = (multiboot_memory_map_t *)(mmapAddr + mmapLength);
+    for (auto *mmap = (multiboot_memory_map_t *)mmapAddr; mmap < end; mmap = next(mmap))
+    {
         uint64_t page_offset = mmap->addr / 0x1000;
         uint64_t num_pages = mmap->len / 0x1000;
         printf("page_offset=%d,num_pages=%d\n", page_offset, num_pages);
         if (mmap->type == 1) {
-            for (uint64_t i = page_offset; i < page_offset + num_pages; ++i) {
-                uint64_t bitmap_index = i / 8;
-                usable[bitmap_index] &= static_cast<std::uint8_t>(~(1u << (i % 8)));
+            for (auto i = std::size_t(page_offset); i < page_offset + num_pages; ++i) {
+                usable[i] = true;
             }
         }
     }
@@ -37,19 +38,16 @@ void PageFrameAllocator::Bitmap::loadMemoryMap(uint32_t mmap_addr, uint32_t mmap
 
 void PageFrameAllocator::markFrameUsable(PageFrame frame, bool usable)
 {
-    uint32_t frameNumber = _frameToIndex(frame);
-    uint32_t index = frameNumber / 8;
-    uint8_t bitNumber = frameNumber % 8;
-    _bitmap.usable[index] &= std::uint8_t(~(1u << bitNumber));
-    _bitmap.usable[index] |= std::uint8_t((!usable) << bitNumber);
+    uint32_t const frameNumber = _frameToIndex(frame);
+    _bitmap.usable[frameNumber] = usable;
 }
 
 bool PageFrameAllocator::requestFrame(PageFrame frame)
 {
-    uint32_t index = _frameToIndex(frame);
-    bool retval = _frameIsFree(index);
+    uint32_t const index = _frameToIndex(frame);
+    bool retval = _bitmap.usableAndFree(index);
     if (retval) {
-        _bitmap.free[index / 8] |= std::uint8_t(1u << (index % 8));
+        _bitmap.used[index] = true;
     }
 
     return retval;
@@ -61,19 +59,19 @@ PageFrame PageFrameAllocator::alloc()
     // start checking from the last place we allocated since the next page is likely available
     for (uint32_t i = startIndex + 1; i < kPagesInBitmap; ++i) {
         // printf("checking bitmap idx %d\n", i);
-        if (_frameIsUsable(i) && _frameIsFree(i)) {
+        if (_bitmap.usableAndFree(i)) {
             // puts("got 'em");
             _lastAllocFrame = _indexToFrame(i);
-            _bitmap.free[i / 8] |= std::uint8_t(1u << (i % 8));
+            _bitmap.used[i] = true;
             return _lastAllocFrame;
         }
     }
 
     // we didn't find anything yet, so check the rest
     for (uint32_t i = 0; i < startIndex; ++i) {
-        if (_frameIsUsable(i) && _frameIsFree(i)) {
+        if (_bitmap.usableAndFree(i)) {
             _lastAllocFrame = _indexToFrame(i);
-            _bitmap.free[i / 8] |= std::uint8_t(1 << (i % 8));
+            _bitmap.used[i] = true;
             return _lastAllocFrame;
         }
     }
@@ -86,6 +84,6 @@ PageFrame PageFrameAllocator::alloc()
 
 void PageFrameAllocator::free(PageFrame frame)
 {
-    auto index = _frameToIndex(frame);
-    _bitmap.free[index / 8] &= std::uint8_t(~(1u << (index % 8)));
+    auto const index = _frameToIndex(frame);
+    _bitmap.used[index] = false;
 }

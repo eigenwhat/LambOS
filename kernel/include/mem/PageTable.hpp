@@ -7,9 +7,9 @@
 #include <cstddef>
 #include <cstdint>
 
-#define k4KPageAddressMask 0xFFFFF000
-#define k4MPageAddressMask 0xFFC00000
-#define kPageFlagsMask 0x00000FFF
+constexpr std::uint32_t k4KPageAddressMask = 0xFFFFF000;
+constexpr std::uint32_t k4MPageAddressMask = 0xFFC00000;
+constexpr std::uint32_t kPageFlagsMask = 0x00000FFF;
 
 enum PageEntryFlag : std::uint32_t {
     kPresentBit = 0x00000001,
@@ -52,8 +52,8 @@ class PageTable
      * @param tableAddress The virtual address where the table resides if paging
      *                     is enabled, physical otherwise.
      */
-    PageTable(std::uintptr_t *tableAddress) : _tableAddress(tableAddress) {}
-    PageTable(void *tableAddress) : PageTable{static_cast<std::uintptr_t *>(tableAddress)} {}
+    PageTable(std::uint32_t tableAddress) : _tableAddress{reinterpret_cast<std::uint32_t *>(tableAddress)} {}
+    PageTable(void *tableAddress) : _tableAddress{static_cast<std::uint32_t *>(tableAddress)} {}
 
     /**
      * Clears all entries in the table.
@@ -62,7 +62,7 @@ class PageTable
     void clear();
 
     /** The addressable location of the page table in memory. */
-    std::uintptr_t *address() const { return _tableAddress; }
+    std::uint32_t *address() const { return _tableAddress; }
 
     /**
      * Returns the PageEntry at the given index.
@@ -87,5 +87,5 @@ class PageTable
 
   private:
     static void invalidatePage(uintptr_t m);
-    std::uintptr_t *_tableAddress;
+    std::uint32_t *_tableAddress;
 };
