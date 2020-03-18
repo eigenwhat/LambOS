@@ -1,14 +1,16 @@
 #pragma once
 
-#include <util/Comparator.hpp>
+#include <util/Compare.hpp>
 #include <util/DynamicArray.hpp>
 #include <util/Hasher.hpp>
 #include <util/LinkedList.hpp>
 #include <util/Map.hpp>
 
+#include <ranges>
+
 namespace sys {
 
-template <typename K, typename V, typename KeyHasher = Hasher<K>, typename KeyEqual = decltype(EqualTo<K>)>
+template <typename K, typename V, typename KeyHasher = Hasher<K>, typename KeyEqual = std::ranges::equal_to>
 class HashMap : public virtual Map<K, V>
 {
   public:

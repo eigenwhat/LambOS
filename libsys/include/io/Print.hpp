@@ -6,6 +6,7 @@
 
 #include <io/OutputStream.hpp>
 #include <io/StandardOutput.hpp>
+#include <util/Compare.hpp>
 #include <util/String.hpp>
 #include <util/TypeTraits.hpp>
 
@@ -49,12 +50,13 @@ void print(OutputStream &out, T &&data)
 template <typename H, typename ...Ts>
 void print(OutputStream &out, char const *format, H &&first, Ts &&...rest)
 {
-    static constexpr auto is_format_spec = [](char c) -> bool { return c == '@' || c == 'x' || c == 'p'; };
+    static constexpr auto has_format_spec = [](char const *s) -> bool { return s[0] == '%' && s[1] == Any<'@','x','p'>; };
+
     auto const inputs = std::make_tuple(std::forward<H>(first), std::forward<Ts>(rest)...);
     size_t currentInput = 0;
 
     while (format[0] != '\0') {
-        if (!(format[0] == '%' && is_format_spec(format[1]))) {
+        if (!(has_format_spec(format))) {
             out.write(*format++);
         }
         else {
@@ -88,7 +90,7 @@ void println(OutputStream &out, char const *format, Ts &&...rest)
 
 template <typename T> void print(T &&data) { print(StandardOutput::Get(), std::forward<T>(data)); }
 
-template <typename H, typename ...Ts>
+template <typename ...Ts>
 void print(char const *format, Ts &&...rest) { print(StandardOutput::Get(), format, std::forward<Ts>(rest)...); }
 
 template <typename ...Ts>

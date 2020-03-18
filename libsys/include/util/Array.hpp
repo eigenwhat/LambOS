@@ -61,18 +61,9 @@ struct Array
     T _elems[Size];
 };
 
-template<typename T, typename... Ts>
-Array(T, Ts...) -> Array<std::enable_if_t<(std::same_as<T, Ts> && ...), T>, 1 + sizeof...(Ts)>;
+template<typename T, std::same_as<T>... Ts> Array(T, Ts...) -> Array<T, 1 + sizeof...(Ts)>;
+
+template<std::swappable T, std::size_t Size>
+constexpr inline void swap(Array<T, Size> &a, Array<T, Size> &b) noexcept(noexcept(a.swap(b))) { a.swap(b); }
 
 } // libsys namespace
-
-namespace std {
-
-template<typename T, std::size_t Size>
-constexpr inline std::enable_if_t<std::is_swappable<T>::value>
-swap(Array<T, Size> &one, Array<T, Size> &two) noexcept(noexcept(one.swap(two))) { one.swap(two); }
-
-template<typename T, std::size_t Size>
-constexpr std::enable_if_t<!std::is_swappable<T>::value> swap(Array<T, Size> &, Array<T, Size> &) = delete;
-
-} // namespace std

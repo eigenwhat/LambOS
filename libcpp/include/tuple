@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <compare>
 #include <concepts>
 
 namespace std {
@@ -13,8 +14,8 @@ template <std::size_t Index, typename T>
 class __tuple_impl
 {
   public:
-    __tuple_impl(T const &v) { val_ = v; }
-    __tuple_impl(T &&v) { val_ = std::move(v); }
+    __tuple_impl(T const &v) : val_{v} {}
+    __tuple_impl(T &&v) : val_{std::move(v)} {}
     T &get() & { return val_; }
     T const &get() const & { return val_; }
     T &&get() && { return std::move(val_); }
@@ -76,14 +77,23 @@ decltype(auto) get(tuple<Args...> const &&t)
 }
 
 template <std::size_t I, typename... Args>
-bool compare_tuple(tuple<Args...> &t1, tuple<Args...> &t2)
+bool __tuple_equal_idx(tuple<Args...> const &t1, tuple<Args...> const &t2) { return get<I>(t1) == get<I>(t2); }
+
+template <size_t...S, typename...Args>
+bool __tuple_equal(tuple<Args...> const &t1, tuple<Args...> const &t2, std::index_sequence<S...>)
 {
-    if constexpr (I == 0) { return get<0>(t1) == get<0>(t2); }
-    else { return get<I>(t1) == get<I>(t2) && compare_tuple<I - 1>(t1, t2); }
+    return (__tuple_equal_idx<S>(t1, t2) && ...);
 }
 
 template <typename... Args>
-bool operator==(tuple<Args...> &t1, tuple<Args...> &t2) { return compare_tuple<sizeof...(Args) - 1>(t1, t2); }
+bool operator==(tuple<Args...> const &t1, tuple<Args...> const &t2)
+{
+    if constexpr (sizeof...(Args) == 0) { return true; }
+    else {
+        return __tuple_equal(t1, t2, [](auto &&a, auto &&b) { return a == b; },
+                             make_index_sequence<sizeof...(Args)>());
+    }
+}
 
 template <typename T> struct __unwrap_refwrapper { using type = T; };
 template <typename T> struct __unwrap_refwrapper<reference_wrapper<T>> { using type = T&; };

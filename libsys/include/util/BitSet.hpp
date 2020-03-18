@@ -19,7 +19,7 @@ class BitSet {
     class ProxyBit
     {
       public:
-        ProxyBit(BitSet *parent, std::size_t index) : _parent{parent}, _index{index} {}
+        constexpr ProxyBit(BitSet *parent, std::size_t index) : _parent{parent}, _index{index} {}
         [[nodiscard]] constexpr operator bool() const { return _parent->test(_index); }
         constexpr ProxyBit& operator=(bool b) { b ? _parent->set(_index) : _parent->unset(_index); return *this; }
 
