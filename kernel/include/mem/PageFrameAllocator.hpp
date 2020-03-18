@@ -25,18 +25,18 @@ class PageFrameAllocator
         sys::BitSet<kPagesInBitmap> used;
     };
 
-    PageFrameAllocator() : _bitmap{}, _lastAllocFrame{0} {}
+    PageFrameAllocator() = default;
+    PageFrameAllocator(uint32_t mmapAddr, uint32_t mmapLength) { _bitmap.loadMemoryMap(mmapAddr, mmapLength); }
+
     void loadMemoryMap(uint32_t mmapAddr, uint32_t mmapLength) { _bitmap.loadMemoryMap(mmapAddr, mmapLength); }
 
     PageFrame alloc();
     void free(PageFrame frame);
     void markFrameUsable(PageFrame frame, bool usable);
     bool requestFrame(PageFrame frame);
+    bool requestFrameIndex(std::size_t index);
 
   private:
-    uint32_t _frameToIndex(PageFrame frame) { return (frame & k4KPageAddressMask) / 0x1000; }
-    PageFrame _indexToFrame(uint32_t index) { return index * 0x1000; }
-
-    Bitmap _bitmap;
-    PageFrame _lastAllocFrame;
+    Bitmap _bitmap{};
+    PageFrame _lastAllocFrame{0};
 };
