@@ -18,9 +18,8 @@ void PageTable::clear() { std::memset(_tableAddress, 0, X86::kPageTableSize); }
 
 void PageTable::install()
 {
-    // TODO: Figure out why using %eax here instead of %0 is so important as to otherwise break paging on QEMU
     asm volatile ("movl %0, %%cr3\n"
-        "mov %%cr0, %%eax\n"
-        "orl $0x80000000, %%eax\n"
-        "mov %%eax, %%cr0\n" :: "r"(_tableAddress) : "%eax");
+                  "mov %%cr0, %0\n"
+                  "orl $0x80000000, %0\n"
+                  "mov %0, %%cr0\n" :: "r"(_tableAddress));
 }

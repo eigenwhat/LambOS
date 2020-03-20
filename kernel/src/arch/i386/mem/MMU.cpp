@@ -13,7 +13,6 @@
 #include <system/Debug.hpp>
 
 #include <cstdio>
-#include <cstdlib>
 #include <cstring>
 #include <new>
 
@@ -21,6 +20,9 @@ namespace {
 
 constexpr std::uint32_t const kVGAPage{0xB8000 / 0x1000};
 constexpr std::uint32_t const kPDESelfMapIndex{1023};
+
+using X86PageTable = std::uint32_t[0x400];
+X86PageTable * const kPageDirectoryAddress = (X86PageTable *)(0xFFC00000);
 
 }
 
@@ -38,11 +40,7 @@ namespace {
 // Pulls the page table from the self-mapped page directory.
 // Trust me, you need to use this. Don't use the address from the page directory
 // entry. That's the physical page frame!
-PageTable PageTableForDirectoryIndex(uint32_t index)
-{
-    uint32_t *addr = (uint32_t *) 0xFFC00000 + (0x400 * index);
-    return PageTable(addr);
-}
+PageTable PageTableForDirectoryIndex(uint32_t index) { return PageTable(kPageDirectoryAddress + index); }
 
 } // anonymous namespace
 
@@ -50,23 +48,24 @@ PageTable PageTableForDirectoryIndex(uint32_t index)
 // MMU Public Methods
 //===========================================================
 
-//PageTable MMU::cloneDirectory(PageFrame const &p)
-//{
-//    void *page = palloc(1);
-//    std::memset(page, 0, X86::kPageTableSize);
-//    return {page};
-//}
+PageTable MMU::cloneDirectory(AddressSpace src)
+{
+    void *page = palloc(src, 1);
+    std::memset(page, 0, X86::kPageTableSize);
+    return {page};
+}
 
 MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length) : _pageFrameAllocator{}
 {
     _pageFrameAllocator.loadMemoryMap(mmap_addr, mmap_length);
 
+    // mark kernel frames as unusable (i.e. taken)
     uint32_t i = 0;
     for (; i < 0x100000; i += 0x1000) {
         _pageFrameAllocator.markFrameUsable(i, false);
     }
 
-    uint32_t kernel_end_addr = (uint32_t) & kernel_end;
+    auto kernel_end_addr = (uint32_t)&kernel_end;
 
     for (; i <= kernel_end_addr; i += 0x1000) {
         if (!_pageFrameAllocator.requestFrame(i)) {
@@ -77,41 +76,54 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length) : _pageFrameAllocator{}
 
 void MMU::install(AddressSpace addressSpace)
 {
+    std::uint32_t readOnlyEnd = std::uint32_t(&readonly_end) / 0x1000;
     addressSpace.clear();
-    PageTable firstTable((uint32_t * )(_pageFrameAllocator.alloc()));
-    firstTable.clear();
 
     // identity map current used address space
-    uint32_t readOnlyEnd = (uint32_t) & readonly_end / 0x1000;
-    uint32_t lastUsedPage = (uint32_t) firstTable.address() / 0x1000;
-
-    if (lastUsedPage >= 0x400) {
-        kernel->panic("Kernel spans past first page table.");
-    }
-
+    std::uint32_t lastUsedFrame = readOnlyEnd;
     uint32_t address = 0;
-    for (uint16_t i = 0; i <= static_cast<uint16_t>(lastUsedPage); ++i) {
+    uint16_t tableDirectoryIndex = 0;
+
+    auto const addToDirectory = [&](uint16_t i, PageTable t) {
+        // Install finished table
+        PageEntry entry((uint32_t)t.address());
+        entry.setFlag(kPresentBit);
+        entry.setFlag(kReadWriteBit);
+        addressSpace.setEntry(i, entry);
+    };
+
+    auto const createNextTable = [&] {
+        PageTable newTable{_pageFrameAllocator.alloc()};
+        newTable.clear();
+        const auto tableFrameIndex = std::uint32_t(newTable.address()) / 0x1000;
+        lastUsedFrame = std::max(lastUsedFrame, tableFrameIndex);
+        return newTable;
+    };
+
+    PageTable table;
+    for (std::size_t frame = 0; frame <= lastUsedFrame; ++frame, address += 0x1000)
+    {
+        if (frame % 0x400 == 0) {
+            if (table) { addToDirectory(tableDirectoryIndex++, table); }
+            table = createNextTable();
+        }
+
         PageEntry entry(address);
         entry.setFlag(kPresentBit);
         // make sure pages for read only data are marked read only
-        if (i > readOnlyEnd || i == kVGAPage) {
+        if (frame > readOnlyEnd || frame == kVGAPage) {
             entry.setFlag(kReadWriteBit);
         }
-        firstTable.setEntry(i, entry);
-        address += 0x1000;
+
+        auto const index = static_cast<uint16_t>(frame % 0x400);
+        table.setEntry(index, entry);
     }
 
-    // Install table for first 4MB
-    PageEntry entry((uint32_t) firstTable.address());
-    entry.setFlag(kPresentBit);
-    entry.setFlag(kReadWriteBit);
-    addressSpace.setEntry(0, entry);
+    // install final one.
+    if (table) { addToDirectory(tableDirectoryIndex, table); }
 
     // Set last PDE to PD itself
-    PageEntry directory((uint32_t) addressSpace.address());
-    directory.setFlag(kPresentBit);
-    directory.setFlag(kReadWriteBit);
-    addressSpace.setEntry(kPDESelfMapIndex, directory);
+    addToDirectory(kPDESelfMapIndex, addressSpace);
     addressSpace.install();
 }
 
@@ -153,7 +165,7 @@ void *MMU::palloc(AddressSpace addressSpace, size_t numberOfPages)
 
 void *MMU::palloc(AddressSpace addressSpace, void *virtualAddress, size_t numberOfPages)
 {
-    uintptr_t address = reinterpret_cast<uintptr_t>(virtualAddress);
+    auto address = reinterpret_cast<uintptr_t>(virtualAddress);
     if (address & 0xFFF) {
         return nullptr; // address is not page aligned
     }
@@ -268,3 +280,4 @@ void MMU::_flush()
             "movl %eax, %cr3"
             );
 }
+

@@ -31,13 +31,15 @@ class PageEntry
     PageEntry(std::uintptr_t address) : _entry(address & k4KPageAddressMask) {}
     PageEntry(std::uintptr_t entry, int) : _entry(entry) {}
 
+    [[nodiscard]] bool getFlag(PageEntryFlag flag) const { return (bool)(_entry & flag); }
     void unsetFlag(PageEntryFlag flag) { _entry &= ~flag; }
     void setFlag(PageEntryFlag flag) { _entry |= flag; }
-    bool getFlag(PageEntryFlag flag) { return (bool)(_entry & flag); }
     void setFlags(std::uintptr_t flags) { _entry = (_entry & k4KPageAddressMask) | (flags & kPageFlagsMask); }
-    std::uintptr_t address() { return _entry & k4KPageAddressMask; }
-    std::uintptr_t flags() { return _entry & kPageFlagsMask; }
-    friend class PageTable;
+
+    [[nodiscard]] std::uintptr_t address() const { return _entry & k4KPageAddressMask; }
+    [[nodiscard]] std::uintptr_t flags() const { return _entry & kPageFlagsMask; }
+    [[nodiscard]] std::uintptr_t entry() const { return _entry; }
+
   private:
     std::uintptr_t _entry;
 };
@@ -62,7 +64,7 @@ class PageTable
     void clear();
 
     /** The addressable location of the page table in memory. */
-    std::uint32_t *address() const { return _tableAddress; }
+    [[nodiscard]] std::uint32_t * address() const { return _tableAddress; }
 
     /**
      * Returns the PageEntry at the given index.
@@ -78,12 +80,14 @@ class PageTable
      */
     void setEntry(uint16_t index, PageEntry entry)
     {
-        _tableAddress[index] = entry._entry;
+        _tableAddress[index] = entry.entry();
         invalidatePage(entry.address());
     }
 
     /** Installs the PageTable as the active page directory. */
     void install();
+
+    explicit operator bool() const { return _tableAddress != nullptr; }
 
   private:
     static void invalidatePage(uintptr_t m);

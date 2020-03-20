@@ -15,6 +15,7 @@ class MMU
 
     /**
      * Allocates contiguous pages of memory.
+     * @param addressSpace The address space to allocate within.
      * @param numberOfPages The number of pages to allocate.
      * @return the start of the contiguous allocated memory.
      */
@@ -22,7 +23,8 @@ class MMU
 
     /**
      * Attempts to allocate a number of pages at the given address.
-     * @param virtualAddress
+     * @param addressSpace The address space to allocate within.
+     * @param virtualAddress The target address.
      * @param numberOfPages The number of pages to allocate.
      * @return the start of the contiguous allocated memory.
      */
@@ -30,13 +32,14 @@ class MMU
 
     /**
      * Frees a page-aligned block of memory.
+     * @param addressSpace The address space to free from.
      * @param startOfMemoryRange The start of the memory block to free.
      * @param numberOfPages The length of the memory block in pages. Defaults to 1.
      * @return -1 if an error occurred, 0 otherwise.
      */
     int pfree(AddressSpace addressSpace, void *startOfMemoryRange, size_t numberOfPages = 1);
 
-//    PageTable cloneDirectory(PageFrame const &directory);
+    PageTable cloneDirectory(AddressSpace src);
 
     AddressSpace create() { return AddressSpace{(uint32_t *)(_pageFrameAllocator.alloc())}; }
 
