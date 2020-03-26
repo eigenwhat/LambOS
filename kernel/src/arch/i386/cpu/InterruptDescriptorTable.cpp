@@ -133,7 +133,7 @@ std::uint64_t InterruptDescriptorTable::EncodeEntry(IDTEntry source)
 
 void InterruptDescriptorTable::encodeEntry(uint8_t entryNumber, IDTEntry source)
 {
-    idt[entryNumber] = EncodeEntry(source);
+    idt_[entryNumber] = EncodeEntry(source);
 }
 
 uint8_t stub_isr_mem[sizeof(StubISR)];
@@ -145,8 +145,8 @@ void InterruptDescriptorTable::encodeISRs()
     PanicISR *panicISR = new(panic_isr_mem) PanicISR;
 
     // assign all the defaults
-    std::ranges::generate_n(idt, 256, [] { static int i = 0; return EncodeEntry(IDTEntry(0x08, kIsrs[i++], 0x8E)); });
-    std::ranges::fill_n(isr, 256, defaultISR);
+    std::ranges::generate_n(idt_, 256, [] { static int i = 0; return EncodeEntry(IDTEntry(0x08, kIsrs[i++], 0x8E)); });
+    std::ranges::fill_n(isr_, 256, defaultISR);
 
     // configure system interrupts
     addISR(*this, 0,  defaultISR); // kDivideByZero

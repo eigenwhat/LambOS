@@ -36,7 +36,7 @@ void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2);
 
 sys::BochsDebugOutputStream debugOut;
 
-X86::X86()
+X86::CPU::CPU()
 {
     // Set up GDT
     _gdt.encodeEntry(0, GDTEntry());
@@ -54,7 +54,7 @@ X86::X86()
 
 }
 
-void X86::install()
+void X86::CPU::install()
 {
     // Set up IDT
     _idt.encodeISRs();
@@ -69,7 +69,7 @@ void X86::install()
     _idt.install();
 }
 
-void X86::enableInterrupts()
+void X86::CPU::enableInterrupts()
 {
     static bool pic_initialized = false;
     if (!pic_initialized) {
@@ -80,7 +80,7 @@ void X86::enableInterrupts()
     asm volatile ("sti");
 }
 
-void X86::maskIRQ(unsigned int IRQ)
+void X86::CPU::maskIRQ(unsigned int IRQ)
 {
     uint16_t port;
     uint8_t value;
@@ -96,7 +96,7 @@ void X86::maskIRQ(unsigned int IRQ)
     outb(port, value);
 }
 
-void X86::unmaskIRQ(unsigned int IRQ)
+void X86::CPU::unmaskIRQ(unsigned int IRQ)
 {
     uint16_t port;
     uint8_t value;

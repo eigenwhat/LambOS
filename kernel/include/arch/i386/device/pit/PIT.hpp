@@ -11,7 +11,7 @@ extern "C" uint16_t read_PIT_count();
 class PIT
 {
   public:
-    static void installIRQ(X86 &cpu) { PITIRQ::install(cpu); }
+    static void installIRQ(X86::CPU &cpu) { PITIRQ::install(cpu); }
 
     static uint16_t readPitCount()
     {

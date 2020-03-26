@@ -14,8 +14,6 @@
 
 extern "C" void set_idt(void *idt, size_t size);
 
-#define IDT_SIZE 256
-
 struct InterruptServiceRoutine
 {
     static inline void endOfInterrupt() { outb(0x20, 0x20); }
@@ -43,24 +41,23 @@ class IDTEntry
 
 class InterruptDescriptorTable
 {
+    static constexpr int kIdtSize = 256;
+    InterruptServiceRoutine *isr_[kIdtSize];
+    uint64_t idt_[kIdtSize];
   public:
     static std::uint64_t EncodeEntry(IDTEntry source);
 
     void encodeEntry(uint8_t entryNumber, IDTEntry source);
     void encodeISRs();
-    void install() { set_idt(this->idt, sizeof(uint64_t) * IDT_SIZE); }
+    void install() { set_idt(this->idt_, sizeof(uint64_t) * kIdtSize); }
 
     void callISR(InterruptNumber interruptNumber, RegisterTable &registers)
     {
-        (*isr[static_cast<int>(interruptNumber)])(registers);
+        (*isr_[static_cast<int>(interruptNumber)])(registers);
     }
 
     void setISR(InterruptNumber interruptNumber, InterruptServiceRoutine *routine)
     {
-        isr[static_cast<int>(interruptNumber)] = routine;
+        isr_[static_cast<int>(interruptNumber)] = routine;
     }
-
-  private:
-    InterruptServiceRoutine *isr[IDT_SIZE];
-    uint64_t idt[IDT_SIZE];
 };

@@ -35,6 +35,7 @@ VGA4BitColor defaultTextColor = COLOR_LIGHT_GREY;
 Kernel *kernel = nullptr;
 X86Kernel *x86Kernel = nullptr;
 STATIC_ALLOC(X86Kernel, kern_mem);
+PageFaultISR kPageFaultIsr;
 
 extern "C" {
 
@@ -55,6 +56,7 @@ int log_test(char const *printstr, int success);
 // ====================================================
 // Functions
 // ====================================================
+extern "C++"
 void perform_task(char const *desc, auto &&task)
 {
     sys::debug_print(desc);
@@ -82,7 +84,7 @@ void kernel_main(multiboot_info_t *info, uint32_t magic)
     log_task("Installing CPU descriptor tables...", [] { x86Kernel->cpu().install(); });
     log_task("Setting up memory management unit...", [&] { x86Kernel->installMMU(info->mmap_addr, info->mmap_length); });
     log_task("Installing interrupt handlers...", [] {
-        x86Kernel->cpu().idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
+        x86Kernel->cpu().idt()->setISR(InterruptNumber::kPageFault, &kPageFaultIsr);
         x86Kernel->installSyscalls();
         x86Kernel->cpu().enableInterrupts();
     });

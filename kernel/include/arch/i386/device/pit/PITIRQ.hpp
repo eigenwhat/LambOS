@@ -19,7 +19,7 @@ class PITIRQ : public InterruptServiceRoutine
      * @param cpu The CPU to install into.
      * @param keyboard The PS2Keyboard driver object to send events to.
      */
-    static void install(X86 &cpu)
+    static void install(X86::CPU &cpu)
     {
         cpu.idt()->setISR(InterruptNumber::kPITIRQ, new PITIRQ());
         cpu.unmaskIRQ(0);

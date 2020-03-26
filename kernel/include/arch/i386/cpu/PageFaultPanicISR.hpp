@@ -19,7 +19,7 @@ class PageFaultISR : public InterruptServiceRoutine
     {
         DEBUG_BREAK();
         uint32_t cr2;
-        asm volatile ("\t movl %%cr2, %0" : "=rm"(cr2));
+        asm volatile("movl %%cr2, %0" : "=r" (cr2));
         auto message = sys::format("Page Fault: %x/%@%@%@%@%@",
                                    uint32_t{cr2},
                                    registers.err_code & 0x01 ? "Protection/" : "",

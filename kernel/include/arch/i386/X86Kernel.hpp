@@ -10,7 +10,7 @@ class X86Kernel : public Kernel
 public:
     X86Kernel();
 
-    X86 &cpu() { return _x86cpu; }
+    X86::CPU &cpu() { return _x86cpu; }
 
     /**
      * Prepares the memory management unit for us.
@@ -22,7 +22,7 @@ public:
     void installSyscalls();
 
 private:
-    X86 _x86cpu;
+    X86::CPU _x86cpu;
     VGATextConsole _vgaConsole;
     ConsoleOutputStream _consoleOutputStream;
     sys::Maybe<MMU> _maybemmu{};

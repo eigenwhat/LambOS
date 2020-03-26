@@ -15,10 +15,12 @@
 
 extern sys::BochsDebugOutputStream debugOut;
 
-class X86
+namespace X86 {
+
+class CPU
 {
   public:
-    X86();
+    CPU();
 
     void install();
 
@@ -35,3 +37,5 @@ class X86
     InterruptDescriptorTable _idt{};
     TaskStateSegment _tss{};
 };
+
+}
