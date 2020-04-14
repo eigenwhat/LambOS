@@ -9,6 +9,24 @@
 
 namespace sys {
 
+enum class Arch { x86, x86_64, Unknown };
+
+#ifdef __amd64__
+constexpr inline bool is_amd64 = true;
+#else
+constexpr inline bool is_amd64 = false;
+#endif
+
+#ifdef __i386__
+constexpr inline bool is_i386 = true;
+#else
+constexpr inline bool is_i386 = false;
+#endif
+
+constexpr inline Arch kSystemArchitecture = is_i386  ? Arch::x86
+                                          : is_amd64 ? Arch::x86_64
+                                          : Arch::Unknown;
+
 inline namespace literals {
 
 [[nodiscard]]
