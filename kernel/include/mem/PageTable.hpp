@@ -28,6 +28,7 @@ class PageTable;
 class PageEntry
 {
   public:
+    PageEntry() = default;
     PageEntry(std::uintptr_t address) : _entry(address & k4KPageAddressMask) {}
     PageEntry(std::uintptr_t entry, int) : _entry(entry) {}
 
