@@ -54,4 +54,5 @@ class MMU
     void _flush();
 
     PageFrameAllocator _pageFrameAllocator;
+    bool _pagingEnabled = false;
 };

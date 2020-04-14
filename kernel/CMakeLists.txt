@@ -18,6 +18,7 @@ set(I386_SOURCES
         src/arch/i386/device/display/VGATextConsole.cpp
         src/arch/i386/device/storage/X86AtaDevice.cpp
         src/arch/i386/mem/MMU.cpp
+        src/arch/i386/mem/PageDirectory.cpp
         src/arch/i386/mem/PageFrameAllocator.cpp
         src/arch/i386/mem/PageTable.cpp
         src/arch/i386/proc/context_switch.s
