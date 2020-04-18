@@ -41,7 +41,7 @@ class MMU
 
     PageTable cloneDirectory(AddressSpace src);
 
-    AddressSpace create() { return AddressSpace{(uint32_t *)(_pageFrameAllocator.alloc())}; }
+    AddressSpace create() { return AddressSpace{(uint32_t *)(_pageFrameAllocator.alloc(1))}; }
 
     /** Prepares and installs a page directory. */
     void install(AddressSpace addressSpace);
