@@ -93,7 +93,7 @@ void MMU::install(AddressSpace addressSpace)
     };
 
     auto const createNextTable = [&] {
-        PageTable newTable{_pageFrameAllocator.alloc()};
+        PageTable newTable{_pageFrameAllocator.alloc(1)};
         newTable.clear();
         const auto tableFrameIndex = std::uint32_t(newTable.address()) / 0x1000;
         lastUsedFrame = std::max(lastUsedFrame, tableFrameIndex);
@@ -222,7 +222,7 @@ PageTable MMU::getOrCreateTable(AddressSpace addressSpace, uint16_t directoryInd
     PageEntry pde = addressSpace.entryAtIndex(directoryIndex);
     PageTable table{PageTableForDirectoryIndex(directoryIndex)};
     if (!pde.getFlag(kPresentBit)) { // no page table here, create one
-        pde = PageEntry(_pageFrameAllocator.alloc());
+        pde = PageEntry(_pageFrameAllocator.alloc(1));
         pde.setFlags(kPresentBit | kReadWriteBit);
         addressSpace.setEntry(directoryIndex, pde);
         table.clear();
@@ -256,7 +256,7 @@ void MMU::allocatePages([[maybe_unused]] AddressSpace addressSpace, void *addres
     size_t pagesLeft = numberOfPages;
     while (pagesLeft > 0) { // map the pages
         PageTable table = PageTableForDirectoryIndex(currpde);
-        PageEntry entry{_pageFrameAllocator.alloc()};
+        PageEntry entry{_pageFrameAllocator.alloc(1)};
         entry.setFlags(kPresentBit | kReadWriteBit);
         table.setEntry(currpte, entry);
 

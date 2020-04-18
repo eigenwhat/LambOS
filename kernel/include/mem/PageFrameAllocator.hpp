@@ -10,8 +10,9 @@
 #include <util/BitSet.hpp>
 
 constexpr std::uint32_t const kPagesInBitmap = 1048576;
+constexpr std::uint32_t const kFrameSize = 4096;
 
-typedef uint32_t PageFrame;
+using PageFrame = std::uintptr_t;
 
 class PageFrameAllocator
 {
@@ -30,8 +31,15 @@ class PageFrameAllocator
 
     void loadMemoryMap(uint32_t mmapAddr, uint32_t mmapLength) { _bitmap.loadMemoryMap(mmapAddr, mmapLength); }
 
-    PageFrame alloc();
-    void free(PageFrame frame);
+    template <typename T>
+    void * alloc()
+    {
+        constexpr auto framesNeeded = sys::div_ceil(sizeof(T), kFrameSize);
+        return reinterpret_cast<void *>(alloc(framesNeeded));
+    }
+
+    PageFrame alloc(std::size_t numberOfFrames);
+    void free(PageFrame frame, std::size_t numberOfFrames = 1);
     void markFrameUsable(PageFrame frame, bool usable);
     bool requestFrame(PageFrame frame);
     bool requestFrameIndex(std::size_t index);

@@ -11,6 +11,8 @@
 #include <cstdio>
 #include <cstring>
 
+using namespace sys::literals;
+
 namespace {
 
 constexpr auto frame_to_index(PageFrame frame) { return (frame & k4KPageAddressMask) / 0x1000; }
@@ -61,26 +63,45 @@ bool PageFrameAllocator::requestFrameIndex(std::size_t index)
     return retval;
 }
 
-PageFrame PageFrameAllocator::alloc()
+PageFrame PageFrameAllocator::alloc(std::size_t numberOfFrames)
 {
-    uint32_t startIndex = frame_to_index(_lastAllocFrame);
+    if (numberOfFrames == 0) { return std::numeric_limits<PageFrame>::max(); }
+
+    uint32_t const startIndex = frame_to_index(_lastAllocFrame);
+
+    auto const findFrames = [=, this](uint32_t i) -> sys::Maybe<PageFrame> {
+        // printf("checking bitmap idx %d\n", i);
+        bool found = true;
+        for (auto offset = 0_sz; offset < numberOfFrames; ++offset) {
+            found &= _bitmap.usableAndFree(i + offset);
+        }
+
+        if (found) {
+            // puts("got 'em");
+            PageFrame const result = index_to_frame(i);
+            for (auto offset = 0_sz; offset < numberOfFrames; ++offset) {
+                _bitmap.used[i + offset] = true;
+            }
+            _lastAllocFrame = index_to_frame(i + numberOfFrames - 1);
+            return result;
+        }
+        else {
+            return sys::Nothing;
+        }
+    };
     // start checking from the last place we allocated since the next page is likely available
     for (uint32_t i = startIndex; i < kPagesInBitmap; ++i) {
-        // printf("checking bitmap idx %d\n", i);
-        if (_bitmap.usableAndFree(i)) {
-            // puts("got 'em");
-            _lastAllocFrame = index_to_frame(i);
-            _bitmap.used[i] = true;
-            return _lastAllocFrame;
+        auto result = findFrames(i);
+        if (result) {
+            return *result;
         }
     }
 
     // we didn't find anything yet, so check the rest
     for (uint32_t i = 0; i < startIndex; ++i) {
-        if (_bitmap.usableAndFree(i)) {
-            _lastAllocFrame = index_to_frame(i);
-            _bitmap.used[i] = true;
-            return _lastAllocFrame;
+        auto result = findFrames(i);
+        if (result) {
+            return *result;
         }
     }
 
@@ -90,8 +111,10 @@ PageFrame PageFrameAllocator::alloc()
     return 0;
 }
 
-void PageFrameAllocator::free(PageFrame frame)
+void PageFrameAllocator::free(PageFrame frame, std::size_t numberOfFrames)
 {
     auto const index = frame_to_index(frame);
-    _bitmap.used[index] = false;
+    for (auto i = 0_sz; i < numberOfFrames; ++i) {
+        _bitmap.used[index + i] = false;
+    }
 }
