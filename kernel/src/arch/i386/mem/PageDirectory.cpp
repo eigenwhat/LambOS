@@ -17,7 +17,7 @@ void PageDirectory::install()
 void PageDirectory::clear()
 {
 //    for (auto &table : tables_) { table.clear(); }
-    tableFrames_.fill(0);
+    tableFrames_.fill(PageEntry{0});
 }
 
 } // namespace X86

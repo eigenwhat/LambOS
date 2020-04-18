@@ -12,15 +12,15 @@ constexpr std::uint32_t k4MPageAddressMask = 0xFFC00000;
 constexpr std::uint32_t kPageFlagsMask = 0x00000FFF;
 
 enum PageEntryFlag : std::uint32_t {
-    kPresentBit = 0x00000001,
-    kReadWriteBit = 0x00000002,
-    kSupervisorBit = 0x00000004,
-    kWriteThroughBit = 0x00000008,
-    kCacheDisabledBit = 0x00000010,
-    kAccessedBit = 0x00000020,
-    kDirtyBit = 0x00000040,
-    kPageSizeBit = 0x00000080,
-    kGlobalBit = 0x00000100,
+    kPresentBit       = 0b00000001,
+    kReadWriteBit     = 0b00000010,
+    kSupervisorBit    = 0b00000100,
+    kWriteThroughBit  = 0b00001000,
+    kCacheDisabledBit = 0b00010000,
+    kAccessedBit      = 0b00100000,
+    kDirtyBit         = 0b01000000,
+    kPageSizeBit      = kDirtyBit,
+    kGlobalBit        = 0b10000000,
 };
 
 class PageTable;
@@ -29,7 +29,7 @@ class PageEntry
 {
   public:
     PageEntry() = default;
-    PageEntry(std::uintptr_t address) : _entry(address & k4KPageAddressMask) {}
+    explicit PageEntry(std::uintptr_t address) : _entry(address & k4KPageAddressMask) {}
     PageEntry(std::uintptr_t entry, int) : _entry(entry) {}
 
     [[nodiscard]] bool getFlag(PageEntryFlag flag) const { return (bool)(_entry & flag); }
@@ -45,18 +45,22 @@ class PageEntry
     std::uintptr_t _entry;
 };
 
+static_assert(sizeof(PageEntry) == sizeof(std::uint32_t));
+
 class PageTable
 {
   public:
     PageTable() : _tableAddress{nullptr} {}
+
+    explicit PageTable(PageEntry e) : _tableAddress{reinterpret_cast<PageEntry *>(e.address())} {}
 
     /**
      * Creates a representation of a page table.
      * @param tableAddress The virtual address where the table resides if paging
      *                     is enabled, physical otherwise.
      */
-    PageTable(std::uint32_t tableAddress) : _tableAddress{reinterpret_cast<std::uint32_t *>(tableAddress)} {}
-    PageTable(void *tableAddress) : _tableAddress{static_cast<std::uint32_t *>(tableAddress)} {}
+    PageTable(std::uint32_t tableAddress) : _tableAddress{reinterpret_cast<PageEntry *>(tableAddress)} {}
+    PageTable(void *tableAddress) : _tableAddress{static_cast<PageEntry *>(tableAddress)} {}
 
     /**
      * Clears all entries in the table.
@@ -65,14 +69,15 @@ class PageTable
     void clear();
 
     /** The addressable location of the page table in memory. */
-    [[nodiscard]] std::uint32_t * address() const { return _tableAddress; }
+    [[nodiscard]] std::uint32_t * address() const { return (std::uint32_t *)_tableAddress; }
 
     /**
      * Returns the PageEntry at the given index.
      * @param index The index of the entry.
      * @return The entry.
      */
-    [[nodiscard]] PageEntry entryAtIndex(uint16_t index) const { return {_tableAddress[index], 0}; }
+    [[nodiscard]] PageEntry entryAtIndex(uint16_t index) const { return _tableAddress[index]; }
+    [[nodiscard]] PageEntry operator[](uint16_t index) const { return _tableAddress[index]; }
 
     /**
      * Sets the PageEntry at the given index.
@@ -81,7 +86,7 @@ class PageTable
      */
     void setEntry(uint16_t index, PageEntry entry)
     {
-        _tableAddress[index] = entry.entry();
+        _tableAddress[index] = entry;
         invalidatePage(entry.address());
     }
 
@@ -92,5 +97,5 @@ class PageTable
 
   private:
     static void invalidatePage(uintptr_t m);
-    std::uint32_t *_tableAddress;
+    PageEntry *_tableAddress;
 };
