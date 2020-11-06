@@ -30,3 +30,5 @@ private:
     sys::PrintStream _stdOut;
     alignas(MMU) std::byte _mmuMem[sizeof(MMU)];
 };
+
+extern X86Kernel *x86Kernel;

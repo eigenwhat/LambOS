@@ -25,6 +25,8 @@
 
 using sys::New;
 
+#define STATIC_ALLOC(type_, name_) alignas(type_) std::byte name_[sizeof(type_)]
+
 // ====================================================
 // Globals
 // ====================================================
@@ -33,10 +35,10 @@ VGA4BitColor defaultTextColor = COLOR_LIGHT_GREY;
 
 Kernel *kernel = nullptr;
 X86Kernel *x86Kernel = nullptr;
-uint8_t kern_mem[sizeof(X86Kernel)];
+STATIC_ALLOC(X86Kernel, kern_mem);
 
-uint8_t dbgout_mem[sizeof(sys::PrintStream)];
-uint8_t bochsout_mem[sizeof(BochsDebugOutputStream)];
+STATIC_ALLOC(sys::PrintStream, dbgout_mem);
+STATIC_ALLOC(BochsDebugOutputStream, bochsout_mem);
 sys::PrintStream *debugOut;
 
 extern "C" {
@@ -48,39 +50,51 @@ void init_system();
 Volume *read_ata();
 void read_multiboot(multiboot_info_t *info);
 
-int log_result(char const *printstr, int success, char const *ackstr, char const *nakstr);
-int log_task(char const *printstr, int success);
+extern "C++"
+template <typename Callable>
+int log_task(char const *printstr, Callable &&c);
+
 int check_flag(multiboot_info_t *info, char const *printstr, uint32_t flag);
 int log_test(char const *printstr, int success);
 
 // ====================================================
 // Functions
 // ====================================================
+void perform_task(char const *desc, auto &&task)
+{
+    debugOut->print(desc);
+    task();
+    debugOut->println("DONE.");
+}
+
 void kernel_main(multiboot_info_t *info, uint32_t magic)
 {
-    // Get this party started
-    x86Kernel = new(kern_mem) X86Kernel;
-    kernel = x86Kernel;
-
     // Set up output to bochs as a debug output stream
     sys::OutputStream *stream = new(bochsout_mem) BochsDebugOutputStream();
     debugOut = new(dbgout_mem) sys::PrintStream(*stream);
 
-    if (magic != 0x2BADB002) {
-        kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
-    }
+    perform_task("Constructing kernel...", [] {
+        // Get this party started
+        x86Kernel = new(kern_mem) X86Kernel;
+        kernel = x86Kernel;
+    });
 
-    read_multiboot(info);
+    log_task("Reading multiboot info...", [&] {
+        if (magic != 0x2BADB002) {
+            kernel->panic("Operating system not loaded by multiboot compliant bootloader.");
+        }
 
-    x86Kernel->cpu().install();
-    log_task("Installing CPU descriptor tables...", true);
+        read_multiboot(info);
+    });
 
-    x86Kernel->installMMU(info->mmap_addr, info->mmap_length);
-    log_task("Setting up memory management unit...", true);
-    x86Kernel->cpu().idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
 
-    x86Kernel->installSyscalls();
-    x86Kernel->cpu().enableInterrupts();
+    log_task("Installing CPU descriptor tables...", [] { x86Kernel->cpu().install(); });
+    log_task("Setting up memory management unit...", [&] { x86Kernel->installMMU(info->mmap_addr, info->mmap_length); });
+    log_task("Installing interrupt handlers...", [] {
+        x86Kernel->cpu().idt()->setISR(InterruptNumber::kPageFault, new PageFaultISR{});
+        x86Kernel->installSyscalls();
+        x86Kernel->cpu().enableInterrupts();
+    });
     init_system();
 }
 
@@ -227,8 +241,9 @@ void read_multiboot(multiboot_info_t *info)
     }
 }
 
-int log_result(char const *printstr, int success, char const *ackstr, char const *nakstr)
+size_t log_task_begin(char const *printstr)
 {
+    debugOut->print(printstr);
     kernel->console()->moveTo(kernel->console()->row(), 0);
     for (uint32_t i = 0; i < kernel->console()->width(); ++i) {
         kernel->console()->putChar(' ');
@@ -242,12 +257,21 @@ int log_result(char const *printstr, int success, char const *ackstr, char const
         kernel->console()->writeString("\n");
     }
 
+    kernel->console()->setForegroundColor(defaultTextColor);
+
+    return kernel->console()->row();
+}
+
+int log_result(int success, char const *ackstr, char const *nakstr)
+{
     if (success) {
+        debugOut->println(ackstr);
         kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(ackstr) + 3));
         kernel->console()->writeString("[");
         kernel->console()->setForegroundColor(COLOR_GREEN);
         kernel->console()->writeString(ackstr);
     } else {
+        debugOut->println(nakstr);
         kernel->console()->moveTo(kernel->console()->row(), kernel->console()->width() - (strlen(nakstr) + 3));
         kernel->console()->writeString("[");
         kernel->console()->setForegroundColor(COLOR_RED);
@@ -261,19 +285,32 @@ int log_result(char const *printstr, int success, char const *ackstr, char const
     return success;
 }
 
-int log_task(char const *printstr, int success)
+extern "C++"
+template <typename Callable>
+int log_task(char const *printstr, Callable &&c)
 {
-    return log_result(printstr, success, "DONE", "FAIL");
+    if constexpr (std::is_void_v<std::invoke_result_t<Callable>>) {
+        log_task_begin(printstr);
+        c();
+        return log_result(true, "DONE", "FAIL");
+    }
+    else {
+        log_task_begin(printstr);
+        auto result = c();
+        return log_result(static_cast<int>(result), "DONE", "FAIL");
+    }
 }
 
 int check_flag(multiboot_info_t *info, char const *printstr, uint32_t flag)
 {
-    return log_result(printstr, int(info->flags & flag), "FOUND", "FAIL");
+    log_task_begin(printstr);
+    return log_result(int(info->flags & flag), "FOUND", "FAIL");
 }
 
 int log_test(char const *printstr, int success)
 {
-    return log_result(printstr, success, "PASS", "FAIL");
+    log_task_begin(printstr);
+    return log_result(success, "PASS", "FAIL");
 }
 
 } // extern C

@@ -41,6 +41,7 @@ add_subdirectory(libsys)
 add_subdirectory(kernel)
 
 add_subdirectory(programs/kvshell)
+add_subdirectory(programs/proc_test)
 
 set(ALL_PROGRAMS
         elf-test)

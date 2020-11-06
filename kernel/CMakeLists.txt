@@ -36,6 +36,7 @@ set (SOURCES
         src/fs/iso9660/Iso9660.cpp
         src/fs/iso9660/Volume.cpp
         src/proc/elf/Executable.cpp
+        src/mem/Heap.cpp
         src/Kernel.cpp)
 
 add_executable(${KERNEL_TARGET} ${SOURCES} ${INCLUDE_FILES})
