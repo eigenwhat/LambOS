@@ -4,7 +4,7 @@ project(lambos VERSION 0.1 LANGUAGES C CXX ASM-ATT)
 set (WARNING_FLAGS -Werror -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion)
 set (COMMON_COMPILER_FLAGS -ffreestanding -fstack-protector-all ${WARNING_FLAGS})
 set (C_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS})
-set (CXX_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -fno-exceptions -fno-rtti -fconcepts)
+set (CXX_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -fno-exceptions -fno-rtti)
 set (LAMBOS_CXX_STANDARD 20)
 set (CMAKE_C_STANDARD 11)
 
@@ -49,7 +49,7 @@ set(ALL_PROGRAMS
         elf-test)
 
 # create bootable ISO
-find_program(GRUB_MKRESCUE grub-mkrescue)
+find_program(GRUB_MKRESCUE NAMES grub-mkrescue i686-elf-grub-mkrescue)
 if (NOT GRUB_MKRESCUE)
     message (WARNING "Unable to find `grub-mkrescue`. Bootable ISO image generation will not be available.")
 else ()
