@@ -14,6 +14,7 @@ namespace Syscall {
     inline std::uint32_t exit(X86Kernel &, RegisterTable const &registers);
     inline std::uint32_t sleep(X86Kernel &, RegisterTable const &registers);
     inline std::uint32_t yield(X86Kernel &, RegisterTable const &registers);
+    inline std::uint32_t die(X86Kernel &, RegisterTable const &registers);
 } // namespace Syscall
 
 struct SyscallHandler : public InterruptServiceRoutine
@@ -43,6 +44,8 @@ struct SyscallHandler : public InterruptServiceRoutine
                 registers.eax = Syscall::sleep(_kernel, registers); break;
             case SyscallId::kYield:
                 registers.eax = Syscall::yield(_kernel, registers); break;
+            case SyscallId::kDie:
+                registers.eax = Syscall::die(_kernel, registers); break;
             default:
                 reportUnknownSyscall(registers);
         }
@@ -92,5 +95,10 @@ inline std::uint32_t exit(X86Kernel &k, RegisterTable const &registers)
 
 inline std::uint32_t sleep(X86Kernel &, RegisterTable const &) { return 0; }
 inline std::uint32_t yield(X86Kernel &, RegisterTable const &) { return 0; }
+inline std::uint32_t die(X86Kernel &, RegisterTable const &)
+{
+    kernel->panic("Committed honorable sudoku");
+    return 0;
+}
 
 } // namespace Syscall

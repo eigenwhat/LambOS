@@ -47,6 +47,12 @@ int sys_sleep(int status)
 
 int sys_yield() { return 0; }
 
+int sys_die()
+{
+    auto registers = fake_syscall();
+    return (int)Syscall::die((X86Kernel&)*kernel, registers);
+}
+
 } // extern "C"
 
 #endif

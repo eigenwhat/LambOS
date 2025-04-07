@@ -15,6 +15,7 @@ DEFN_SYSCALL3(write, SyscallId::kWrite, uint32_t, uint8_t const *, size_t);
 DEFN_SYSCALL3(read, SyscallId::kRead, uint32_t, uint8_t *, size_t);
 DEFN_SYSCALL1(sleep, SyscallId::kSleep, int);
 DEFN_SYSCALL0(yield, SyscallId::kYield);
+DEFN_SYSCALL0(die, SyscallId::kDie);
 
 } // extern "C"
 
