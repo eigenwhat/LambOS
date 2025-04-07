@@ -16,6 +16,9 @@ struct iterator
     using difference_type   = _DiffT;
     using pointer           = _PtrT;
     using reference         = _RefT;
+
+    constexpr bool operator==(iterator const &) const noexcept = default;
+    constexpr auto operator<=>(iterator const &) const noexcept = default;
 };
 
 struct default_sentinel_t {};
