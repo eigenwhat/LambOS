@@ -8,7 +8,9 @@
 #include <io/FileReader.hpp>
 #include <util/ArrayList.hpp>
 #include <Kernel.hpp>
-#include <util/LinkedList.hpp>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 namespace elf {
 
@@ -118,4 +120,6 @@ class Executable
     bool _isLoaded = false;
 };
 
-}
+} // namespace elf
+
+#pragma GCC diagnostic pop

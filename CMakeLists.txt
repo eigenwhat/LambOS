@@ -1,12 +1,18 @@
-cmake_minimum_required(VERSION 3.14)
+cmake_minimum_required(VERSION 3.31)
 project(lambos VERSION 0.1 LANGUAGES C CXX ASM-ATT)
 
-set (WARNING_FLAGS -Werror -Wall -Wextra -Wshadow -Wconversion -Wsign-conversion -Wno-error=invalid-constexpr)
-set (COMMON_COMPILER_FLAGS -ffreestanding -fstack-protector-all ${WARNING_FLAGS})
-set (C_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS})
-set (CXX_COMPILER_FLAGS ${COMMON_COMPILER_FLAGS} -fno-exceptions -fno-rtti)
-set (LAMBOS_CXX_STANDARD 20)
-set (CMAKE_C_STANDARD 11)
+set (WARNING_FLAGS -Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion)
+set (COMMON_COMPILER_FLAGS -ffreestanding -fstack-protector-all)
+set (CXX_COMPILER_FLAGS -fno-exceptions -fno-rtti)
+add_compile_options(
+        # this is a kernel, so we don't want any of the normal runtime stuff
+        "$<$<COMPILE_LANGUAGE:C,CXX>:${COMMON_COMPILER_FLAGS}>"
+        "$<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>"
+
+        # warnings
+        "$<$<COMPILE_LANGUAGE:C,CXX>:${WARNING_FLAGS}>")
+set (LAMBOS_CXX_STANDARD 23)
+set (CMAKE_C_STANDARD 23)
 
 #set (CMAKE_EXE_LINKER_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
 

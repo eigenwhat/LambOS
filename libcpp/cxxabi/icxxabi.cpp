@@ -79,7 +79,7 @@ void __cxa_finalize(void *f)
         * being called and removed one place down in the list, so as to cover up the hole.
         * Otherwise, whenever a destructor is called and removed, an entire space in the table is wasted.
         **/
-        if (__atexit_funcs[i].destructor_func == f)
+        if (__atexit_funcs[i].destructor_func == reinterpret_cast<void (*)(void *)>(f))
         {
             /*
             * Note that in the next line, not every destructor function is a class destructor.

@@ -10,7 +10,7 @@ void exit(int exit_code);
 // order, this is really just theater as the functions do nothing.
 void _init();
 void _fini();
-void __cxa_finalize();
+void __cxa_finalize(void*);
 
 // should really be void and use exit(), but we don't have proper process
 // support yet, so that's just going to have to wait

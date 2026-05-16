@@ -27,14 +27,14 @@ __LIBC_CONSTEXPR
 int strcmp(char const *str1, char const *str2)
 {
     while (*str1 && *str2 && (*str1 == *str2)) { ++str1; ++str2; }
-    return *(const unsigned char *)str1 - *(const unsigned char *)str2;
+    return *str1 - *str2;
 }
 
 __LIBC_CONSTEXPR
 int strncmp(char const *str1, char const *str2, size_t num)
 {
     while ((num--) && *str1 && *str2 && (*str1++ == *str2++));
-    return *(const unsigned char *)str1 - *(const unsigned char *)str2;
+    return *str1 - *str2;
 }
 
 __LIBC_CONSTEXPR

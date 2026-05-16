@@ -1,7 +1,10 @@
 #pragma once
 
 #include <cstddef>
-#include <stdint.h>
+#include <cstdint>
+
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpedantic"
 
 namespace iso9660 {
 
@@ -202,3 +205,6 @@ struct [[gnu::packed]] SparseFileEntryInfo
 } // namespace rockridge
 
 } // namespace iso9660
+
+
+#pragma GCC diagnostic pop
