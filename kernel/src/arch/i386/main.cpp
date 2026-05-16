@@ -98,8 +98,12 @@ void init_system()
     PS2KeyboardISR::install(x86Kernel->cpu(), kb);
     PITIRQ::install(x86Kernel->cpu());
     kernel->setIn(New<KeyboardInputStream>(kb));
-    auto cd = read_ata();
-
+    auto * const cd = read_ata();
+    if (!cd)
+    {
+        sys::debug_println("Unable to read ATA devices!");
+        puts("\nUnable to read any ATA devices! You might want to look into that.");
+    }
     kernel->console()->setForegroundColor(COLOR_WHITE);
     puts("\n* * *");
     DateTime now = X86RealTimeClock::currentTime();
@@ -114,7 +118,7 @@ void init_system()
     puts("\n* * *");
 
     sys::debug_println("Finding /bin/proc-test...");
-    auto proctestEntry = cd->find("/bin/proc-test");
+    auto proctestEntry = cd ? cd->find("/bin/proc-test") : nullptr;
     if (proctestEntry) {
         auto proctest = elf::Executable(*proctestEntry);
         printf("Running `proc-test A`...\n");
@@ -130,7 +134,7 @@ void init_system()
     kernel->console()->setForegroundColor(defaultTextColor);
     puts("");
 
-    auto cvshEntry = cd->find("/bin/kvshell");
+    auto cvshEntry = cd ? cd->find("/bin/kvshell") : nullptr;
     if (cvshEntry) {
         auto kvshell = elf::Executable(*cvshEntry);
         printf("Running kvshell...\n");
