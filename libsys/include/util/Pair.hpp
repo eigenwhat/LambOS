@@ -54,12 +54,7 @@ template <typename A, typename B> class Pair
         return *this;
     };
 
-    bool operator==(const Pair &rhs) const
-    {
-        return first == rhs.first && second == rhs.second;
-    }
-
-    bool operator!=(const Pair &rhs) const { return !operator==(rhs); }
+    bool operator==(const Pair &rhs) const noexcept = default;
 };
 
 template <typename A, typename B>

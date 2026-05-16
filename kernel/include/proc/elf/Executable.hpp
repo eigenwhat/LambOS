@@ -83,14 +83,7 @@ class Executable
         Section &operator=(Section const &) = delete;
         Section &operator=(Section &&rhs) = default;
 
-        bool operator==(Section const &rhs) const
-        {
-            return name == rhs.name
-                   && vaddress == rhs.vaddress
-                   && data == rhs.data;
-        }
-
-        bool operator!=(Section const &rhs) const { return !operator==(rhs); }
+        bool operator==(Section const &rhs) const noexcept = default;
     };
 
     struct Segment
@@ -109,13 +102,7 @@ class Executable
         Segment &operator=(Segment const &) = delete;
         Segment &operator=(Segment &&rhs) = default;
 
-        bool operator==(Segment const &rhs) const
-        {
-            return vaddress == rhs.vaddress
-                   && data == rhs.data;
-        }
-
-        bool operator!=(Segment const &rhs) const { return !operator==(rhs); }
+        bool operator==(Segment const &rhs) const noexcept = default;
     };
 
   private:

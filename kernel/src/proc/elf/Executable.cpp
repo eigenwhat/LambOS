@@ -42,10 +42,7 @@ class SegmentRAII
         return *this;
     }
 
-    bool operator==(SegmentRAII const &rhs)
-    {
-        return _addr == rhs._addr && _pages == rhs._pages && _armed == rhs._armed;
-    }
+    bool operator==(SegmentRAII const &rhs) const noexcept = default;
 
     void disarm() { _armed = false; }
 

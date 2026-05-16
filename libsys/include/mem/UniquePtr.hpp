@@ -46,8 +46,7 @@ template <typename T> class UniquePtr
     constexpr T& operator*() const noexcept { return *_ptr; }
     constexpr explicit operator T*() const noexcept { return _ptr; }
 
-    constexpr bool operator==(const UniquePtr &r) const noexcept { return _ptr == r._ptr; }
-    constexpr bool operator!=(const UniquePtr &r) const noexcept { return !operator==(r); }
+    constexpr bool operator==(const UniquePtr &r) const noexcept = default;
     constexpr explicit operator bool() const noexcept { return _ptr != nullptr; }
 
   private:

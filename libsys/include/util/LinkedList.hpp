@@ -282,17 +282,7 @@ template <typename T> class LinkedList
      * @param rhs The LinkedList to compare to.
      * @return `true` if equal, `false` otherwise.
      */
-    bool operator==(const LinkedList &rhs) const
-    {
-        return _first == rhs._first && _last == rhs._last && _size == rhs._size;
-    }
-
-    /**
-     * Checks if two LinkedList objects are not equal.
-     * @param rhs The LinkedList to compare to.
-     * @return `true` if not equal, `false` otherwise.
-     */
-    bool operator!=(const LinkedList &rhs) const { return !operator==(rhs); }
+    bool operator==(const LinkedList &rhs) const noexcept = default;
 
     /** An iterator pointing to the first element in the list. */
     const_iterator begin() const { return const_iterator{LLIteratorImpl{_first.get(), this}}; }
@@ -404,8 +394,7 @@ template <typename T> class LinkedList
         void decrement() { _obj = _obj->prev; }
         T& get_value() const { return _obj->value; }
         T* get_ptr() const { return &_obj->value; }
-        constexpr bool operator==(LLIteratorImpl const &rhs) const { return _obj == rhs._obj && _parent == rhs._parent; }
-        constexpr bool operator!=(LLIteratorImpl const &rhs) const { return !(rhs == *this); }
+        constexpr bool operator==(LLIteratorImpl const &rhs) const noexcept = default;
 
       private:
         Node *_obj;

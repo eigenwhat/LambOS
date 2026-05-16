@@ -39,11 +39,8 @@ class Maybe
     constexpr Maybe() = default;
     constexpr Maybe(Void) : Maybe() {}
 
-    template <std::copy_constructible U = T>
-    constexpr Maybe(T const &v) : _store(v), _set(true) {}
-
-    template <std::move_constructible U = T>
-    constexpr Maybe(T &&v) : _store(std::move(v)), _set(true) {}
+    constexpr Maybe(T const &v) requires std::copy_constructible<T> : _store(v), _set(true) {}
+    constexpr Maybe(T &&v) requires std::move_constructible<T> : _store(std::move(v)), _set(true) {}
 
     constexpr Maybe(Maybe const &other) : _store{}, _set(other._set) { if (_set) { _store.init(other.ref_()); } }
 
@@ -259,7 +256,7 @@ class Maybe
         using pointer = typename std::conditional<Const, RegularType const *, RegularType *>::type;
 
         // maintain is_trivially_copy_constructible by defining the Iterator->ConstIterator constructor as a template.
-        template <bool OtherConst, typename = typename std::enable_if<Const || !OtherConst>::type>
+        template <bool OtherConst> requires (Const || !OtherConst)
         constexpr BasicIterator(const BasicIterator<OtherConst> &other) : parent_(other.parent_), end_(other.end_) {}
 
         explicit BasicIterator(const_ptr_t<Maybe, Const> parent) : parent_(parent), end_(kValueIterator) {}
@@ -272,8 +269,7 @@ class Maybe
         constexpr BasicIterator& operator--() { end_ = false; return *this; }
         constexpr BasicIterator operator--(int) { auto copy = *this; operator--(); return copy; }
 
-        constexpr bool operator==(BasicIterator const &rhs) const { return parent_ == rhs.parent_ && end_ == rhs.end_; }
-        constexpr bool operator!=(BasicIterator const &rhs) const { return !(rhs == *this); }
+        constexpr bool operator==(BasicIterator const &rhs) const = default;
 
         constexpr bool end() const { return end_; }
 

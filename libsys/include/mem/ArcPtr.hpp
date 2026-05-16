@@ -89,8 +89,8 @@ struct ArcRefCount
 
     explicit operator bool() const { return _data; }
 
-    constexpr bool operator==(ArcRefCount const &rhs) const noexcept { return _data == rhs._data; }
-    constexpr bool operator==(std::nullptr_t) noexcept { return _data == nullptr; }
+    constexpr bool operator==(ArcRefCount const &rhs) const noexcept = default;
+    constexpr bool operator==(std::nullptr_t) const noexcept { return _data == nullptr; }
 
   private:
     struct concept_t

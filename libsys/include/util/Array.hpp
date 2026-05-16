@@ -7,6 +7,8 @@
 #include <util/Concepts.hpp>
 
 #include <algorithm>
+#include <compare>
+#include <ranges>
 #include <utility>
 
 namespace sys {
@@ -51,12 +53,20 @@ struct Array
     [[nodiscard]] constexpr const_iterator cbegin() const noexcept { return const_iterator(data()); }
     [[nodiscard]] constexpr const_iterator cend() const noexcept { return const_iterator(data() + Size); }
 
-    [[nodiscard]] constexpr friend bool operator==(Array const &lhs, Array const &rhs) { return std::equal(lhs.begin(), lhs.end(), rhs.begin()); }
-    [[nodiscard]] constexpr friend bool operator!=(Array const &lhs, Array const &rhs) { return !(lhs == rhs); }
-    [[nodiscard]] constexpr friend bool operator<(Array const &lhs, Array const &rhs) { return std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end()); }
-    [[nodiscard]] constexpr friend bool operator>(Array const &lhs, Array const &rhs) { return rhs < lhs; }
-    [[nodiscard]] constexpr friend bool operator<=(Array const &lhs, Array const &rhs) { return !(lhs > rhs); }
-    [[nodiscard]] constexpr friend bool operator>=(Array const &lhs, Array const &rhs) { return !(lhs < rhs); }
+    [[nodiscard]] constexpr friend bool operator==(Array const &lhs, Array const &rhs)
+        requires std::equality_comparable<T>
+    {
+        return std::equal(lhs.begin(), lhs.end(), rhs.begin());
+    }
+
+    [[nodiscard]] constexpr friend auto operator<=>(Array const &lhs, Array const &rhs)
+        requires std::three_way_comparable<T>
+    {
+        if (lhs == rhs) { return std::strong_ordering::equal; }
+
+        bool const lhsLessThanRhs = std::lexicographical_compare(lhs.begin(), lhs.end(), rhs.begin(), rhs.end());
+        return lhsLessThanRhs ? std::strong_ordering::less : std::strong_ordering::greater;
+    }
 
     T _elems[Size];
 };
