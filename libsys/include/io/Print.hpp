@@ -62,9 +62,9 @@ void print(OutputStream &out, char const *format, H &&first, Ts &&...rest)
         else {
             char const formatSpecifier = format[1];
             std::advance(format, 2);
-            template_for<0, type_count<H, Ts...>>([&](auto idx_constant) {
-                constexpr auto index = decltype(idx_constant)::value;
-                using type = nth_type_t<index, H, Ts...>;
+            template_for<0, type_count<H, Ts...>>([&]<typename I>(I) {
+                constexpr auto index = I::value;
+                using type = std::remove_cvref_t<nth_type_t<index, H, Ts...>>;
                 if (currentInput == index) {
                     if constexpr (std::integral<type> || pointer<type>) {
                         if (formatSpecifier == 'x' || formatSpecifier == 'p') {
