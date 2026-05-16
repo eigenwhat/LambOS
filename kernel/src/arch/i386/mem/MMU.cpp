@@ -18,19 +18,21 @@
 
 namespace {
 
-constexpr std::uint32_t const kVGAPage{0xB8000 / 0x1000};
-constexpr std::uint32_t const kPDESelfMapIndex{1023};
+constexpr std::uint32_t kVGAPage{0xB8000 / 0x1000};
+constexpr std::uint16_t kHigherHalfStartDirectoryIndex{768};
+constexpr std::uint32_t kKernelVirtualBase{std::uint32_t{kHigherHalfStartDirectoryIndex} << 22u};
+constexpr std::uint32_t kPDESelfMapIndex{1023};
 
 using X86PageTable = std::uint32_t[0x400];
-X86PageTable * const kPageDirectoryAddress = (X86PageTable *)(0xFFC00000);
+X86PageTable * const kPageDirectoryAddress = reinterpret_cast<X86PageTable *>(kPDESelfMapIndex << 22u);
 
 }
 
 //==========================================================
 // Externs
 //==========================================================
-extern uint32_t kernel_end;
-extern uint32_t readonly_end;
+extern uint32_t kernel_end_phys;
+extern uint32_t readonly_end_phys;
 
 //==========================================================
 // Utility methods
@@ -55,6 +57,29 @@ PageTable MMU::cloneDirectory(AddressSpace src)
     return {page};
 }
 
+AddressSpace MMU::create()
+{
+    // Early bootstrap path: before MMU install, we only have a physical frame
+    // descriptor for the page directory.
+    if (!_pagingEnabled) {
+        return AddressSpace{_pageFrameAllocator.alloc(1)};
+    }
+
+    // Runtime path: back the page directory with a kernel-mapped virtual page
+    // and record the underlying frame for CR3 loads.
+    auto *virtualPageDirectory = static_cast<std::uint32_t *>(palloc(kernel->addressSpace(), 1));
+    if (!virtualPageDirectory) {
+        kernel->panic("MMU::create: unable to allocate virtual page for page directory");
+    }
+
+    auto const pageDirectoryEntry = pageForAddress(kernel->addressSpace(), virtualPageDirectory);
+    if (!pageDirectoryEntry.getFlag(kPresentBit)) {
+        kernel->panic("MMU::create: missing physical frame for page directory allocation");
+    }
+
+    return PageTable{virtualPageDirectory};
+}
+
 MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length) : _pageFrameAllocator{}
 {
     _pageFrameAllocator.loadMemoryMap(mmap_addr, mmap_length);
@@ -65,7 +90,7 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length) : _pageFrameAllocator{}
         _pageFrameAllocator.markFrameUsable(i, false);
     }
 
-    auto kernel_end_addr = (uint32_t)&kernel_end;
+    auto kernel_end_addr = (uint32_t)&kernel_end_phys;
 
     for (; i <= kernel_end_addr; i += 0x1000) {
         if (!_pageFrameAllocator.requestFrame(i)) {
@@ -76,7 +101,7 @@ MMU::MMU(uint32_t mmap_addr, uint32_t mmap_length) : _pageFrameAllocator{}
 
 void MMU::install(AddressSpace addressSpace)
 {
-    std::uint32_t readOnlyEnd = std::uint32_t(&readonly_end) / 0x1000;
+    std::uint32_t readOnlyEnd = std::uint32_t(&readonly_end_phys) / 0x1000;
     addressSpace.clear();
 
     // identity map current used address space
@@ -84,12 +109,12 @@ void MMU::install(AddressSpace addressSpace)
     uint32_t address = 0;
     uint16_t tableDirectoryIndex = 0;
 
-    auto const addToDirectory = [&](uint16_t i, PageTable t) {
+    auto const addToDirectory = [&](uint16_t i, PageEntry entry) {
         // Install finished table
-        PageEntry entry((uint32_t)t.address());
         entry.setFlag(kPresentBit);
         entry.setFlag(kReadWriteBit);
-        addressSpace.setEntry(i, entry);
+        auto *jesuschrist = reinterpret_cast<PageEntry *>(addressSpace.address());
+        jesuschrist[i] = entry;
     };
 
     auto const createNextTable = [&] {
@@ -104,7 +129,10 @@ void MMU::install(AddressSpace addressSpace)
     for (std::size_t frame = 0; frame <= lastUsedFrame; ++frame, address += 0x1000)
     {
         if (frame % 0x400 == 0) {
-            if (table) { addToDirectory(tableDirectoryIndex++, table); }
+            if (table) {
+                PageEntry entry{reinterpret_cast<std::uintptr_t>(table.address())};
+                addToDirectory(tableDirectoryIndex++, entry);
+            }
             table = createNextTable();
         }
 
@@ -120,11 +148,57 @@ void MMU::install(AddressSpace addressSpace)
     }
 
     // install final one.
-    if (table) { addToDirectory(tableDirectoryIndex, table); }
+    if (table) {
+        PageEntry entry{reinterpret_cast<std::uintptr_t>(table.address())};
+        addToDirectory(tableDirectoryIndex, entry);
+    }
+    _identityLastDirectoryIndex = tableDirectoryIndex;
+
+    // Mirror low-memory mappings into the higher-half (3GiB+) kernel window.
+    // Use separate page tables so low identity mappings can later be removed.
+    for (uint16_t i = 0; i <= tableDirectoryIndex; ++i) {
+        auto const pdeIndex = static_cast<uint16_t>(kHigherHalfStartDirectoryIndex + i);
+        if (pdeIndex >= kPDESelfMapIndex) {
+            kernel->panic("MMU::install: higher-half PDE mapping overlaps reserved entries");
+        }
+
+        auto const lowDirectoryEntry = addressSpace.entryAtIndex(i);
+        if (lowDirectoryEntry.getFlag(kPresentBit)) {
+            addToDirectory(pdeIndex, lowDirectoryEntry);
+        }
+    }
 
     // Set last PDE to PD itself
-    addToDirectory(kPDESelfMapIndex, addressSpace);
+    addToDirectory(kPDESelfMapIndex, PageEntry{reinterpret_cast<std::uintptr_t>(addressSpace.address())});
     addressSpace.install();
+    _pagingEnabled = true;
+
+    // The AddressSpace pointer was a physical address when paging was off.
+    // Now that the kernel is mapped at kKernelVirtualBase, the same physical
+    // frame is accessible at (physical + kKernelVirtualBase). Rebase it so
+    // the kernel's stored AddressSpace is a proper higher-half virtual address.
+    auto const physicalPD = reinterpret_cast<std::uintptr_t>(addressSpace.address());
+    auto const higherHalfPD = reinterpret_cast<std::uint32_t *>(physicalPD + kKernelVirtualBase);
+    kernel->setAddressSpace(AddressSpace{higherHalfPD});
+}
+
+bool MMU::dropKernelBootstrapIdentityMappings()
+{
+
+    if (_identityMappingsDropped) {
+        return true;
+    }
+
+    auto pageDirectory = PageTableForDirectoryIndex(kPDESelfMapIndex);
+    for (uint16_t i = 0; i <= _identityLastDirectoryIndex; ++i) {
+        auto *jesuschrist = reinterpret_cast<PageEntry *>(pageDirectory.address());
+        jesuschrist[i] = PageEntry{0};
+        // pageDirectory.setEntry(i, PageEntry{0});
+    }
+
+    _flush();
+    _identityMappingsDropped = true;
+    return true;
 }
 
 void *MMU::palloc(AddressSpace addressSpace, size_t numberOfPages)
@@ -132,7 +206,11 @@ void *MMU::palloc(AddressSpace addressSpace, size_t numberOfPages)
     size_t contiguousFoundPages = 0;
     uintptr_t retpde = 0, retpte = 0;
     void *retval = nullptr;
-    for (uint16_t pde = 0; pde < 1024 && contiguousFoundPages != numberOfPages; ++pde) {
+
+    // Keep kernel heap allocations in higher-half virtual space.
+    constexpr uint16_t kKernelAllocStartPDE = kHigherHalfStartDirectoryIndex + 1;
+    constexpr uint16_t kKernelAllocEndPDE = kPDESelfMapIndex;
+    for (uint16_t pde = kKernelAllocStartPDE; pde < kKernelAllocEndPDE && contiguousFoundPages != numberOfPages; ++pde) {
         PageTable table = getOrCreateTable(addressSpace, pde);
 
         // look through page table
@@ -157,15 +235,15 @@ void *MMU::palloc(AddressSpace addressSpace, size_t numberOfPages)
     }
 
     if (retval) { // if we succeeded in finding space
-        allocatePages(addressSpace, retval, numberOfPages);
+        allocatePages(addressSpace, VirtualAddress::fromPtr(retval), numberOfPages);
     }
 
     return retval;
 }
 
-void *MMU::palloc(AddressSpace addressSpace, void *virtualAddress, size_t numberOfPages)
+void *MMU::palloc(AddressSpace addressSpace, VirtualAddress virtualAddress, size_t numberOfPages)
 {
-    auto address = reinterpret_cast<uintptr_t>(virtualAddress);
+    auto address = virtualAddress.raw();
     if (address & 0xFFF) {
         return nullptr; // address is not page aligned
     }
@@ -184,7 +262,7 @@ void *MMU::palloc(AddressSpace addressSpace, void *virtualAddress, size_t number
         allocatePages(addressSpace, virtualAddress, numberOfPages);
     }
 
-    return virtualAddress;
+    return virtualAddress.asPtr();
 }
 
 int MMU::pfree([[maybe_unused]] AddressSpace addressSpace, void *startOfMemoryRange, size_t numberOfPages)
@@ -248,11 +326,9 @@ PageEntry MMU::pageForAddress(AddressSpace addressSpace, void *virtualAddress)
 }
 
 
-void MMU::allocatePages([[maybe_unused]] AddressSpace addressSpace, void *address, size_t numberOfPages)
+void MMU::allocatePages([[maybe_unused]] AddressSpace addressSpace, VirtualAddress address, size_t numberOfPages)
 {
-    auto virtualAddress = reinterpret_cast<uintptr_t>(address);
-    uint32_t currpde = virtualAddress >> 22u;
-    uint16_t currpte = virtualAddress >> 12u & 0x03FFu;
+    auto [currpde, currpte, _] = address.decompose();
     size_t pagesLeft = numberOfPages;
     while (pagesLeft > 0) { // map the pages
         PageTable table = PageTableForDirectoryIndex(currpde);
@@ -280,4 +356,3 @@ void MMU::_flush()
             "movl %eax, %cr3"
             );
 }
-

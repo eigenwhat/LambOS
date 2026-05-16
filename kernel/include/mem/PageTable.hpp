@@ -48,6 +48,8 @@ class PageEntry
     [[nodiscard]] std::uintptr_t flags() const noexcept { return entry_ & kPageFlagsMask; }
     [[nodiscard]] std::uintptr_t entry() const noexcept { return entry_; }
 
+    bool operator==(PageEntry const& table) const noexcept = default;
+
   private:
     std::uintptr_t entry_;
 };
@@ -66,7 +68,7 @@ class PageTable
      * @param tableAddress The virtual address where the table resides if paging
      *                     is enabled, physical otherwise.
      */
-    PageTable(std::uint32_t tableAddress) : _tableAddress{reinterpret_cast<PageEntry *>(tableAddress)} {}
+    PageTable(std::uintptr_t tableAddress) : _tableAddress{reinterpret_cast<PageEntry *>(tableAddress)} {}
     PageTable(void *tableAddress) : _tableAddress{static_cast<PageEntry *>(tableAddress)} {}
 
     /**

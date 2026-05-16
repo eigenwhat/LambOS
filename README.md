@@ -80,6 +80,17 @@ The following CMake options are available for setting:
 * `QEMU_USE_GDB`: Tells QEMU to run with the gdbserver enabled and wait
     for a signal from the connection before booting. (OFF)
 
+Higher-half kernel notes
+------------------------
+
+The i386 kernel is linked in the higher-half virtual address space:
+
+* Virtual base: `0xC0000000` (3 GiB)
+* Physical load base: `0x00100000` (1 MiB)
+
+If this setup is modified, keep linker (`linker.ld`) and bootstrap paging
+(`kernel/src/arch/i386/cpu/boot.s`) in sync.
+
 Page fault analysis helper
 --------------------------
 

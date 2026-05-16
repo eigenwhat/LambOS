@@ -84,5 +84,5 @@ class VGATextConsole : public Console
     std::size_t _consoleRow = 0;
     std::size_t _consoleColumn = 0;
     std::uint8_t _consoleColor = kDefaultTextColor | kDefaultBackgroundColor << 4u;
-    std::uint16_t *_consoleBuffer = (uint16_t *)0xB8000;
+    std::uint16_t *_consoleBuffer = (uint16_t *)0xC00B8000;
 };

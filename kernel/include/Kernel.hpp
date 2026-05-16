@@ -40,7 +40,7 @@ class Kernel : public Context
      */
     void *palloc(void *virtualAddress, size_t numberOfPages)
     {
-        return _mmu->palloc(addressSpace(), virtualAddress, numberOfPages);
+        return _mmu->palloc(addressSpace(), VirtualAddress::fromPtr(virtualAddress), numberOfPages);
     }
 
     /**

@@ -6,14 +6,18 @@ ENTRY(_start)
    kernel image. */
 SECTIONS
 {
-    /* Begin putting sections at 1 MiB, a conventional place for kernels to be
-       loaded at by the bootloader. */
-    . = 1M;
+    KERNEL_VIRTUAL_BASE = 0xC0000000;
+    KERNEL_PHYSICAL_BASE = 1M;
+
+    /* Link the kernel in the higher half, but keep the physical load at 1 MiB. */
+    . = KERNEL_VIRTUAL_BASE + KERNEL_PHYSICAL_BASE;
+    kernel_start = .;
+    kernel_start_phys = kernel_start - KERNEL_VIRTUAL_BASE;
 
     /* First put the multiboot header, as it is required to be put very early
        early in the image or the bootloader won't recognize the file format.
        Next we'll put the .text section. */
-    .text BLOCK(4K) : ALIGN(4K)
+    .text ALIGN(4K) : AT(ADDR(.text) - KERNEL_VIRTUAL_BASE)
     {
         *(.multiboot)
         *(.text)
@@ -21,27 +25,28 @@ SECTIONS
     }
 
     /* Read-only data. */
-    .rodata BLOCK(4K) : ALIGN(4K)
+    .rodata ALIGN(4K) : AT(ADDR(.rodata) - KERNEL_VIRTUAL_BASE)
     {
         *(.rodata)
     }
 
     readonly_end = .;
+    readonly_end_phys = readonly_end - KERNEL_VIRTUAL_BASE;
 
     /* Read-write data (initialized) */
-    .data BLOCK(4K) : ALIGN(4K)
+    .data ALIGN(4K) : AT(ADDR(.data) - KERNEL_VIRTUAL_BASE)
     {
         *(.data)
     }
 
     /* Read-write data (uninitialized) */
-    .bss BLOCK(4K) : ALIGN(4K)
+    .bss ALIGN(4K) : AT(ADDR(.bss) - KERNEL_VIRTUAL_BASE)
     {
         *(COMMON)
         *(.bss)
     }
 
-    .bootstrap_stack BLOCK(4K) : ALIGN(4K)
+    .bootstrap_stack ALIGN(4K) : AT(ADDR(.bootstrap_stack) - KERNEL_VIRTUAL_BASE)
     {
         *(.bootstrap_stack)
     }
@@ -50,5 +55,5 @@ SECTIONS
        a segment with the same name. Simply add stuff here as needed. */
 
     kernel_end = .;
+    kernel_end_phys = kernel_end - KERNEL_VIRTUAL_BASE;
 }
-

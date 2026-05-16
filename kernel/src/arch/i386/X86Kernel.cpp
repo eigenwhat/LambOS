@@ -23,6 +23,7 @@ void X86Kernel::installMMU(uint32_t mmap_addr, uint32_t mmap_length)
     _mmu = _maybemmu.operator->();
     setAddressSpace(_mmu->create());
     _mmu->install(addressSpace());
+    _mmu->dropKernelBootstrapIdentityMappings();
 }
 
 void X86Kernel::installSyscalls()

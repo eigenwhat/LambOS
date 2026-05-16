@@ -4,8 +4,12 @@
 
 #pragma once
 
+#include <mem/Address.hpp>
 #include <mem/AddressSpace.hpp>
 #include <mem/PageFrameAllocator.hpp>
+
+namespace X86 {
+
 
 /** Abstraction for the X86 memory management unit. Implements paging. */
 class MMU
@@ -28,7 +32,7 @@ class MMU
      * @param numberOfPages The number of pages to allocate.
      * @return the start of the contiguous allocated memory.
      */
-    void *palloc(AddressSpace addressSpace, void *virtualAddress, size_t numberOfPages);
+    void *palloc(AddressSpace addressSpace, VirtualAddress virtualAddress, size_t numberOfPages);
 
     /**
      * Frees a page-aligned block of memory.
@@ -41,18 +45,27 @@ class MMU
 
     PageTable cloneDirectory(AddressSpace src);
 
-    AddressSpace create() { return AddressSpace{(uint32_t *)(_pageFrameAllocator.alloc(1))}; }
+    AddressSpace create();
 
-    /** Prepares and installs a page directory. */
+    /** Prepares and installs the kernel bootstrap address space. */
     void install(AddressSpace addressSpace);
+
+    /** Drops temporary low identity mappings used during kernel bootstrap. */
+    bool dropKernelBootstrapIdentityMappings();
 
   private:
     PageTable getOrCreateTable(AddressSpace addressSpace, uint16_t directoryIndex);
     PageTable tableForAddress(AddressSpace addressSpace, void *virtualAddress);
     PageEntry pageForAddress(AddressSpace addressSpace, void *virtualAddress);
-    void allocatePages(AddressSpace addressSpace, void *address, size_t numberOfPages);
+    void allocatePages(AddressSpace addressSpace, VirtualAddress address, size_t numberOfPages);
     void _flush();
 
     PageFrameAllocator _pageFrameAllocator;
     bool _pagingEnabled = false;
+    uint16_t _identityLastDirectoryIndex = 0;
+    bool _identityMappingsDropped = false;
 };
+
+} // namespace X86
+
+using X86::MMU;

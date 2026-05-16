@@ -4,7 +4,7 @@ ENTRY(_start)
 
 SECTIONS
 {
-    . = 512M;
+    . = 0x1000;
 
     .text BLOCK(4K) : ALIGN(4K)
     {
@@ -33,4 +33,3 @@ SECTIONS
         *(.bss)
     }
 }
-
