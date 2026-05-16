@@ -89,8 +89,14 @@ Command readCommand()
     char str[100];
     gets(str);
     auto len = strlen(str);
+    if (len == 0) {
+        return Command::kUnknown;
+    }
 
     char const *arg0 = strtok(str, " ");
+    if (arg0 == nullptr) {
+        return Command::kUnknown;
+    }
     auto toklen = strlen(arg0);
 
     char const *argv = toklen < len ? str+toklen+1 : str+toklen;
