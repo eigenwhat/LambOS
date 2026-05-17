@@ -756,6 +756,7 @@ struct __common_type_fold<common_reference<T1, T2>, __pack_t<_Rest...>, void_t<c
 
 // underlying_type
 template <typename T> using underlying_type = conditional_t<is_enum<T>::value, type_identity<__underlying_type(T)>, nonesuch>;
+template <typename T> using underlying_type_t = typename underlying_type<T>::type;
 
 // ====================================================
 // Type properties (bool values)

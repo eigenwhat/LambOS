@@ -1,0 +1,60 @@
+//
+// Created by Martin Miralles-Cordal on 5/16/2026.
+//
+
+#pragma once
+
+/*
+    bit synopsis
+
+namespace std {
+  // [bit.cast], bit_cast
+  template<class To, class From>
+    constexpr To bit_cast(const From& from) noexcept; // C++20
+
+  // [bit.byteswap], byteswap
+  template<class T>
+    constexpr T byteswap(T value) noexcept;      // C++23
+
+  // [bit.pow.two], integral powers of 2
+  template <class T>
+    constexpr bool has_single_bit(T x) noexcept; // C++20
+  template <class T>
+    constexpr T bit_ceil(T x);                   // C++20
+  template <class T>
+    constexpr T bit_floor(T x) noexcept;         // C++20
+  template <class T>
+    constexpr int bit_width(T x) noexcept;       // C++20
+
+  // [bit.rotate], rotating
+  template<class T>
+    constexpr T rotl(T x, int s) noexcept; // C++20
+  template<class T>
+    constexpr T rotr(T x, int s) noexcept; // C++20
+
+  // [bit.count], counting
+  template<class T>
+    constexpr int countl_zero(T x) noexcept;  // C++20
+  template<class T>
+    constexpr int countl_one(T x) noexcept;   // C++20
+  template<class T>
+    constexpr int countr_zero(T x) noexcept;  // C++20
+  template<class T>
+    constexpr int countr_one(T x) noexcept;   // C++20
+  template<class T>
+    constexpr int popcount(T x) noexcept;     // C++20
+
+  // [bit.endian], endian
+  enum class endian {
+    little = see below,        // C++20
+    big = see below,           // C++20
+    native = see below         // C++20
+  };
+
+} // namespace std
+
+*/
+
+namespace std {
+// TODO: everything
+}

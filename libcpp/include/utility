@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bits/to_underlying.hpp>
+
 #include <type_traits>
 #include <cstdlib>
 #include <cstdio>

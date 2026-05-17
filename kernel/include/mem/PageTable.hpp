@@ -7,11 +7,13 @@
 #include <cstddef>
 #include <cstdint>
 
+#include <bits/to_underlying.hpp>
+
 constexpr std::uint32_t k4KPageAddressMask = 0xFFFFF000;
 constexpr std::uint32_t k4MPageAddressMask = 0xFFC00000;
 constexpr std::uint32_t kPageFlagsMask = 0x00000FFF;
 
-enum PageEntryFlag : std::uint32_t {
+enum PageEntryFlag : std::uint8_t {
     kPresentBit       = 0b00000001,
     kReadWriteBit     = 0b00000010,
     kSupervisorBit    = 0b00000100,
@@ -23,26 +25,31 @@ enum PageEntryFlag : std::uint32_t {
     kGlobalBit        = 0b10000000,
 };
 
+constexpr PageEntryFlag operator~(PageEntryFlag flag)
+{
+    return static_cast<PageEntryFlag>(~std::to_underlying(flag));
+}
+
 class PageTable;
 
 class PageEntry
 {
   public:
     PageEntry() = default;
-    explicit PageEntry(std::uintptr_t address) : _entry(address & k4KPageAddressMask) {}
-    PageEntry(std::uintptr_t entry, int) : _entry(entry) {}
+    explicit PageEntry(std::uintptr_t address) : entry_(address & k4KPageAddressMask) {}
+    PageEntry(std::uintptr_t entry, int) : entry_(entry) {}
 
-    [[nodiscard]] bool getFlag(PageEntryFlag flag) const { return (bool)(_entry & flag); }
-    void unsetFlag(PageEntryFlag flag) { _entry &= ~flag; }
-    void setFlag(PageEntryFlag flag) { _entry |= flag; }
-    void setFlags(std::uintptr_t flags) { _entry = (_entry & k4KPageAddressMask) | (flags & kPageFlagsMask); }
+    [[nodiscard]] bool getFlag(PageEntryFlag flag) const noexcept { return static_cast<bool>(entry_ & flag); }
+    void unsetFlag(PageEntryFlag flag) noexcept { entry_ &= ~flag; }
+    void setFlag(PageEntryFlag flag) noexcept { entry_ |= flag; }
+    void setFlags(std::uintptr_t flags) noexcept { entry_ = (entry_ & k4KPageAddressMask) | (flags & kPageFlagsMask); }
 
-    [[nodiscard]] std::uintptr_t address() const { return _entry & k4KPageAddressMask; }
-    [[nodiscard]] std::uintptr_t flags() const { return _entry & kPageFlagsMask; }
-    [[nodiscard]] std::uintptr_t entry() const { return _entry; }
+    [[nodiscard]] std::uintptr_t address() const noexcept { return entry_ & k4KPageAddressMask; }
+    [[nodiscard]] std::uintptr_t flags() const noexcept { return entry_ & kPageFlagsMask; }
+    [[nodiscard]] std::uintptr_t entry() const noexcept { return entry_; }
 
   private:
-    std::uintptr_t _entry;
+    std::uintptr_t entry_;
 };
 
 static_assert(sizeof(PageEntry) == sizeof(std::uint32_t));
