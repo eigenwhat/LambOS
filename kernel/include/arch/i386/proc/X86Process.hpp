@@ -33,7 +33,7 @@ extern void context_switch(X86Process::State::Context **old, X86Process::State::
 
 namespace X86Process {
 
-void swapActive(Process::ICpuState *curr, Process::ICpuState *next)
+inline void swapActive(Process::ICpuState *curr, Process::ICpuState *next)
 {
     auto *currCtx = static_cast<X86Process::State*>(curr);
     auto *nextCtx = static_cast<X86Process::State*>(next);
