@@ -6,19 +6,17 @@
 
 #include <Defines.hpp>
 
+#include <compare>
+
 namespace sys {
 
 struct Void
 {
     constexpr bool operator==(const Void&) const { return true; }
-    constexpr bool operator<=(const Void&) const { return true; }
-    constexpr bool operator>=(const Void&) const { return true; }
-    constexpr bool operator<(const Void&)  const { return false; }
-    constexpr bool operator!=(const Void&) const { return false; }
-    constexpr bool operator>(const Void&)  const { return false; }
+    constexpr auto operator<=>(const Void&) const { return std::strong_ordering::equal; }
 };
 
-[[maybe_unused]] constexpr const Void Nothing;
+[[maybe_unused]] constexpr inline Void Nothing{};
 
 template <typename T> struct nonvoid { using type = T; };
 template <> struct nonvoid<void> { using type = Void; };
