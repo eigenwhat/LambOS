@@ -24,7 +24,7 @@ template <typename T> class UniquePtr
     template <std::derived_from<T> U = T>
     constexpr UniquePtr &operator=(UniquePtr<U> &&r) noexcept { reset(r.release()); return *this; }
 
-    ~UniquePtr() { if (_ptr) delete _ptr; }
+    ~UniquePtr() { delete _ptr; }
 
     constexpr T *get() const noexcept { return _ptr; }
 

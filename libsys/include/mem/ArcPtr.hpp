@@ -16,7 +16,8 @@ namespace sys {
  * Shared ownership pointer. It's std::shared_ptr, but shoddier.
  * @tparam T The type to store.
  */
-template <typename T> class ArcPtr;
+template <typename T>
+class ArcPtr;
 
 namespace arcptr_detail {
 
@@ -25,15 +26,17 @@ template <typename U> constexpr inline bool is_arcptr<ArcPtr<U>> = true;
 
 } // namespace arcptr_detail
 
-template <typename T> concept is_arcptr = arcptr_detail::is_arcptr<std::decay_t<T>>;
+template <typename T>
+concept is_arcptr = arcptr_detail::is_arcptr<std::decay_t<T>>;
 
-struct ArcRefCount
+class ArcRefCount
 {
   public:
-    ArcRefCount() noexcept : _data{nullptr} {}
+    constexpr ArcRefCount() noexcept : _data{nullptr} {}
 
-    ArcRefCount(std::nullptr_t) noexcept : _data{nullptr} {}
-    ArcRefCount &operator=(std::nullptr_t) noexcept
+    constexpr ArcRefCount(std::nullptr_t) noexcept : _data{nullptr} {}
+
+    constexpr ArcRefCount& operator=(std::nullptr_t) noexcept
     {
         release();
         _data = nullptr;
@@ -41,19 +44,21 @@ struct ArcRefCount
     }
 
     template <typename T>
-    explicit ArcRefCount(T *obj) noexcept : _data{new model_t<T>{obj}} {}
+    constexpr explicit ArcRefCount(T *obj) noexcept : _data{new model_t<T>{obj}} {}
 
-    ArcRefCount(ArcRefCount const &rhs) noexcept : _data{rhs._data} { retain(); }
-    ArcRefCount &operator=(ArcRefCount const &rhs) noexcept
+    constexpr ArcRefCount(ArcRefCount const& rhs) noexcept : _data{rhs._data} { retain(); }
+    constexpr ArcRefCount& operator=(ArcRefCount const& rhs) noexcept
     {
+        if (this == &rhs) { return *this; }
+
         release();
         _data = rhs._data;
         retain();
         return *this;
     }
 
-    ArcRefCount(ArcRefCount &&rhs) noexcept : _data{rhs._data} { rhs._data = nullptr; }
-    ArcRefCount &operator=(ArcRefCount &&rhs) noexcept
+    constexpr ArcRefCount(ArcRefCount&& rhs) noexcept : _data{rhs._data} { rhs._data = nullptr; }
+    constexpr ArcRefCount& operator=(ArcRefCount&& rhs) noexcept
     {
         release();
         _data = rhs._data;
@@ -61,10 +66,11 @@ struct ArcRefCount
         return *this;
     }
 
-    ~ArcRefCount() { release(); }
+    constexpr ~ArcRefCount() { release(); }
 
-    void retain() { if (_data) { _data->retain(); } }
-    void release()
+    constexpr void retain() noexcept { if (_data) { _data->retain(); } }
+
+    constexpr void release() noexcept
     {
         if (_data) {
             _data->release();
@@ -76,7 +82,7 @@ struct ArcRefCount
     }
 
     template <typename T>
-    void reset(T *obj) noexcept
+    constexpr void reset(T *obj) noexcept
     {
         release();
         if (obj) {
@@ -87,28 +93,35 @@ struct ArcRefCount
         }
     }
 
-    explicit operator bool() const { return _data; }
+    constexpr void *ptr() const noexcept { return _data ? _data->ptr() : nullptr; }
 
-    constexpr bool operator==(ArcRefCount const &rhs) const noexcept = default;
+    constexpr explicit operator bool() const noexcept { return _data; }
+
+    constexpr bool operator==(ArcRefCount const& rhs) const noexcept = default;
     constexpr bool operator==(std::nullptr_t) const noexcept { return _data == nullptr; }
 
   private:
     struct concept_t
     {
-        virtual ~concept_t() = default;
-        virtual void retain() = 0;
-        virtual void release() = 0;
-        virtual int count() const = 0;
+        constexpr virtual ~concept_t() = default;
+        constexpr virtual void retain() noexcept = 0;
+        constexpr virtual void release() noexcept = 0;
+
+        [[nodiscard]] constexpr virtual int count() const noexcept = 0;
+        [[nodiscard]] constexpr virtual void *ptr() const noexcept = 0;
     };
 
     template <typename U>
     struct model_t : concept_t
     {
-        model_t(U *obj) : _impl{obj} {}
-        void retain() override { return _impl.retain(); }
-        void release() override { return _impl.release(); }
-        int count() const override { return _impl.count(); }
-        RefCount<U> _impl;
+        RefCount<U> impl;
+
+        constexpr model_t(U *obj) noexcept : impl{obj} {}
+        constexpr void retain() noexcept override { return impl.retain(); }
+        constexpr void release() noexcept override { return impl.release(); }
+
+        [[nodiscard]] constexpr int count() const noexcept override { return impl.count(); }
+        [[nodiscard]] constexpr void *ptr() const noexcept override { return impl.ptr(); }
     };
 
     concept_t *_data;
@@ -118,79 +131,90 @@ struct ArcRefCount
  * Shared ownership pointer. It's std::shared_ptr, but shoddier.
  * @tparam T The type to store.
  */
-template <typename T> class ArcPtr
+template <typename T>
+class ArcPtr
 {
   public:
     using ElementType = T;
 
-    ArcPtr() : _ptr{nullptr}, _refCount{} {}
-    ArcPtr(std::nullptr_t) : _ptr{nullptr}, _refCount{} {}
+    constexpr ArcPtr() noexcept = default;
+    constexpr ArcPtr(std::nullptr_t) noexcept {}
 
     template <std::derived_from<T> U>
-    explicit ArcPtr(U *ptr) noexcept : _ptr{ptr}, _refCount{ptr} {}
+    constexpr explicit ArcPtr(U *ptr) noexcept : _refCount{ptr} {}
+
     template <std::derived_from<T> U>
-    ArcPtr &operator=(U *ptr) noexcept { reset(ptr); return *this; }
-
-    ArcPtr(ArcPtr const &rhs) noexcept : ArcPtr(rhs, Nothing) {}
-    ArcPtr &operator=(ArcPtr const &r) noexcept { return Assign(r); }
-    template <typename U> ArcPtr(ArcPtr<U> const &rhs) noexcept : ArcPtr(rhs, Nothing) {}
-    template <typename U> ArcPtr &operator=(ArcPtr<U> const &r) noexcept { return Assign(r); }
-
-    ArcPtr(ArcPtr &&rhs) noexcept : ArcPtr(std::move(rhs), Nothing) {}
-    ArcPtr &operator=(ArcPtr &&r) noexcept { return Assign(std::move(r)); }
-    template <typename U> ArcPtr(ArcPtr<U> &&rhs) noexcept : ArcPtr(std::move(rhs), Nothing) {}
-    template <typename U> ArcPtr &operator=(ArcPtr<U> &&r) noexcept { return Assign(std::move(r)); }
-
-    ~ArcPtr() { reset(nullptr); }
-
-    T *get() const noexcept { return _ptr; }
-    T *operator->() const noexcept { return get(); }
-    T& operator*() const noexcept { return *get(); }
-    constexpr operator T*() const noexcept { return get(); }
-
-    void reset(T *newPtr) noexcept
+    constexpr ArcPtr& operator=(U *ptr) noexcept
     {
-        _ptr = newPtr;
-        _refCount.reset(newPtr);
+        reset(ptr);
+        return *this;
     }
 
-    constexpr bool operator==(std::nullptr_t) const noexcept { return _ptr == nullptr; }
+    constexpr ArcPtr(ArcPtr const& rhs) noexcept : ArcPtr(rhs, Nothing) {}
+    constexpr ArcPtr& operator=(ArcPtr const& r) noexcept { return Assign(r); }
+
     template <typename U>
-    constexpr bool operator==(const ArcPtr<U> &r) const noexcept { return _ptr == r._ptr && _refCount == r._refCount; }
-    template <typename U> constexpr bool operator==(U *r) const noexcept { return get() == r; }
+    constexpr ArcPtr(ArcPtr<U> const& rhs) noexcept : ArcPtr(rhs, Nothing) {}
+    template <typename U>
+    constexpr ArcPtr& operator=(ArcPtr<U> const& r) noexcept { return Assign(r); }
 
-    explicit constexpr operator bool() const noexcept { return _ptr != nullptr; }
+    constexpr ArcPtr(ArcPtr&& rhs) noexcept : ArcPtr(std::move(rhs), Nothing) {}
+    constexpr ArcPtr& operator=(ArcPtr&& r) noexcept { return Assign(std::move(r)); }
 
-  private:
-    template <typename T1> friend class ArcPtr;
+    template <typename U>
+    constexpr ArcPtr(ArcPtr<U>&& rhs) noexcept : ArcPtr(std::move(rhs), Nothing) {}
+    template <typename U>
+    constexpr ArcPtr& operator=(ArcPtr<U>&& r) noexcept { return Assign(std::move(r)); }
+
+    constexpr ~ArcPtr() { reset(nullptr); }
+
+    constexpr T *get() const noexcept { return reinterpret_cast<T *>(_refCount.ptr()); }
+    constexpr T *operator->() const noexcept { return get(); }
+    constexpr T& operator*() const noexcept { return *get(); }
+    constexpr operator T*() const noexcept { return get(); }
+
+    constexpr void reset(T *newPtr) noexcept { _refCount.reset(newPtr); }
+
+    constexpr bool operator==(std::nullptr_t) const noexcept { return get() == nullptr; }
+
+    template <typename U>
+    constexpr bool operator==(ArcPtr<U> const& r) const noexcept
+    {
+        return get() == r.get() && _refCount == r._refCount;
+    }
+
+    template <typename U>
+    constexpr bool operator==(U *r) const noexcept { return get() == r; }
+
+    constexpr explicit operator bool() const noexcept { return get() != nullptr; }
+
+private:
+    template <typename T1>
+    friend class ArcPtr;
 
     /** Private delegating constructor. */
     template <is_arcptr U>
-    [[gnu::always_inline]] ArcPtr(U &&rhs, Void) noexcept
-            : _ptr{rhs._ptr}, _refCount{std::forward<U>(rhs)._refCount}
-    {
-        if constexpr (std::is_rvalue_reference_v<decltype(rhs)>) { rhs._ptr = nullptr; }
-    }
+    [[gnu::always_inline]]
+    constexpr ArcPtr(U&& rhs, Void) noexcept : _refCount{std::forward<U>(rhs)._refCount} {}
 
     /** Private delegating assignment. */
     template <is_arcptr U>
-    [[gnu::always_inline]] ArcPtr &Assign(U &&r) noexcept
+    [[gnu::always_inline]]
+    constexpr ArcPtr& Assign(U&& r) noexcept
     {
         if (*this != r) {
-            _ptr = std::forward<U>(r)._ptr;
             _refCount = std::forward<U>(r)._refCount;
         }
         return *this;
     }
 
-    T *_ptr;
     ArcRefCount _refCount;
 };
 
-template <typename T, typename ... Args>
-inline ArcPtr<T> make_arc(Args && ...args) { return ArcPtr<T>{new T(std::forward<Args>(args)...)}; }
+template <typename T, typename... Args>
+constexpr ArcPtr<T> make_arc(Args&&...args) { return ArcPtr<T>{new T(std::forward<Args>(args)...)}; }
 
 template <typename T, typename... Args>
-inline ArcPtr<T> New(Args &&...args) { return make_arc<T>(args...); }
+constexpr ArcPtr<T> New(Args&&...args) { return make_arc<T>(args...); }
 
 } // namespace sys

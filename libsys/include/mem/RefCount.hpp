@@ -18,20 +18,22 @@ template <typename T>
 class RefCount
 {
   public:
-    RefCount(T *ptr) : _ptr{ptr} {}
-    virtual ~RefCount() { delete_if_present_and_not_this(); }
-    void retain() { ++_referenceCount; }
-    void release() { if (--_referenceCount == 0) { delete_if_present(); } }
-    int count() const { return _referenceCount; }
+    constexpr RefCount(T *ptr) : _ptr{ptr} {}
+    constexpr virtual ~RefCount() { delete_if_present_and_not_this(); }
+    constexpr void retain() { ++_referenceCount; }
+    constexpr void release() { if (--_referenceCount == 0) { delete_if_present(); } }
+
+    [[nodiscard]] constexpr int count() const { return _referenceCount; }
+    [[nodiscard]] constexpr T *ptr() const noexcept { return _ptr; }
 
   private:
-    [[gnu::always_inline]] void delete_if_present() { if (_ptr) { _delete(); } }
-    [[gnu::always_inline]] void delete_if_present_and_not_this()
+    [[gnu::always_inline]] constexpr void delete_if_present() { if (_ptr) { _delete(); } }
+    [[gnu::always_inline]] constexpr void delete_if_present_and_not_this()
     {
         if constexpr (!std::is_base_of_v<RefCount, T>) { _delete(); }
     }
 
-    [[gnu::always_inline]] void _delete()
+    [[gnu::always_inline]] constexpr void _delete()
     {
         if constexpr (std::is_base_of_v<RefCount, T>) { // check for crtp
             delete this;
