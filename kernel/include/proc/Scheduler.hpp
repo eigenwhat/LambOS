@@ -12,8 +12,8 @@
 class Scheduler
 {
   public:
-    Process * currentProcess() const { return activeProcess_; }
-    Process * currentProcess() { return activeProcess_; }
+    Process const * currentProcess() const { return activeProcess_; }
+    Process       * currentProcess()       { return activeProcess_; }
 
     Process * nextProcess()
     {
@@ -24,6 +24,6 @@ class Scheduler
     }
 
   private:
-    Process *activeProcess_;
+    Process *activeProcess_ = nullptr;
     sys::ArrayList<Process> dormantProcesses_;
 };

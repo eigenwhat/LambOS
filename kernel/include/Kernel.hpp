@@ -22,8 +22,8 @@ class Kernel : public Context
      */
     void panic(char const *errorMessage);
 
-    Scheduler &scheduler() { return lazyInitScheduler(); }
-    Scheduler const &scheduler() const { return lazyInitScheduler(); }
+    Scheduler& scheduler() { return lazyInitScheduler(); }
+    Scheduler const& scheduler() const { return lazyInitScheduler(); }
 
     /**
      * Allocates contiguous pages of memory.
@@ -57,7 +57,7 @@ class Kernel : public Context
   protected:
     Kernel() = default;
 
-    Scheduler & lazyInitScheduler() const
+    Scheduler& lazyInitScheduler() const
     {
         if (!_scheduler) { _scheduler = sys::make_unique<Scheduler>(); }
         return *_scheduler;
