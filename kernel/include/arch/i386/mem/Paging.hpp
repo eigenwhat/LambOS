@@ -20,8 +20,24 @@ constexpr std::size_t const kPageDirectorySize = kPageTableSize * 1024;
 
 class PageDirectory
 {
+    /**
+     * The page tables for this directory. Each entry corresponds to a PDE but
+     * accessible through its virtual address.
+     */
     sys::Array<PageTable, 1024> tables_;
+
+    /**
+     * The page directory entries for this directory. Each entry corresponds to
+     * a PDE and contains the physical address of the page table.
+     *
+     * This is what is canonically "the page directory".
+     */
     sys::Array<PageEntry, 1024> tableFrames_;
+
+    /**
+     * The physical address of the page directory itself, which is also the
+     * physical address of tableFrames_.
+     */
     std::uintptr_t physicalAddress_;
 
   public:
