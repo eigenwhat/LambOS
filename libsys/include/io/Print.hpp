@@ -24,8 +24,8 @@ void debug_println(char const *format, Ts&&...args);
 template <typename T>
 void print(OutputStream &out, T &&data)
 {
-    if constexpr (is_any_of_v<std::decay_t<T>, char, unsigned char, signed char, std::byte>) {
-        out.write(data);
+    if constexpr (is_any_of_v<std::decay_t<T>, char, std::byte>) {
+        out.write(static_cast<char>(data));
     }
     else if constexpr (std::convertible_to<std::decay_t<T>, char const *>) {
         char const *it = data;
