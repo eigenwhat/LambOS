@@ -35,7 +35,8 @@ class Executable
      * Reads the referred to ELF binary into memory.
      * @param entry The DirectoryEntry for the binary.
      */
-    explicit Executable(DirectoryEntry &entry);
+    explicit Executable(DirectoryEntry const& entry) : Executable{entry.fileStream()} {}
+    explicit Executable(sys::UniquePtr<sys::InputStream> data);
 
     ~Executable();
 

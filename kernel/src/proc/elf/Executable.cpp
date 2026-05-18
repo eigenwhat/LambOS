@@ -95,8 +95,8 @@ bool Executable::isElf(DirectoryEntry const &entry)
     return checkHeader(header32);
 }
 
-Executable::Executable(DirectoryEntry &entry)
-        : _file(sys::ArcPtr<sys::InputStream>{entry.fileStream().release()})
+Executable::Executable(sys::UniquePtr<sys::InputStream> data)
+        : _file(sys::ArcPtr<sys::InputStream>{data.release()})
 {
     _file.readAll();
     auto header = readObject<ElfHeader32>(_file, 0);
