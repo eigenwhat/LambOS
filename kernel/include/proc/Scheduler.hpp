@@ -8,20 +8,35 @@
 #include <util/ArrayList.hpp>
 
 #include <ranges>
+#include <utility>
 
 class Scheduler
 {
   public:
     Process const * currentProcess() const { return activeProcess_; }
     Process       * currentProcess()       { return activeProcess_; }
+    void setCurrentProcess(Process *process) { activeProcess_ = process; }
 
-    Process * nextProcess()
+    bool hasRunnableProcess() const
     {
-        auto nextEligible = std::ranges::find_if(dormantProcesses_, [](Process const &p) {
+        return std::ranges::find_if(dormantProcesses_, [](Process const &p) {
             return p.state == Process::State::Runnable;
-        });
-        return nextEligible == dormantProcesses_.end() ? std::addressof(*nextEligible) : currentProcess();
+        }) != dormantProcesses_.end();
     }
+
+    /** Enqueues an embryo process into the dormant process list. */
+    Process *enqueueEmbryo(Process&& process);
+
+    /**
+     * Marks an embryo process runnable once architecture-specific CPU state has
+     * been attached.
+     */
+    bool makeRunnable(Process& process, Process::ICpuState *cpuState);
+
+    Process * nextProcess();
+
+    /** Selects the next process and marks it as the current process. */
+    Process *promoteNextProcessToCurrent();
 
     Process::ID nextPid() { return nextPid_++; }
 
