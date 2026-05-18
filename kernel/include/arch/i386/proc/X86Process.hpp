@@ -15,7 +15,10 @@ struct State : Process::ICpuState
     {
         std::uint32_t edi;
         std::uint32_t esi;
+        std::uint32_t edx;
+        std::uint32_t ecx;
         std::uint32_t ebx;
+        std::uint32_t eax;
         std::uint32_t ebp;
         std::uint32_t eip;
     };
