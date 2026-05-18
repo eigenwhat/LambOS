@@ -23,7 +23,10 @@ class Scheduler
         return nextEligible == dormantProcesses_.end() ? std::addressof(*nextEligible) : currentProcess();
     }
 
+    Process::ID nextPid() { return nextPid_++; }
+
   private:
     Process *activeProcess_ = nullptr;
     sys::ArrayList<Process> dormantProcesses_;
+    Process::ID nextPid_ = 0;
 };
