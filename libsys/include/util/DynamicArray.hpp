@@ -42,10 +42,37 @@ class DynamicArray
     static constexpr size_t kDefaultSize = 8;
 
     DynamicArray() : DynamicArray(kDefaultSize) {}
-    DynamicArray(size_t reserve) : _capacity{reserve}, _data{_alloc(_capacity)} { _construct(data(), _capacity); }
+    explicit DynamicArray(size_t reserve)
+        : _capacity{reserve}, _data{_alloc(_capacity)}
+    {
+        _construct(data(), _capacity);
+    }
+
     DynamicArray(std::initializer_list<T> il) : _capacity(il.size()), _data{_alloc(_capacity)}
     {
         std::uninitialized_move(il.begin(), il.end(), data(), data() + _capacity);
+    }
+
+    DynamicArray(DynamicArray const& other) = delete;
+    DynamicArray& operator=(DynamicArray const& other) = delete;
+
+    DynamicArray(DynamicArray&& other) noexcept
+    {
+        std::swap(_capacity, other._capacity);
+        std::swap(_data, other._data);
+    }
+
+    DynamicArray& operator=(DynamicArray&& other) noexcept
+    {
+        if (this == &other) { return *this; }
+
+        delete[] _data;
+        _capacity = 0;
+
+        std::swap(_capacity, other._capacity);
+        std::swap(_data, other._data);
+
+        return *this;
     }
 
     ~DynamicArray() { delete[] _data; }

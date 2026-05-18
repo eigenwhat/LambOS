@@ -8,6 +8,8 @@
 #include <util/List.hpp>
 #include <util/Iterator.hpp>
 
+#include <concepts>
+
 namespace sys {
 
 /**
@@ -53,13 +55,27 @@ class ArrayList
      * elements.
      * @param reserve The number of elements to pre-allocate space for.
      */
-    ArrayList(size_t reserve) : _data(reserve) {}
+    explicit ArrayList(size_t reserve) : _data(reserve) {}
 
     /**
      * Constructs an ArrayList, pre-allocating space for all the provided elements.
      * @param il The elements to pre-allocate space for and insert.
      */
-    ArrayList(std::initializer_list<T> il) : _data{il}, _size{il.size()} {}
+    explicit ArrayList(std::initializer_list<T> il) : _data{il}, _size{il.size()} {}
+
+    ArrayList(ArrayList const& other) = delete;
+    ArrayList& operator=(ArrayList const& other) = delete;
+    ArrayList(ArrayList&& other) noexcept : _data{std::move(other._data)}
+    {
+        std::swap(_size, other._size);
+    }
+    ArrayList& operator=(ArrayList&& other) noexcept
+    {
+        if (this != &other) { return *this; }
+        _data = std::move(other._data);
+        std::swap(_size, other._size);
+        return *this;
+    }
 
     /**
      * Reserves enough room to hold the given amount.
@@ -113,19 +129,15 @@ class ArrayList
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool enqueue(const T &obj)
+    bool enqueue(T const& obj) requires std::copy_constructible<T>
     {
-        if constexpr (std::is_copy_constructible<T>::value) {
-            if (_size == capacity()) {
-                _data.resize();
-            }
-
-            _data[_size] = obj;
-            ++_size;
-            return true;
+        if (_size == capacity()) {
+            _data.resize();
         }
 
-        return false;
+        _data[_size] = obj;
+        ++_size;
+        return true;
     }
 
     /**
@@ -133,7 +145,7 @@ class ArrayList
      * @param obj The object to add.
      * @return `true` if an object was added. `false` otherwise.
      */
-    bool enqueue(T &&obj)
+    bool enqueue(T&& obj) requires std::move_constructible<T>
     {
         if (_size == capacity()) {
             _data.resize();
