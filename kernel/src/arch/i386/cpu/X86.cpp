@@ -77,7 +77,7 @@ void X86::CPU::enableInterrupts()
         pic_initialized = true;
     }
 
-    asm volatile ("sti");
+    sti();
 }
 
 void X86::CPU::maskIRQ(unsigned int IRQ)
@@ -164,4 +164,3 @@ void init_pics(InterruptDescriptorTable &idt, uint8_t pic1, uint8_t pic2)
     outb(PIC1_DATA, 0xff);
     outb(PIC2_DATA, 0xff);
 }
-

@@ -27,7 +27,7 @@ class CPU
     InterruptDescriptorTable *idt() { return &_idt; }
 
     void enableInterrupts();
-    void disableInterrupts() { asm volatile ("cli"); }
+    void disableInterrupts() { cli(); }
 
     void maskIRQ(unsigned int IRQ);
     void unmaskIRQ(unsigned int IRQ);
