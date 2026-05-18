@@ -38,6 +38,20 @@ class Executable
     explicit Executable(DirectoryEntry const& entry) : Executable{entry.fileStream()} {}
     explicit Executable(sys::UniquePtr<sys::InputStream> data);
 
+    Executable(Executable const &) = delete;
+    Executable &operator=(Executable const &) = delete;
+    Executable(Executable&& rhs) noexcept
+        : _file{std::move(rhs._file)}
+        , _sections{std::move(rhs._sections)}
+        , _segments{std::move(rhs._segments)}
+        , _nameTable{rhs._nameTable}
+        , _entry{rhs._entry}
+        , _isLoaded{rhs._isLoaded}
+    {
+        rhs._isLoaded = false;
+    }
+    Executable &operator=(Executable&& rhs) = default;
+
     ~Executable();
 
     /** The sections as listed in the binary's section header table. */
@@ -114,8 +128,8 @@ class Executable
     void loadNameTable(size_t offset, size_t entryIndex);
 
     sys::FileReader _file;
-    sys::ArrayList<Section> _sections{1};
-    sys::ArrayList<Segment> _segments{1};
+    sys::ArrayList<Section> _sections{};
+    sys::ArrayList<Segment> _segments{};
     Section const *_nameTable = nullptr;
     EntryType _entry = nullptr;
     bool _isLoaded = false;
