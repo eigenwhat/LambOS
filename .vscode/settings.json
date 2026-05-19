@@ -1,0 +1,9 @@
+{
+    "cmake.configureArgs": [
+        "--toolchain cmake/i686-elf.toolchain.cmake",
+        "-DBOCHS_USE_SDL2=ON"
+    ],
+    "cmake.environment": {
+        "BXSHARE": "/opt/homebrew/share/bochs"
+    }
+}

@@ -6,3 +6,4 @@ stoof/
 none
 .idea
 cmake-build-*/
+/build/
