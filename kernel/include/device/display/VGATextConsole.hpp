@@ -45,6 +45,7 @@ class VGATextConsole : public Console
      * @param data The string of characters to write.
      */
     void writeString(char const *data) override;
+    void writeString(char const *data, size_t len) override;
 
     /** Clears the console. */
     void clear() override;

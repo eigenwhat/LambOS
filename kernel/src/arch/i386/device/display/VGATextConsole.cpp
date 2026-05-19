@@ -113,12 +113,16 @@ void VGATextConsole::moveTo(std::size_t row, std::size_t col)
 
 void VGATextConsole::writeString(char const *data)
 {
+    return writeString(data, strlen(data));
+}
+
+void VGATextConsole::writeString(char const *data, size_t len)
+{
     bool moveCursor = _cursorIsVisible;
     if (moveCursor) {
         setCursorVisible(false);
     }
-    size_t datalen = strlen(data);
-    for (size_t i = 0; i < datalen; i++) {
+    for (size_t i = 0; i < len; i++) {
         putChar(data[i]);
     }
     if (moveCursor) {

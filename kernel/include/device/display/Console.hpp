@@ -39,6 +39,7 @@ public:
      * @param data The string of characters to write.
      */
     virtual void writeString(char const *data) = 0;
+    virtual void writeString(char const *data, size_t len) = 0;
 
     /** Clears the console. */
     virtual void clear() = 0;
