@@ -79,3 +79,36 @@ The following CMake options are available for setting:
 
 * `QEMU_USE_GDB`: Tells QEMU to run with the gdbserver enabled and wait
     for a signal from the connection before booting. (OFF)
+
+Page fault analysis helper
+--------------------------
+
+A helper script is available at `scripts/page_fault_report.py` to analyze
+the panic string emitted by `PageFaultISR` and run symbolization utilities
+(`addr2line`, `nm`, `readelf`, `objdump`) against the built kernel binary.
+
+Example:
+
+```bash
+./scripts/page_fault_report.py "Page Fault: cr2=0xFFC00004 eip=0xC0112498/in Kernel mode/"
+```
+
+JSON output (useful for automation/coding agents):
+
+```bash
+./scripts/page_fault_report.py --format json "Page Fault: cr2=0xFFC00004 eip=0xC0112498/in Kernel mode/"
+```
+
+The script auto-detects:
+
+* Kernel image path (prefers `build/kernel/kernel.bin`, then `cmake-build-debug/kernel/kernel.bin`)
+* Binutils tools from CMake cache (`CMAKE_ADDR2LINE`, `CMAKE_OBJDUMP`, etc.)
+
+Useful options:
+
+* `--kernel <path>`: Explicit kernel binary/ELF path
+* `--build-dir <path>`: Build directory to inspect (repeatable)
+* `--tool-prefix i686-elf-`: Force a specific cross-tool prefix
+* `--objdump-window 0xA0`: Increase disassembly context around EIP
+* `--output report.txt`: Save report to a file
+* `--format json`: Emit a machine-readable report
