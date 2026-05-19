@@ -11,6 +11,13 @@
 
 namespace std {
 
+namespace detail {
+
+template<typename T>
+concept __has_member_begin = requires(T& t) {t.begin(); };
+
+} // namespace detail
+
 // iterator concepts
 // concept readable
 template<class In>

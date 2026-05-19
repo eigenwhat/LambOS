@@ -11,8 +11,8 @@
 
 namespace std {
 
-template<typename _T> inline constexpr auto begin(_T& rng) { return rng.begin(); }
-template<typename _T> inline constexpr auto begin(const _T& rng) { return rng.begin(); }
+template<detail::__has_member_begin _T> inline constexpr auto begin(_T& rng) { return rng.begin(); }
+template<detail::__has_member_begin _T> inline constexpr auto begin(const _T& rng) { return rng.begin(); }
 
 template<typename _T> inline constexpr auto end(_T& rng) { return rng.end(); }
 template<typename _T> inline constexpr auto end(const _T& rng) { return rng.end(); }

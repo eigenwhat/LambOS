@@ -31,18 +31,20 @@ struct find_if_fn {
     }
 
   public:
-    template <input_iterator I, typename S, typename Proj = identity, typename Pred>
-    requires sentinel_for<S, I> && indirect_unary_predicate<Pred, projected<I, Proj>>
+    template <input_iterator I, sentinel_for<I> S,
+              typename Proj = identity,
+              indirect_unary_predicate<projected<I, Proj>> Pred>
     constexpr I operator()(I first, S last, Pred pred, Proj proj = Proj{}) const
     {
         return find_if_fn::impl(std::move(first), std::move(last), pred, proj);
     }
 
-    template <input_range Rng, typename Proj = identity, typename Pred>
-    requires indirect_unary_predicate<Pred, projected<iterator_t<Rng>, Proj>>
+    template <input_range Rng,
+              typename Proj = identity,
+              indirect_unary_predicate<projected<iterator_t<Rng>, Proj>> Pred>
     constexpr safe_iterator_t<Rng> operator()(Rng&& rng, Pred pred, Proj proj = Proj{}) const
     {
-        return find_if_fn::impl(begin(rng), end(rng), pred, proj);
+        return find_if_fn::impl(ranges::begin(rng), ranges::end(rng), pred, proj);
     }
 };
 
@@ -54,7 +56,7 @@ namespace detail {
 
 struct find_fn {
     template <input_iterator I, sentinel_for<I> S, typename T, typename Proj = identity>
-    requires sentinel_for<S, I> && indirect_relation<ranges::equal_to, projected<I, Proj>, const T*>
+    requires sentinel_for<S, I> && indirect_relation<equal_to, projected<I, Proj>, const T*>
     constexpr I operator()(I first, S last, const T& value, Proj proj = Proj{}) const
     {
         const auto pred = [&value] (const auto& t) { return t == value; };
@@ -62,7 +64,7 @@ struct find_fn {
     }
 
     template <input_range Rng, typename T, typename Proj = identity>
-    requires indirect_relation<ranges::equal_to, projected<iterator_t<Rng>, Proj>, const T*>
+    requires indirect_relation<equal_to, projected<iterator_t<Rng>, Proj>, const T*>
     constexpr safe_iterator_t<Rng> operator()(Rng&& rng, const T& value, Proj proj = Proj{}) const
     {
         const auto pred = [&value] (const auto& t) { return t == value; };

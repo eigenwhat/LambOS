@@ -10,7 +10,38 @@
 
 namespace std::ranges {
 
-using std::begin;
+namespace detail {
+
+void begin() = delete;
+
+template <typename T>
+concept __adl_begin = !std::detail::__has_member_begin<T>
+                    && (is_class_v<remove_cvref_t<T>> || is_enum_v<remove_cvref_t<T>>)
+                    && requires(T&& t) { { begin(t) } -> input_or_output_iterator; };
+
+struct begin_fn {
+    template <typename _T>
+    [[nodiscard]]
+    constexpr auto operator()(_T (&t)[]) const noexcept requires(sizeof(_T) >= 0) { return t + 0; }
+
+    template <typename _T, size_t _Np>
+    [[nodiscard]]
+    constexpr auto operator()(_T (&t)[_Np]) const noexcept requires(sizeof(_T) >= 0) { return t + 0; }
+
+    template <std::detail::__has_member_begin _T>
+    [[nodiscard]]
+    constexpr auto operator()(_T&& t) const noexcept(noexcept(t.begin())) { return t.begin(); }
+
+    template <__adl_begin _T>
+    [[nodiscard]]
+    constexpr auto operator()(_T&& t) const noexcept(noexcept(begin(t))) { return begin(t); }
+
+    void operator()(auto&&) const = delete;
+};
+} // namespace detail
+
+__DEF_NIEBLOID(detail::begin_fn, begin)
+
 using std::cbegin;
 using std::rbegin;
 using std::crbegin;
