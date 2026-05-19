@@ -5,6 +5,7 @@
 #pragma once
 
 #include <util/BasicString.hpp>
+#include <util/StringView.hpp>
 
 #include <algorithm>
 #include <concepts>

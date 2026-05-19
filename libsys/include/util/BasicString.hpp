@@ -167,6 +167,8 @@ template <typename T> class BasicString
      */
     constexpr T const *cstr() const { return _data.data(); }
 
+    constexpr T const *data() const { return _data.data(); }
+
     /**
      * The maximum capacity of the currently allocated block.
      * @return The size of the underlying memory block.
