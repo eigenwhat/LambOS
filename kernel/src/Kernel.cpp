@@ -3,8 +3,11 @@
 //
 
 #include <Kernel.hpp>
-#include <cstring>
 #include <system/Debug.hpp>
+#include <util/StringView.hpp>
+
+#include <cstring>
+
 //======================================================
 // Kernel
 //======================================================
@@ -26,13 +29,39 @@ void Kernel::panic(char const *string)
     }
 
     size_t rowToCenter = console()->height() / 2;
-    size_t columnToCenter = (console()->width() - length) / 2;
-    console()->moveTo(rowToCenter, columnToCenter);
-    console()->writeString(string);
+    const auto maxLineWidth = console()->width() - 4; // Leave some padding on the sides
+    if (length > maxLineWidth)
+    {
+        sys::StringView wholeStr{string};
+        auto estimatedLines = length / maxLineWidth + static_cast<std::size_t>(length % console()->width() != 0);
+        std::size_t row = rowToCenter - (estimatedLines / 2);
+        for (std::size_t i = 0; i < estimatedLines; ++i) {
+            sys::StringView line = wholeStr.substring(0, maxLineWidth);
+            if (line.isEmpty()) {
+                break;
+            }
+            for (std::size_t j = line.size(); j > 0; --j) {
+                if (line[j-1] == ' ') {
+                    line = line.substring(0, j);
+                    break;
+                }
+            }
+            size_t columnToCenter = (console()->width() - line.size()) / 2;
+            console()->moveTo(row++, columnToCenter);
+            console()->writeString(line.data(), line.size());
+            wholeStr = wholeStr.substring(line.size());
+        }
+    }
+    else {
+        size_t columnToCenter = (console()->width() - length) / 2;
+        console()->moveTo(rowToCenter, columnToCenter);
+        console()->writeString(string);
+    }
 
     char const *msg = "0xL4MBOS";
     console()->moveTo(console()->height() - 2, (console()->width() - strlen(msg)) / 2);
     console()->writeString(msg);
 
+    sys::debug_println("Kernel panic: %@", string);
     asm("cli\nhlt");
 }
