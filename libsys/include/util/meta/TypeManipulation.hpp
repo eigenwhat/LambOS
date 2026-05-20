@@ -41,11 +41,11 @@ template <typename Type, bool Const = true>
 using const_rvref_t = std::add_rvalue_reference_t<const_t<std::remove_reference_t<Type>, Const>>;
 
 /**
- * The value type of T. (T minus all pointer and reference levels)
+ * The value type of T. (T minus all reference levels)
  * @tparam T The type to operate on.
  */
 template <typename T>
-using value_t = const_t<std::decay_t<T>, std::is_const_v<T>>;
+using value_t = const_t<std::remove_cvref_t<T>, std::is_const_v<T>>;
 
 /**
  * The lvalue reference type of T.

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#include <type_traits>
+
 /*
     bit synopsis
 
@@ -56,5 +58,12 @@ namespace std {
 */
 
 namespace std {
-// TODO: everything
+
+template <class _To, class _From>
+  requires(sizeof(_To) == sizeof(_From) && is_trivially_copyable_v<_To> && is_trivially_copyable_v<_From>)
+[[nodiscard]] [[gnu::always_inline]]
+constexpr _To bit_cast(const _From& __from) noexcept {
+  return __builtin_bit_cast(_To, __from);
 }
+
+} // namespace std
