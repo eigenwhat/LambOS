@@ -21,7 +21,7 @@ class PITIRQ : public InterruptServiceRoutine
      */
     static void install(X86::CPU &cpu)
     {
-        cpu.idt()->setISR(InterruptNumber::kPITIRQ, new PITIRQ());
+        cpu.idt().setISR(InterruptNumber::kPITIRQ, new PITIRQ());
         cpu.unmaskIRQ(0);
     }
 

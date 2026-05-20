@@ -24,7 +24,9 @@ class CPU
 
     void install();
 
-    InterruptDescriptorTable *idt() { return &_idt; }
+    InterruptDescriptorTable& idt() { return _idt; }
+    GlobalDescriptorTable&    gdt() { return _gdt; }
+    TaskStateSegment&         tss() { return _tss; }
 
     void enableInterrupts();
     void disableInterrupts() { cli(); }

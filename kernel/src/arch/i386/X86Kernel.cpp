@@ -27,7 +27,7 @@ void X86Kernel::installMMU(uint32_t mmap_addr, uint32_t mmap_length)
 
 void X86Kernel::installSyscalls()
 {
-    cpu().idt()->setISR(InterruptNumber::kSystemCall, new SyscallHandler{*this});
+    cpu().idt().setISR(InterruptNumber::kSystemCall, new SyscallHandler{*this});
 }
 
 void X86Kernel::schedule()

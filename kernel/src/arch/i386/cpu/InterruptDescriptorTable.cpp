@@ -99,7 +99,7 @@ class PanicISR : public InterruptServiceRoutine
 extern "C" void interrupt_handler(RegisterTable registers)
 {
     auto &cpu = static_cast<X86Kernel*>(kernel)->cpu();
-    cpu.idt()->callISR(static_cast<InterruptNumber>(registers.int_no), registers);
+    cpu.idt().callISR(static_cast<InterruptNumber>(registers.int_no), registers);
 }
 
 //======================================================
