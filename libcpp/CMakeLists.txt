@@ -17,29 +17,21 @@ add_library(lambos-cxxabi OBJECT cxxabi/cpplang.cpp cxxabi/icxxabi.cpp)
 
 macro(add_libcpp TARGET_NAME IS_KERNEL)
     add_library(${TARGET_NAME} STATIC ${SOURCES} ${INCLUDE_FILES})
+    lambos_add_compile_options(${TARGET_NAME})
     target_include_directories(${TARGET_NAME} PUBLIC include)
     target_include_directories(${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:${KERNEL_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
-    set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD ${LAMBOS_CXX_STANDARD})
-    set(LIBCPP_CCXX_FLAGS)
-    target_compile_options(${TARGET_NAME} PRIVATE
-    $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS} ${LIBCPP_CCXX_FLAGS}>
-    $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS} ${LIBCPP_CCXX_FLAGS}>)
+    target_compile_features(${TARGET_NAME} PUBLIC ${LAMBOS_CXX_STANDARD_FEATURE})
     target_link_libraries(${TARGET_NAME} PUBLIC lambos-cxxabi)
 
     if (${IS_KERNEL})
         message("Generating libcpp target '${TARGET_NAME}' for kernel target")
-        set(LIBC_C_COMPILER_FLAGS ${LIBC_C_COMPILER_FLAGS} -DKERNEL)
-        set(LIBC_CXX_COMPILER_FLAGS ${LIBC_CXX_COMPILER_FLAGS} -DKERNEL)
+        target_compile_options(${TARGET_NAME} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>: -DKERNEL>)
         target_include_directories(${TARGET_NAME} PRIVATE $<TARGET_PROPERTY:${KERNEL_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
         target_link_libraries(${TARGET_NAME} PUBLIC ${LIBK_TARGET})
     else()
         message("Generating libcpp target '${TARGET_NAME}' for non-kernel targets")
         target_link_libraries(${TARGET_NAME} PUBLIC ${LIBC_TARGET})
     endif()
-
-    target_compile_options(${TARGET_NAME} PRIVATE
-            $<$<COMPILE_LANGUAGE:C>:${LIBC_C_COMPILER_FLAGS}>
-            $<$<COMPILE_LANGUAGE:CXX>:${LIBC_CXX_COMPILER_FLAGS}>)
 endmacro()
 
 add_libcpp(${LIBCPP_TARGET} NO)

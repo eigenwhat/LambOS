@@ -6,11 +6,8 @@ function(add_lambos_executable)
 
     add_executable(${ALEX_NAME} ${ALEX_SOURCES} ${CMAKE_SOURCE_DIR}/programs/start.c)
 
-    target_compile_options(${ALEX_NAME} PRIVATE
-            $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}>
-            $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>)
-
-    set_property(TARGET ${ALEX_NAME} PROPERTY CXX_STANDARD ${LAMBOS_CXX_STANDARD})
+    lambos_add_compile_options(${ALEX_NAME})
+    target_compile_features(${ALEX_NAME} PUBLIC ${LAMBOS_CXX_STANDARD_FEATURE})
     set_property(TARGET ${ALEX_NAME} PROPERTY LINK_FLAGS
             " -T ${CMAKE_SOURCE_DIR}/programs/link.ld -ffreestanding -O2 -nostdlib -lgcc")
 endfunction()

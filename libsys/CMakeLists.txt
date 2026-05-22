@@ -14,7 +14,6 @@ set (SOURCES
 
 add_library(${LIBSYS_TARGET} STATIC ${SOURCES})
 target_include_directories(${LIBSYS_TARGET} PUBLIC include)
-set_property(TARGET ${LIBSYS_TARGET} PROPERTY CXX_STANDARD ${LAMBOS_CXX_STANDARD})
-target_compile_options(${LIBSYS_TARGET} PRIVATE
-        $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS}> $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>)
+target_compile_features(${LIBSYS_TARGET} PUBLIC ${LAMBOS_CXX_STANDARD_FEATURE})
+lambos_add_compile_options(${LIBSYS_TARGET})
 target_link_libraries(${LIBSYS_TARGET} ${LIBC_TARGET} ${LIBCPP_TARGET})

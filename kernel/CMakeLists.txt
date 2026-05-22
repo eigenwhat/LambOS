@@ -43,16 +43,13 @@ set (SOURCES
 add_executable(${KERNEL_TARGET} ${SOURCES} ${INCLUDE_FILES})
 target_include_directories(${KERNEL_TARGET} PUBLIC include)
 target_include_directories(${KERNEL_TARGET} INTERFACE $<TARGET_PROPERTY:${LIBSYS_TARGET},INTERFACE_INCLUDE_DIRECTORIES>)
-#target_link_libraries(${KERNEL_TARGET} ${KERNEL_HEADERS_TARGET})
 set_property(TARGET ${KERNEL_TARGET} PROPERTY OUTPUT_NAME kernel.bin)
-set_property(TARGET ${KERNEL_TARGET} PROPERTY LINK_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
+target_link_options(${KERNEL_TARGET} PRIVATE -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc)
 
 # set compilation options
-set_property(TARGET ${KERNEL_TARGET} PROPERTY CXX_STANDARD ${LAMBOS_CXX_STANDARD})
-set(KERNEL_CCXX_FLAGS -DKERNEL)
-target_compile_options(${KERNEL_TARGET} PRIVATE
-        $<$<COMPILE_LANGUAGE:C>:${C_COMPILER_FLAGS} ${KERNEL_CCXX_FLAGS}>
-        $<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS} ${KERNEL_CCXX_FLAGS}>)
+target_compile_features(${KERNEL_TARGET} PUBLIC ${LAMBOS_CXX_STANDARD_FEATURE})
+lambos_add_compile_options(${KERNEL_TARGET})
+target_compile_options(${KERNEL_TARGET} PRIVATE $<$<COMPILE_LANGUAGE:C,CXX>:-DKERNEL>)
 
 # check for and link support libs
 if (NOT DEFINED LIBK_TARGET)

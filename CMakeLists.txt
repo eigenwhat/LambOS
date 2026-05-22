@@ -2,19 +2,21 @@ cmake_minimum_required(VERSION 3.31)
 project(lambos VERSION 0.1 LANGUAGES C CXX ASM-ATT)
 
 set (WARNING_FLAGS -Werror -Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wsign-conversion)
-set (COMMON_COMPILER_FLAGS -ffreestanding -fstack-protector-all)
+set (COMMON_COMPILER_FLAGS -ffreestanding -nostdlib -fstack-protector-all)
 set (CXX_COMPILER_FLAGS -fno-exceptions -fno-rtti)
-add_compile_options(
-        # this is a kernel, so we don't want any of the normal runtime stuff
-        "$<$<COMPILE_LANGUAGE:C,CXX>:${COMMON_COMPILER_FLAGS}>"
-        "$<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>"
 
-        # warnings
-        "$<$<COMPILE_LANGUAGE:C,CXX>:${WARNING_FLAGS}>")
-set (LAMBOS_CXX_STANDARD 23)
+macro(lambos_add_compile_options target)
+    target_compile_options(${target} PRIVATE
+            "$<$<COMPILE_LANGUAGE:C,CXX>:${COMMON_COMPILER_FLAGS}>"
+            "$<$<COMPILE_LANGUAGE:C,CXX>:${WARNING_FLAGS}>"
+            "$<$<COMPILE_LANGUAGE:CXX>:${CXX_COMPILER_FLAGS}>")
+endmacro()
+
 set (CMAKE_C_STANDARD 23)
-
-#set (CMAKE_EXE_LINKER_FLAGS " -T ${CMAKE_SOURCE_DIR}/linker.ld -ffreestanding -O2 -nostdlib -lgcc")
+set (CMAKE_CXX_STANDARD 23)
+set (LAMBOS_CXX_STANDARD_FEATURE cxx_std_${CMAKE_CXX_STANDARD})
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
+set (CMAKE_CXX_SCAN_FOR_MODULES OFF) # wtf
 
 # options
 
