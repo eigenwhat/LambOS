@@ -292,7 +292,7 @@ template<typename T> struct is_null_pointer : public _is_null_pointer_impl<typen
 // is_function
 template<typename> struct is_function : public false_type {};
 template<typename Ret, typename... Args> struct is_function<Ret(Args...)> : public true_type {};
-template<typename Ret, typename... Args> struct is_function<Ret(Args......)> : public true_type {};
+template<typename Ret, typename... Args> struct is_function<Ret(Args..., ...)> : public true_type {};
 
 // is_void
 template<typename> struct is_void : public false_type {};
@@ -373,7 +373,7 @@ template<typename _Res, typename... Args NOEXCEPT_TPARAM>
 struct __is_referenceable<_Res(Args...) NOEXCEPT_QUALIFIER> : public true_type {};
 
 template<typename _Res, typename... Args NOEXCEPT_TPARAM>
-struct __is_referenceable<_Res(Args......) NOEXCEPT_QUALIFIER> : public true_type {};
+struct __is_referenceable<_Res(Args..., ...) NOEXCEPT_QUALIFIER> : public true_type {};
 
 // is_constructible
 namespace internal {

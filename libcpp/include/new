@@ -32,7 +32,7 @@ template<typename T>
 template<typename Ret, typename... Args NOEXCEPT_TPARAM>
 void launder(Ret (*)(Args...) NOEXCEPT_QUALIFIER) = delete;
 template<typename Ret, typename... Args NOEXCEPT_TPARAM>
-void launder(Ret (*)(Args......) NOEXCEPT_QUALIFIER) = delete;
+void launder(Ret (*)(Args..., ...) NOEXCEPT_QUALIFIER) = delete;
 void launder(void*) = delete;
 void launder(const void*) = delete;
 void launder(volatile void*) = delete;

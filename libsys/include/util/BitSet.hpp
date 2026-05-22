@@ -30,7 +30,7 @@ class BitSet {
 
   public:
     constexpr BitSet() : BitSet(false) {}
-    constexpr explicit BitSet(bool initial) { std::memset(_bits, initial ? 0xFF : 0, size()); }
+    constexpr explicit BitSet(bool initial) { std::memset(_bits, initial ? 0xFF : 0, sizeof(_bits)); }
 
     [[nodiscard]]
     constexpr bool test(std::size_t bit) const { return (unitForBit(bit) & bitmask(bit)) != StoreUnit{0}; }
