@@ -4,6 +4,7 @@
 
 #pragma once
 
+#include <bits/memory/construct_at.hpp>
 #include <bits/memory/destroy.hpp>
 #include <bits/memory/uninitialized_copy.hpp>
 #include <bits/memory/uninitialized_default_construct.hpp>

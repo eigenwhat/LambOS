@@ -13,7 +13,18 @@
 
 namespace std {
 
-template <destructible T> void destroy_at(T* location) noexcept { location->~T(); }
+template <destructible T>
+[[gnu::always_inline]]
+constexpr void destroy_at(T* location) noexcept { location->~T(); }
+
+template <typename T> requires is_array_v<T>
+[[gnu::always_inline]]
+constexpr void destroy_at(T* location)
+{
+    auto first = std::begin(*location);
+    auto last = std::end(*location);
+    for (; first != last; ++first) { destroy_at(std::addressof(*first)); }
+}
 
 namespace detail {
 

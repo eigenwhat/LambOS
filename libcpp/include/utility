@@ -1,5 +1,7 @@
 #pragma once
 
+#include <bits/memory/addressof.hpp>
+#include <bits/forward.hpp>
 #include <bits/to_underlying.hpp>
 
 #include <type_traits>
@@ -8,19 +10,9 @@
 
 namespace std {
 
-template <typename T> using __rref_t = remove_reference_t<T>;
-
-template<typename T> inline constexpr T *addressof(T &r) noexcept { return __builtin_addressof(r); }
-template<typename T> const T *addressof(const T&&) = delete;
-
-template <typename T> constexpr __rref_t<T> &&move(T&& a) { return static_cast<__rref_t<T>&&>(a); }
-
 template<typename T>
 constexpr conditional_t<is_nothrow_move_constructible_v<T> || !is_copy_constructible_v<T>, T &&, T const &>
 move_if_noexcept(T& x) noexcept { return std::move(x); }
-
-template<typename T> constexpr T && forward(__rref_t<T> & t) noexcept { return static_cast<T &&>(t); }
-template<typename T> constexpr T && forward(__rref_t<T> && t) noexcept { return static_cast<T &&>(t); }
 
 template<typename T>
 constexpr void swap(T& a, T& b) noexcept(is_nothrow_move_constructible<T>::value &&
